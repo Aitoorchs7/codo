@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(flutter test *)",
+      "Bash(flutter pub get *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "PowerShell(flutter analyze *)",
+      "PowerShell(flutter test *)",
+      "PowerShell(flutter pub get *)",
+      "PowerShell(git status *)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)",
+      "PowerShell(git show *)"
+    ],
+    "ask": [
+      "Edit(pubspec.yaml)",
+      "Edit(android/app/build.gradle.kts)"
+    ],
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git * commit *)",
+      "Bash(git * push *)",
+      "Bash(flutter upgrade *)",
+      "PowerShell(git commit *)",
+      "PowerShell(git push *)",
+      "PowerShell(git * commit *)",
+      "PowerShell(git * push *)",
+      "PowerShell(flutter upgrade *)",
+      "Read(**/google-services.json)",
+      "Read(**/GoogleService-Info.plist)",
+      "Read(**/firebase_options.dart)",
+      "Read(**/key.properties)",
+      "Read(**/*.jks)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/google-services.json)",
+      "Edit(**/GoogleService-Info.plist)",
+      "Edit(**/firebase_options.dart)",
+      "Edit(**/key.properties)",
+      "Edit(**/*.jks)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Edit(**/*.g.dart)",
+      "Edit(**/GeneratedPluginRegistrant*)",
+      "Edit(ios/**)",
+      "Edit(macos/**)",
+      "Edit(linux/**)",
+      "Edit(windows/**)"
+    ]
+  }
+}
