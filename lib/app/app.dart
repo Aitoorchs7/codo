@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../screens/onboarding/onboarding_screen.dart';
+
 class App extends StatelessWidget{
 
   const App({super.key});
@@ -10,9 +12,12 @@ class App extends StatelessWidget{
 
     return MaterialApp(
       title: 'Codo',
-      home:Scaffold(
+      initialRoute: "/onboarding",
 
-      )
+      routes: {
+        "/onboarding": (context) => OnboardingScreen(),
+
+      },
     );
   }
 
