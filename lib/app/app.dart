@@ -9,15 +9,11 @@ class App extends StatelessWidget{
   Widget build(BuildContext context) {
 
     return MaterialApp(
-      title: "Codo",
-      // RUTAS CON NOMBRE: un mapa "nombre de ruta -> función que crea la pantalla".
-      routes: {
+      title: 'Codo',
+      home:Scaffold(
 
-      },
-      // Primera pantalla que se muestra al arrancar la app.
-      initialRoute: "/Onboardingview",
+      )
     );
   }
 
 }
-

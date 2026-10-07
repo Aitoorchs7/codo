@@ -18,8 +18,7 @@ Future<void> main() async {
   que comparten varias clases para no estar cambiando variables
   en cada clase. */
   runApp(const App());
-
-
 }
+
 
 
