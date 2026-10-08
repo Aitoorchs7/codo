@@ -28,9 +28,9 @@ App Flutter, proyecto integrado de 2.º DAM (autor: Aitor). Motiva a cumplir obj
 - No releas documentos que ya están en la conversación.
 
 ## Arquitectura
-`view → repository → (Drift local | service remoto)`. Las vistas (pantallas) escuchan streams del repositorio y nunca acceden a datos directamente.
+`view → repository → (Drift local | admin remoto)`. Las vistas (pantallas) escuchan streams del repositorio y nunca acceden a datos directamente.
 ```
-lib/ app/ (MaterialApp, rutas, tema) · l10n/ · models/ · services/ · repositories/ · views/<sección>/ · widgets/ · utils/
+lib/ app/ (MaterialApp, rutas, tema) · l10n/ · models/ · admins/ · repositories/ · screens/<sección>/ · widgets/ · utils/
 test/ · server/ (fase 3, Dart shelf) · docs/
 ```
 Stack: Firebase (Auth, Firestore `withConverter`, FCM, Remote Config, Crashlytics, App Check) · Drift · isolates · Dart shelf + WebSocket en Cloud Run · Supabase · Play Billing · AdMob + UMP.

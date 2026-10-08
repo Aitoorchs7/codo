@@ -83,9 +83,9 @@ lib/
 ├── app/           # MaterialApp, rutas con nombre, tema
 ├── l10n/          # Textos ES/EN
 ├── models/        # Clases de dominio y sus conversores
-├── services/      # Hablan con fuentes externas (Firebase, API, Billing…)
+├── admins/        # Hablan con fuentes externas: Firebase, almacenamiento, preferencias del móvil, API, Billing…
 ├── repositories/  # Única puerta de datos para la UI
-├── views/         # Las pantallas, una carpeta por sección o flujo
+├── screens/       # Las pantallas, una carpeta por sección o flujo
 ├── widgets/       # Piezas reutilizables
 └── utils/
 ```

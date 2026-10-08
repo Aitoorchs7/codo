@@ -1,4 +1,6 @@
+import 'package:codo/app/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:codo/admins/preferences_admin.dart';
 
 //Son las tres paginas que aparecen en el onboarding
 // las del tutorial de como funciona la app
@@ -14,6 +16,8 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   // _conroller: controlador de la página.
   final _controller = PageController();
+  // traemos las preferencias del usuario
+  final _prefs = PreferencesAdmin();
   // indica la pagina en la que se encuantra ahora la pantalla
   int _current = 0;
 
@@ -21,9 +25,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onPageChanged(int index) {
     setState(() => _current = index);
   }
-  void _finish() {
-    // TODO: Ir a /login.
+  //el finish cambia de pagina a la siguiente (login)
+  //y cambia el valor de onboarding_seen a true para que
+  // al entrar a la aplicacion no se vuelva a mostrar
+  Future<void> _finish() async {
+    await _prefs.markAsOnboardingSeen();
+    if (!mounted) return;
+    Navigator.popAndPushNamed(context, AppRoutes.login);
   }
+  //funcion que controla en 300 milisegundos el cambio de pagina, si el usuario
+  // ejecuta la funcion finish si ha termionado el onboarding
   void _next() {
     if (_current == _pageCount - 1) {
       _finish();
@@ -33,7 +44,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     }
-
   }
   // Flutter lo llama una vez, cuando la pantalla sale del árbol para siempre.
   // Aquí se libera lo creado en el State; si no, el controlador se queda en
@@ -48,6 +58,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     // TODO: Scaffold con botón Saltar, PageView (3 páginas), puntos y botón.
-    return const Scaffold();
+    return Scaffold(
+      body: Center(
+        child: TextButton(onPressed: _next, child: Text('Saltar'))
+      ),
+    );
   }
 }

@@ -20,7 +20,7 @@ Léelo y edítalo; Aitor revisa el diff antes de aceptar.
 Si Aitor tomó una decisión con ayuda de la IA (eligió entre alternativas, descartó o corrigió una propuesta), usa la skill `bitacora-ia` para dar el borrador de la entrada de `IA.md`. Si se creó un agente, skill o comando nuevo, propón también su fila en la tabla «Agentes y skills propios» y deja «Trabajo ahorrado» para que lo mida él. Si no hubo ninguna decisión propia, dilo en vez de inventarla.
 
 ## 4. Commits
-Ejecuta `flutter analyze`; si no sale limpio, avísalo primero (CLAUDE.md lo exige antes de cada commit). Después usa la skill `commits` para proponer los commits de lo que siga sin commitear.
+Ejecuta `flutter analyze` y `flutter test`; si alguno no sale limpio, avísalo primero (CLAUDE.md y `.claude/rules/tests.md` lo exigen antes de cada commit). Después usa la skill `commits` para proponer los commits de lo que siga sin commitear.
 
 ## 5. Resumen
 Termina con 6 líneas como máximo: qué cambió en `ESTADO.md`, qué queda para la próxima sesión y si hay riesgo con la fecha de entrega (días que quedan frente a puntos de la checklist sin hacer).

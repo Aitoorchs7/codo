@@ -29,6 +29,17 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 
 ---
 
+### 002 · 2026-10-08 · Rutas con nombre y «onboarding visto»
+- **Fase / hito:** Fase 1 / H0.
+- **Qué pedí:** cómo pasar de página en el onboarding y cómo terminarlo (`_finish`) guardando que ya se ha visto; dónde va cada cosa en las carpetas.
+- **Qué me dio:** explicación de `PageController`, de `routes` frente a `onGenerateRoute`, de `shared_preferences` y de `async`/`await`/`mounted`; revisión de `app.dart` y de `_finish`; valoración del patrón de «admins» del profesor.
+- **Qué corregí o descarté, y por qué:**
+  - Mi primer `_finish` no guardaba nada (variables locales que desaparecen). Lo pasé a una clase `PreferencesAdmin`, fuera de la pantalla, para que el splash lea lo mismo.
+  - Mantengo `screens/` aunque los documentos decían `views/` [tu motivo].
+  - La IA propuso dejar las preferencias en `services/`. Lo moví todo a `admins/`, incluido `AuthService`, porque lo pide el profesor y me parece más claro.
+  - `DataHolder` y `FirebaseAdmin` quedan pendientes de preguntar al profesor [confirma si lo decides].
+- **Resultado:** `lib/admins/preferences_admin.dart`, `lib/app/app_routes.dart`, `lib/screens/onboarding/onboarding_screen.dart`.
+
 ## Agentes y skills propios
 | Nombre | Tipo | Creado | Qué tarea repetida resuelve | Trabajo ahorrado (medido) |
 |---|---|---|---|---|
