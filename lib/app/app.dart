@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
@@ -21,5 +20,11 @@ class App extends StatelessWidget{
       )
     );
   }
+
+}
+class AppRoutes{
+  //clase estatica para que no se pueda instanciar
+  AppRoutes._();
+
 
 }

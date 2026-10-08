@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../app/codo_colors.dart';
+
 //Son las tres paginas que aparecen en el onboarding
 // las del tutorial de como funciona la app
 const _pageCount = 3;
@@ -22,7 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     setState(() => _current = index);
   }
   void _finish() {
-    // TODO: Ir a /login.
+    Navigator.of(context).pushReplacementNamed('/login');
   }
   void _next() {
     if (_current == _pageCount - 1) {
@@ -48,6 +50,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     // TODO: Scaffold con botón Saltar, PageView (3 páginas), puntos y botón.
-    return const Scaffold();
+    final scheme = Theme.of(context).colorScheme;
+    final codo = Theme.of(context).extension<CodoColors>()!;
+
+    return const Scaffold(
+      body: Center(
+        child: Text('Onboarding'),
+      ),
+    );
   }
 }
