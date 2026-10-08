@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+//Son las tres paginas que aparecen en el onboarding
+// las del tutorial de como funciona la app
+const _pageCount = 3;
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -8,23 +12,20 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  // Controla el PageView desde código: avanzar de página con el botón,
-  // saltar a una concreta o saber en cuál está. Sin él solo se puede deslizar.
+  // _conroller: controlador de la página.
   final _controller = PageController();
+  // indica la pagina en la que se encuantra ahora la pantalla
+  int _current = 0;
 
-  // TODO: página actual (int) para los puntos y el texto del botón.
-  // TODO: _finish(): guardar seenKey en shared_preferences y ir a /login.
-  // TODO: _next(): avanzar de página o terminar en la última.
-  void pagina_actual(int pagina) {
-    setState(() {
-      _controller.jumpToPage(pagina);
-    });
+  // cambia la pagina que el usuario ve, lo llamamos cuando queramos para que la cambie
+  void _onPageChanged(int index) {
+    setState(() => _current = index);
   }
   void _finish() {
     // TODO: Ir a /login.
   }
   void _next() {
-    if (_controller.page == 2) {
+    if (_current == _pageCount - 1) {
       _finish();
     } else {
       _controller.nextPage(
