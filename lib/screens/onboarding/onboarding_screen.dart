@@ -1,6 +1,8 @@
 import 'package:codo/app/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:codo/admins/preferences_admin.dart';
+import 'package:codo/widgets/codo_background.dart';
+import 'package:codo/app/codo_colors.dart';
 
 //Son las tres paginas que aparecen en el onboarding
 // las del tutorial de como funciona la app
@@ -40,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _finish();
     } else {
       _controller.nextPage(
-        duration: const Duration(milliseconds: 3000),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -56,40 +58,124 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
       return Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              // 1. Saltar, arriba a la derecha
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(onPressed: _finish, child: const Text('Saltar'),
+        body: CodoBackground(
+          child: SafeArea(
+            child: Column(
+              children: [
+                // 1. Saltar, arriba a la derecha
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(onPressed: _finish, child: const Text('Saltar'),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: PageView(
-                  controller: _controller,
-                  onPageChanged: _onPageChanged,
-                  children: const [
-                    Center(child: Text('Página 1')),
-                    Center(child: Text('Página 2')),
-                    Center(child: Text('Página 3')),
-                  ],
+                Expanded(
+                  child: PageView(
+                    controller: _controller,
+                    onPageChanged: _onPageChanged,
+                    // con un bucle recorremos las paginas que quiere mos mostrar
+                    // segun el indice en el que este y si el usuario pulsa el
+                    //boton de siguiente, el indice aumenta +1 y asi sucesivamente
+                    children: [
+                      for (final p in _pages) _OnboardingPage(data: p),
+                    ],
+                  ),
                 ),
-              ),
-              // 2. Barra de progreso
-              LinearProgressIndicator(
-                value: _current / (_pageCount - 1),
-              ),
-              // 3. TODO: fila de puntos
-              TextButton(
-                onPressed: _next,
-                child: Text(_current == _pageCount - 1 ? 'Empezar' : 'Siguiente'),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      // 2. Barra de progreso
+                      LinearProgressIndicator(
+                        value: _current / (_pageCount - 1),
+                      ),
+                      FilledButton(
+                        onPressed: _next,
+                        child: Text(_current == _pageCount - 1 ? 'Empezar' : 'Siguiente'),
+                      )
+                    ]
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
   }
+// los datos de las paginas que llevan de
+// la clase app_theme en el tema claro y oscuro
+class _PageData {
+  const _PageData({
+    required this.icon,
+    required this.title,
+    required this.text,
+  });
+
+  final IconData icon;
+  final String title;
+  final String text;
+}
+
+// como se ve una pagina sin texto porque todas tienen la misma estructura
+class _OnboardingPage extends StatelessWidget {
+  const _OnboardingPage({required this.data});
+
+  final _PageData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).extension<CodoColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        // Centrado en vertical.
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(data.icon, size: 96, color: CodoColors.accent),
+          const SizedBox(height: 32),
+          Text(
+            data.title,
+            textAlign: TextAlign.center,
+            style: textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            data.text,
+            textAlign: TextAlign.center,
+            style: textTheme.bodyLarge?.copyWith(color: c.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+// Los textos que aparecen en las paginas según su posición en la tabla
+const _pages = [
+  _PageData(
+    icon: Icons.groups,
+    title: 'Ponerse cuesta menos '
+        'acompañado',
+    text: 'Publica lo que estés haciendo y tus'
+        'amigos se suman a la vez. Estudiar,'
+        'entrenar o leer, a tu codo.',
+  ),
+  _PageData(
+    icon: Icons.handshake,
+    title: 'Un pacto, dos '
+        'personas',
+    text: 'Elegis un reto y haceis check-in cada dia.'
+        'Si uno se descuelga, perdeís los dos. Por'
+        'eso nadie se descuelga',
+  ),
+  _PageData(
+    icon: Icons.emoji_events,
+    title: 'Cada objetivo cuenta',
+    text: 'Gana XP, sube de nivel y llena tu perfil de '
+        'medallas por lo que de verdad has'
+        'cumplido.',
+  ),
+];

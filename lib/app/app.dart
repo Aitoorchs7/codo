@@ -1,7 +1,5 @@
 
 import 'package:codo/app/app_routes.dart';
-import 'package:codo/screens/login/login_screen.dart';
-import 'package:codo/screens/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
