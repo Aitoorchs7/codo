@@ -33,14 +33,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!mounted) return;
     Navigator.popAndPushNamed(context, AppRoutes.login);
   }
-  //funcion que controla en 300 milisegundos el cambio de pagina, si el usuario
+  //funcion que controla en 300 milisegundos el cambio de pagina, lo rapido que cambia la pagina
   // ejecuta la funcion finish si ha termionado el onboarding
   void _next() {
     if (_current == _pageCount - 1) {
       _finish();
     } else {
       _controller.nextPage(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 3000),
         curve: Curves.easeInOut,
       );
     }
@@ -57,11 +57,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Scaffold con botón Saltar, PageView (3 páginas), puntos y botón.
-    return Scaffold(
-      body: Center(
-        child: TextButton(onPressed: _next, child: Text('Saltar'))
-      ),
-    );
+      return Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              // 1. Saltar, arriba a la derecha
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(onPressed: _finish, child: const Text('Saltar'),
+                ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _controller,
+                  onPageChanged: _onPageChanged,
+                  children: const [
+                    Center(child: Text('Página 1')),
+                    Center(child: Text('Página 2')),
+                    Center(child: Text('Página 3')),
+                  ],
+                ),
+              ),
+              // 2. Barra de progreso
+              LinearProgressIndicator(
+                value: _current / (_pageCount - 1),
+              ),
+              // 3. TODO: fila de puntos
+              TextButton(
+                onPressed: _next,
+                child: Text(_current == _pageCount - 1 ? 'Empezar' : 'Siguiente'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
-}
