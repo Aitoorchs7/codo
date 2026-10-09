@@ -1,11 +1,11 @@
 ---
 paths:
-  - "lib/services/**/*.dart"
+  - "lib/admins/**/*.dart"
 ---
-# Servicios
+# Admins (acceso a fuentes externas)
 
-- Cada servicio envuelve **una** fuente externa (Firebase Auth, Firestore, FCM, la API propia…) y no sabe nada de pantallas.
-- Dependencias inyectadas con valor por defecto, para probarlo con un falso: `Servicio({Dep? dep}) : _dep = dep ?? Dep.instance;` (como `AuthService`).
+- Cada admin envuelve **una** fuente externa (Firebase Auth, Firestore, Storage, preferencias del móvil, FCM, la API propia…) y no sabe nada de pantallas.
+- Dependencias inyectadas con valor por defecto, para probarlo con un falso: `Admin({Dep? dep}) : _dep = dep ?? Dep.instance;` (como `AuthService`).
 - Traduce las excepciones del SDK (`FirebaseAuthException`, `FirebaseException`…) a un fallo de dominio con enum: patrón `AuthFailure(AuthError)`. Nunca dejes escapar el código crudo ni redactes un mensaje para el usuario.
 - Si lee o escribe Firestore, usa `withConverter` con el conversor del modelo: de aquí sale siempre un modelo, no un `Map`.
 - Sin `BuildContext`, sin `Navigator`, sin importar `package:flutter/material.dart`.

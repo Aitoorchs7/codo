@@ -29,9 +29,9 @@ Cómo invocarlos: pedirlo en lenguaje natural ("pasa el auditor de rúbrica") o 
 Se cargan solas cuando Claude lee ficheros que encajan con su `paths`, así que no gastan contexto el resto del tiempo. `CLAUDE.md` fija la arquitectura; las rules fijan cómo se escribe cada capa y están alineadas con los criterios de `auditor-ui` y `revisor-codo`.
 | Fichero | Se carga al tocar | Fija |
 |---|---|---|
-| `views.md` | `lib/views/`, `lib/widgets/` | Nombres, sin acceso directo a datos, 4 estados, tema y accesibilidad, `dispose`, uso de `provider` |
+| `screens.md` | `lib/screens/`, `lib/widgets/` | Nombres, sin acceso directo a datos, 4 estados, tema y accesibilidad, `dispose`, uso de `provider` |
 | `repositories.md` | `lib/repositories/` | Única puerta de datos, devuelven modelos, `Stream`/`Future`, sin Flutter |
-| `services.md` | `lib/services/` | Una fuente externa por servicio, dependencias inyectadas, excepciones del SDK → fallo de dominio |
+| `admins.md` | `lib/admins/` | Una fuente externa por admin, dependencias inyectadas, excepciones del SDK → fallo de dominio |
 | `models.md` | `lib/models/` | Inmutables, conversor para `withConverter`, datos corruptos |
 | `app.md` | `lib/app/`, `lib/main.dart` | `main()` mínimo, `MultiProvider`, rutas con nombre (`AppRoutes`) y argumentos tipados |
 | `tests.md` | `test/` | Casos malos, sin red real, nunca desactivar pruebas |

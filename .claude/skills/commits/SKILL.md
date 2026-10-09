@@ -14,7 +14,7 @@ El historial se evalúa y debe verse repartido en el tiempo (≥ 15 commits en l
    - El mensaje con el formato `tipo(ámbito): qué` en español, imperativo, ≤ 72 caracteres.
    - Tipos: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `style`.
    - Ámbitos habituales: `splash`, `onboarding`, `auth`, `firestore`, `routes`, `nav`, `theme`, `docs`.
-4. Orden recomendado: primero lo que otros cambios necesitan (modelos, servicios), luego pantallas, luego docs.
+4. Orden recomendado: primero lo que otros cambios necesitan (modelos, admins), luego pantallas, luego docs.
 
 ## Avisos obligatorios
 - **Nunca** propongas añadir `google-services.json`, `firebase_options.dart`, `*.jks`, `key.properties` ni `.env`. Si aparecen en `git status`, avisa de que hay que ponerlos en `.gitignore`.
