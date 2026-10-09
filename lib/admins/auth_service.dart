@@ -1,7 +1,7 @@
 /* clase para comprobar si el usuario ya esta
 registrado o debe hacerlo y en caso de que quiera cerrar sesión
 pasa por aquí también */
-import 'package:codo/services/auth_failure.dart';
+import 'package:codo/admins/auth_failure.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
