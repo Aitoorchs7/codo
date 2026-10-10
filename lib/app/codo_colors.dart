@@ -44,8 +44,8 @@ class CodoColors extends ThemeExtension<CodoColors> {
   final Color error, success, warning;
 
   static const dark = CodoColors(
-    bgTop: Color(0xFF2B2C2F),
-    bgBottom: Color(0xFF161719),
+    bgTop: Color(0xFF0F2A66),
+    bgBottom: Color(0xFF050B1F),
     surfaceCard: Color(0x8C3A3B3F), // rgba(58,59,63,0.55)
     surfaceCardBorder: Color(0x1AFFFFFF),
     surfaceSolid: Color(0xFF2E2F33),
@@ -68,8 +68,8 @@ class CodoColors extends ThemeExtension<CodoColors> {
   );
 
   static const light = CodoColors(
-    bgTop: Color(0xFFDEDFE1),
-    bgBottom: Color(0xFFC8C9CC),
+    bgTop: Color(0xFFE6EEFF),
+    bgBottom: Color(0xFFB8C9F0),
     surfaceCard: Color(0xB8FFFFFF), // rgba(255,255,255,0.72)
     surfaceCardBorder: Color(0xF2FFFFFF),
     surfaceSolid: Color(0xFFF4F4F5),
