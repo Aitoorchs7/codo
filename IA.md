@@ -40,6 +40,19 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - `DataHolder` y `FirebaseAdmin` quedan pendientes de preguntar al profesor [confirma si lo decides].
 - **Resultado:** `lib/admins/preferences_admin.dart`, `lib/app/app_routes.dart`, `lib/screens/onboarding/onboarding_screen.dart`.
 
+---
+
+### 003 · 2026-10-10 · Diseño visual del onboarding (cristal, fondo azul, fuente)
+- **Fase / hito:** Fase 1 / H0.
+- **Qué pedí:** replicar el diseño del onboarding del lienzo con los colores del tema; luego un cristal «más natural» (luz en el borde, interior transparente), fondo azul y la tipografía igual que en el diseño.
+- **Qué me dio:** explicación de `Theme`/`ThemeExtension`, `LinearGradient`, `Scaffold`/`SafeArea`, `AnimatedContainer`, `CustomPainter`; los widgets `GlassSurface` y `GlassButton`; diagnóstico del error de `google_fonts` y de un margen de 40 en vez de 24.
+- **Qué corregí o descarté, y por qué:**
+  - Pedí más naturalidad: la IA había puesto luz y reflejos dentro del cristal; pasé la luz al borde.
+  - Elegí yo el fondo azul marino, aunque se sale de la paleta grafito.
+  - `google_fonts` 9 daba error de tipos (`material_ui`): bajé a la 6.3.3 y descarté migrar todo el proyecto.
+  - La IA propuso un `outlinedButtonTheme` para «Saltar»; no sabe desenfocar, así que lo sustituí por `GlassButton`.
+- **Resultado:** `lib/widgets/glass_surface.dart`, `lib/widgets/glass_button.dart`, `lib/widgets/codo_background.dart`, `lib/app/app_theme.dart`, `lib/screens/onboarding/onboarding_screen.dart`.
+
 ## Agentes y skills propios
 | Nombre | Tipo | Creado | Qué tarea repetida resuelve | Trabajo ahorrado (medido) |
 |---|---|---|---|---|

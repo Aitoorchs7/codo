@@ -4,7 +4,6 @@ import 'package:codo/admins/preferences_admin.dart';
 import 'package:codo/widgets/codo_background.dart';
 import 'package:codo/app/codo_colors.dart';
 import 'package:codo/widgets/glass_button.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 //Son las tres paginas que aparecen en el onboarding
 // las del tutorial de como funciona la app

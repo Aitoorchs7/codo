@@ -56,4 +56,8 @@ class AuthService {
       _ => AuthError.unknown,
     };
   }
+
+  // Guardamos el estado de sesión del usuario actual
+  //si no hay usuario devuelve null
+  Future<User?> currentUser() => authStateChanges.first;
 }

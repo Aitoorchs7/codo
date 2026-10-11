@@ -22,7 +22,7 @@ class App extends StatelessWidget{
       darkTheme: AppTheme.dark,
 
       routes: AppRoutes.routes,
-      initialRoute: AppRoutes.onboarding,
+      initialRoute: AppRoutes.splash,
       // Sigue el modo claro/oscuro del móvil.
       themeMode: ThemeMode.system,
     );
