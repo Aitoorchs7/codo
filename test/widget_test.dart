@@ -1,21 +1,33 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:codo/app/app_routes.dart';
+import 'package:codo/utils/startup_route.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
-import 'package:codo/app/app.dart';
-
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const App());
-    expect(find.byType(MaterialApp), findsOneWidget);
+  test('startupRoute goes to home when there is a session', () {
+    expect(
+      startupRoute(signedIn: true, onboardingSeen: true),
+      AppRoutes.home,
+    );
+  });
+
+  test('startupRoute skips onboarding when signed in, even if not seen', () {
+    expect(
+      startupRoute(signedIn: true, onboardingSeen: false),
+      AppRoutes.home,
+    );
+  });
+
+  test('startupRoute goes to onboarding on first launch without session', () {
+    expect(
+      startupRoute(signedIn: false, onboardingSeen: false),
+      AppRoutes.onboarding,
+    );
+  });
+
+  test('startupRoute goes to login when onboarding was seen but no session', () {
+    expect(
+      startupRoute(signedIn: false, onboardingSeen: true),
+      AppRoutes.login,
+    );
   });
 }
