@@ -1,11 +1,16 @@
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../models/profile.dart';
+import 'package:codo/admins/firestore_admin.dart';
+import 'package:codo/models/profile.dart';
 
 class ProfileRepository {
-  final _col = FirebaseFirestore.instance.collection('users').withConverter<Profile>(
-    fromFirestore: Profile.fromFirestore,
-    toFirestore: (profile, _) => profile.toFirestore(),
-  );
+  ProfileRepository({FirestoreAdmin? admin}) : _admin = admin ?? FirestoreAdmin();
+
+  final FirestoreAdmin _admin;
+
+  Future<void> saveProfile(Profile profile) =>
+      _admin.profiles.doc(profile.uid).set(profile);
+
+  Future<Profile?> getProfile(String uid) async {
+    final doc = await _admin.profiles.doc(uid).get();
+    return doc.data();
+  }
 }

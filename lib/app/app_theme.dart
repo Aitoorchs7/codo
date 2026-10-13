@@ -11,6 +11,14 @@ class AppTheme {
   static final light = _build(Brightness.light, CodoColors.light);
   static final dark = _build(Brightness.dark, CodoColors.dark);
 
+  // Borde redondeado de los campos de texto.
+  static OutlineInputBorder _fieldBorder(Color color, {double width = 1}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: color, width: width),
+    );
+  }
+
   // Construye un tema a partir de la paleta de su modo. Es el mismo código
   // para los dos modos: solo cambian los colores que recibe.
   static ThemeData _build(Brightness brightness, CodoColors c) {
@@ -60,6 +68,25 @@ class AppTheme {
       scaffoldBackgroundColor: c.bgBottom,
       // Registra CodoColors para leerlo con Theme.of(context).extension.
       extensions: [c],
+      // Campos de texto: relleno suave, esquinas de 16, borde azul al enfocar
+      // y borde rojo si hay error.
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: c.track,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        border: _fieldBorder(c.divider),
+        enabledBorder: _fieldBorder(c.divider),
+        disabledBorder: _fieldBorder(c.divider),
+        focusedBorder: _fieldBorder(CodoColors.accent, width: 2),
+        errorBorder: _fieldBorder(c.error, width: 2),
+        focusedErrorBorder: _fieldBorder(c.error, width: 2),
+        labelStyle: TextStyle(color: c.textSecondary),
+        floatingLabelStyle: TextStyle(color: c.accentText),
+        helperStyle: TextStyle(color: c.textSecondary),
+        errorStyle: TextStyle(color: c.error),
+        prefixIconColor: c.textSecondary,
+        suffixIconColor: c.textSecondary,
+      ),
       // Botón principal: acento, forma de cápsula.
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(

@@ -70,7 +70,7 @@ stateDiagram-v2
 flowchart TB
     UI[Pantallas y widgets] --> R[Repositorios]
     R --> L[(Drift · local, offline)]
-    R --> S[Servicios]
+    R --> S[Admins]
     S --> FB[Firebase: Auth · Firestore · FCM · Remote Config]
     S --> API[Servicio propio Dart shelf · REST + WebSocket]
     API --> SQL[(Supabase · compras, XP, catálogo)]
@@ -87,9 +87,18 @@ lib/
 ├── repositories/  # Única puerta de datos para la UI
 ├── screens/       # Las pantallas, una carpeta por sección o flujo
 ├── widgets/       # Piezas reutilizables
-└── utils/
+└── utils/         # Funciones sueltas sin pantalla (p. ej. a qué ruta ir al arrancar) y datos de ejemplo
 ```
 Cada capa tiene una única responsabilidad. **Las pantallas no saben de dónde vienen los datos**: se los pide al repositorio, que decide si los lee de la base de datos local o de la nube. Así puedo cambiar Firestore por otra fuente, o probar la lógica con una base de datos en memoria, sin tocar la interfaz. Los **modelos** están separados para que la app trabaje con objetos tipados y no con mapas sueltos.
+
+### Datos en Firestore
+Un único admin (`FirestoreAdmin`) conoce Firestore y entrega cada colección con su conversor (`withConverter`), de modo que de ahí salen siempre modelos y nunca mapas. Los modelos leen cada campo con funciones seguras (`field_readers.dart`): si un dato falta o tiene otro tipo, usan un valor por defecto en vez de romper la pantalla.
+
+| Colección | Documento | Campos | Modelo |
+|---|---|---|---|
+| `users` | id = `uid` de la cuenta (se crea al registrarse) | `displayName`, `xp`, `badges`, `createdAt`, `photoUrl?`, `bio?` | `Profile` |
+| `pacts` | un pacto | `title`, `partnerName`, `daysDone`, `daysTotal`, `createdAt` | `Pact` |
+| `badges` | una medalla del catálogo | `name`, `description`, `xpReward`, `imageUrl` | `Medal` |
 
 ---
 
@@ -118,12 +127,17 @@ flutter test             # pruebas
 | Fichero | Para qué sirve | Por qué no se sube |
 |---|---|---|
 | `android/app/google-services.json` | Conectar Android con Firebase | Identifica el proyecto de Firebase; se mantiene fuera por seguridad |
+| `lib/firebase_options.dart` | Datos del proyecto Firebase para todas las plataformas (lo genera `flutterfire configure`) | Identifica el proyecto de Firebase; se mantiene fuera por seguridad |
 | `android/key.properties`, `*.jks` | Firmar el .aab de release | Quien tenga la clave podría publicar versiones en mi nombre |
 | `.env` | URLs y claves del servicio propio | Son credenciales |
 
 ---
 
 ## 🧪 Pruebas
+**Automáticas** (`flutter test`, sin Firebase real): ruta de arranque según sesión y onboarding, preferencias con valor corrupto, un mensaje por cada error de acceso, lectores seguros de campos y progreso de un pacto con datos extremos.
+
+**Manuales** en Android y web:
+
 | Qué se probó | Esperado | Resultado Android | Resultado web |
 |---|---|---|---|
 | _pendiente_ | | | |

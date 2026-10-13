@@ -1,6 +1,5 @@
 import 'package:codo/admins/auth_service.dart';
 import 'package:codo/admins/preferences_admin.dart';
-import 'package:codo/app/app_routes.dart';
 import 'package:codo/utils/startup_route.dart';
 import 'package:flutter/material.dart';
 

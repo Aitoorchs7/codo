@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codo/models/field_readers.dart';
 
 class Profile {
 
@@ -29,12 +30,12 @@ class Profile {
     final data = snapshot.data();
     return Profile(
       uid: snapshot.id,
-      displayName: data?['displayName'] ?? '',
-      photoUrl: data?['photoUrl'],
-      bio: data?['bio'],
-      xp: data?['xp'] ?? 0,
-      badges: List<String>.from(data?['badges'] ?? []),
-      createdAt: (data?['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      displayName: readString(data?['displayName']),
+      photoUrl: readOptionalString(data?['photoUrl']),
+      bio: readOptionalString(data?['bio']),
+      xp: readInt(data?['xp']),
+      badges: readStringList(data?['badges']),
+      createdAt: readDate(data?['createdAt']),
     );
   }
 
@@ -43,7 +44,7 @@ class Profile {
       'displayName': displayName,
       'xp': xp,
       'badges': badges,
-      'createdAt': createdAt,
+      'createdAt': Timestamp.fromDate(createdAt),// con esto evitamos el datetimenow()
       if(photoUrl != null) 'photoUrl': photoUrl,
       if(bio != null) 'bio': bio,
     };

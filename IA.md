@@ -53,6 +53,17 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - La IA propuso un `outlinedButtonTheme` para «Saltar»; no sabe desenfocar, así que lo sustituí por `GlassButton`.
 - **Resultado:** `lib/widgets/glass_surface.dart`, `lib/widgets/glass_button.dart`, `lib/widgets/codo_background.dart`, `lib/app/app_theme.dart`, `lib/screens/onboarding/onboarding_screen.dart`.
 
+
+### 004 · 2026-10-12 · Perfil en Firestore, modelos y repositorios
+- **Fase / hito:** Fase 1 / H0.
+- **Qué pedí:** guardar el perfil al registrarme y mostrarlo en Home; después los modelos de pactos y medallas con sus repositorios. Pedí ir «paso a paso» y no copiar ficheros enteros.
+- **Qué me dio:** explicación de `withConverter` (el traductor, no la orden de guardar), `Future`/`Stream`, `FutureBuilder` y sus estados, lectores seguros de campos, `Pact` con `progress`, `FirestoreAdmin`, los repositorios y pruebas de casos malos.
+- **Qué corregí o descarté, y por qué:**
+  - Mi primer `saveProfile` no escribía nada (faltaba `.set`), usaba otra colección (`"profiles"`) y `currentUser!`. Lo rehíce con `_col.doc(profile.uid).set(profile)`.
+  - Para `Medal` copié `Pact` con sus campos; lo corregí y añadí yo `imageUrl` para las imágenes de la cuadrícula.
+  - La IA propuso `displayName` = parte del correo antes de la `@`. Después lo cambiaremos
+  - Dejé los datos de ejemplo sin subir y el commit para más adelante, para no precipitarme.
+- **Resultado:** `lib/models/`, `lib/admins/firestore_admin.dart`, `lib/repositories/`, `lib/screens/home/home_screen.dart`, `test/field_readers_test.dart`.
 ## Agentes y skills propios
 | Nombre | Tipo | Creado | Qué tarea repetida resuelve | Trabajo ahorrado (medido) |
 |---|---|---|---|---|
