@@ -8,8 +8,6 @@ class App extends StatelessWidget{
 
   const App({super.key});
 
-  static final Map<String, Widget Function(BuildContext)> rutasApp= AppRoutes.routes;
-
   @override
   Widget build(BuildContext context) {
 
@@ -21,7 +19,7 @@ class App extends StatelessWidget{
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
 
-      routes: AppRoutes.routes,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
       initialRoute: AppRoutes.splash,
       // Sigue el modo claro/oscuro del móvil.
       themeMode: ThemeMode.system,
