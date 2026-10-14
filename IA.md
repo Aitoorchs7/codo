@@ -64,6 +64,19 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - La IA propuso `displayName` = parte del correo antes de la `@`. Después lo cambiaremos
   - Dejé los datos de ejemplo sin subir y el commit para más adelante, para no precipitarme.
 - **Resultado:** `lib/models/`, `lib/admins/firestore_admin.dart`, `lib/repositories/`, `lib/screens/home/home_screen.dart`, `test/field_readers_test.dart`.
+
+### 005 · 2026-10-14 · Barra inferior, pactos, medallas y rutas con argumentos
+- **Fase / hito:** Fase 1 / H0.
+- **Qué pedí:** la barra de navegación con las 5 secciones, la lista de pactos y la cuadrícula de medallas desde Firestore, y un detalle de pacto con rutas con nombre. Fuimos «paso a paso».
+- **Qué me dio:** el esquema (barra «tonta» + estado en Home, `IndexedStack`, `StreamBuilder` con 4 estados, `GridView`), revisiones de mi código y el diseño de `onGenerateRoute` con una clase de argumentos.
+- **Qué corregí o descarté, y por qué:**
+  - Mi primera barra no compilaba (`setState` en un `StatelessWidget`, `BottomNavigationBar` con parámetros que no existen). La rehíce con `NavigationBar` y el estado en Home.
+  - En `onTap` llamé a `pushNamed` en vez de pasar una función, y en `PactsScreen` añadí un parámetro `pacts` que sobraba. Ambos corregidos tras la revisión.
+  - Unifiqué el nombre en `medal` (la colección sigue siendo `badges`, porque renombrarla exige tocar reglas y repetir el seed).
+  - No amplié la fecha del «modo prueba» de las reglas de Firestore: añadí reglas con sesión iniciada.
+  - Descarté `go_router` (dependencia no aprobada) y leer los argumentos con un cast.
+  - Una vez pedí que la IA terminara por mí el final del `build` del Perfil (SizedBox y botón de cerrar sesión).
+- **Resultado:** commits 6942884, b01f246, 7de54d5 y 8b08716; `lib/widgets/codo_nav_bar.dart`, `lib/screens/{home,pacts,profile}/`, `lib/app/app_routes.dart`.
 ## Agentes y skills propios
 | Nombre | Tipo | Creado | Qué tarea repetida resuelve | Trabajo ahorrado (medido) |
 |---|---|---|---|---|
