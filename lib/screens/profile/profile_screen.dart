@@ -2,6 +2,8 @@ import 'package:codo/admins/auth_service.dart';
 import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/profile.dart';
 import 'package:codo/repositories/profile_repository.dart';
+import 'package:codo/utils/example_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -32,6 +34,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 // Vacía la pila: atrás no vuelve al inicio con la sesión cerrada.
     Navigator.pushNamedAndRemoveUntil(
         context, AppRoutes.login, (route) => false);
+  }
+
+  // metodo para cargar datos de prueba
+  Future<void> _seed() async{
+    try{
+      await seedSampleData();
+      if(!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Datos de prueba cargados')),
+      );
+    }catch(e){
+      if(!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al subir: $e')),
+      );
+    }
   }
 
   @override
@@ -79,6 +97,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: _signOut,
             child: const Text('Cerrar sesión'),
           ),
+            if (kDebugMode) ...[
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: _seed,
+                child: const Text('Subir datos de ejemplo'),
+              ),
+            ],
           ],
         ),
     );
