@@ -2,6 +2,7 @@ import 'package:codo/admins/auth_service.dart';
 import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/profile.dart';
 import 'package:codo/repositories/profile_repository.dart';
+import 'package:codo/screens/profile/medal_grid.dart';
 import 'package:codo/utils/example_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,81 +32,84 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _signOut() async {
     await AuthService().signOut();
     if (!mounted) return;
-// Vacía la pila: atrás no vuelve al inicio con la sesión cerrada.
+    // Vacía la pila: atrás no vuelve al inicio con la sesión cerrada.
     Navigator.pushNamedAndRemoveUntil(
-        context, AppRoutes.login, (route) => false);
+      context,
+      AppRoutes.login,
+      (route) => false,
+    );
   }
 
   // metodo para cargar datos de prueba
-  Future<void> _seed() async{
-    try{
+  Future<void> _seed() async {
+    try {
       await seedSampleData();
-      if(!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Datos de prueba cargados')),
-      );
-    }catch(e){
-      if(!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al subir: $e')),
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Datos de prueba cargados')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error al subir: $e')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-          FutureBuilder<Profile?>(
-            future: _profile,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              }
-              if (snapshot.hasError) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('No se pudo cargar tu perfil.'),
-                    const SizedBox(height: 12),
-                    FilledButton(
-                      onPressed: () {
-                        setState(() {
-                          _profile = _load();
-                        });
-                      },
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
+    return SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: FutureBuilder<Profile?>(
+              future: _profile,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+                if (snapshot.hasError) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('No se pudo cargar tu perfil.'),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: () {
+                          setState(() {
+                            _profile = _load();
+                          });
+                        },
+                        child: const Text('Reintentar'),
+                      ),
+                    ],
+                  );
+                }
+                final profile = snapshot.data;
+                if (profile == null) {
+                  return const Text('Todavía no tienes perfil.');
+                }
+                return Text(
+                  'Hola, ${profile.displayName}',
+                  style: textTheme.headlineMedium,
                 );
-              }
-              final profile = snapshot.data;
-              if (profile == null) {
-                return const Text('Todavía no tienes perfil.');
-              }
-              return Text(
-                'Hola, ${profile.displayName}',
-                style: textTheme.headlineMedium,
-              );
-            },
+              },
+            ),
           ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _signOut,
-            child: const Text('Cerrar sesión'),
-          ),
-            if (kDebugMode) ...[
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _seed,
-                child: const Text('Subir datos de ejemplo'),
-              ),
-            ],
+          const Expanded(child: MedalGrid()),
+          const SizedBox(height: 12),
+          FilledButton(onPressed: _signOut, child: const Text('Cerrar sesión')),
+          if (kDebugMode) ...[
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: _seed,
+              child: const Text('Subir datos de ejemplo'),
+            ),
           ],
-        ),
+          const SizedBox(height: 12),
+        ],
+      ),
     );
   }
 }
