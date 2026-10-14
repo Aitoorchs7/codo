@@ -89,7 +89,7 @@ class _AuthScreenState extends State<AuthScreen> {
             uid: FirebaseAuth.instance.currentUser!.uid,
             displayName: email.split('@').first,
             xp: 0,
-            badges: [],
+            medals: [],
             createdAt: DateTime.now(),
           )
         );

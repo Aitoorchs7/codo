@@ -11,7 +11,7 @@ class Profile {
   final DateTime createdAt;
 
   final int xp;
-  final List<String> badges;
+  final List<String> medals;
 
 
   Profile({
@@ -20,7 +20,7 @@ class Profile {
     this.photoUrl,
     this.bio,
     required this.xp,
-    required this.badges,
+    required this.medals,
     required this.createdAt,
   });
 
@@ -34,7 +34,7 @@ class Profile {
       photoUrl: readOptionalString(data?['photoUrl']),
       bio: readOptionalString(data?['bio']),
       xp: readInt(data?['xp']),
-      badges: readStringList(data?['badges']),
+      medals: readStringList(data?['badges']),
       createdAt: readDate(data?['createdAt']),
     );
   }
@@ -43,7 +43,7 @@ class Profile {
     return{
       'displayName': displayName,
       'xp': xp,
-      'badges': badges,
+      'badges': medals,
       'createdAt': Timestamp.fromDate(createdAt),// con esto evitamos el datetimenow()
       if(photoUrl != null) 'photoUrl': photoUrl,
       if(bio != null) 'bio': bio,

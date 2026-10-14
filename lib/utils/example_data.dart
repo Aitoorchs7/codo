@@ -1,5 +1,5 @@
 import 'package:codo/admins/firestore_admin.dart';
-import 'package:codo/models/badge.dart';
+import 'package:codo/models/medal.dart';
 import 'package:codo/models/pact.dart';
 
 final samplePacts = [

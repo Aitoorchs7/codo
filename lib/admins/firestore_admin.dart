@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:codo/models/badge.dart';
+import 'package:codo/models/medal.dart';
 import 'package:codo/models/pact.dart';
 import 'package:codo/models/profile.dart';
 
