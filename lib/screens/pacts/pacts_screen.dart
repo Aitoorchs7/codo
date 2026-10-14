@@ -1,5 +1,7 @@
+import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/pact.dart';
 import 'package:codo/repositories/pact_repository.dart';
+import 'package:codo/screens/pacts/pact_detail_screen.dart';
 import 'package:flutter/material.dart';
 
 class PactsScreen extends StatefulWidget {
@@ -66,7 +68,14 @@ class _PactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Card(
-        child: Padding(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => Navigator.pushNamed(
+            context,
+            AppRoutes.pactDetail,
+            arguments: PactDetailArgs(pact: pact),
+          ),
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,6 +91,7 @@ class _PactCard extends StatelessWidget {
               ],
             )
         )
+      ),
     );
   }
 }
