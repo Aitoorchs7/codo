@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'codo_colors.dart';
 
-/// Temas claro y oscuro de Codo. Las pantallas no escriben colores:
-/// los leen de aquí con Theme.of(context).
+// Temas claro y oscuro de Codo. Las pantallas no escriben colores:
+// los leen de aquí con Theme.of(context).
 class AppTheme {
   AppTheme._();
 

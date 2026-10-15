@@ -184,8 +184,8 @@ const _pages = [
     icon: Icons.handshake,
     title: 'Un pacto, dos '
         'personas',
-    text: 'Elegis un reto y haceis check-in cada dia.'
-        'Si uno se descuelga, perdeís los dos. Por'
+    text: 'Elegís un reto y hacéis check-in cada día.'
+        'Si uno se descuelga, perdéis los dos. Por'
         'eso nadie se descuelga',
   ),
   _PageData(

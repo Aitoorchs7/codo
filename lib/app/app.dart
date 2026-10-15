@@ -13,6 +13,7 @@ class App extends StatelessWidget{
 
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Codo',
 
       //los temas claro y oscuro de la app
