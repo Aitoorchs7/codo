@@ -40,21 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // metodo para cargar datos de prueba
-  Future<void> _seed() async {
-    try {
-      await seedSampleData();
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Datos de prueba cargados')));
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error al subir: $e')));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -100,13 +85,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Expanded(child: MedalGrid()),
           const SizedBox(height: 12),
           FilledButton(onPressed: _signOut, child: const Text('Cerrar sesión')),
-          if (kDebugMode) ...[
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _seed,
-              child: const Text('Subir datos de ejemplo'),
-            ),
-          ],
           const SizedBox(height: 12),
         ],
       ),
