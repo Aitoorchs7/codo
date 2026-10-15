@@ -5,8 +5,8 @@ class Profile {
 
   final String uid;
   final String displayName;
-  String? photoUrl;
-  String? bio;
+  final String? photoUrl;
+  final String? bio;
 
   final DateTime createdAt;
 
@@ -14,7 +14,7 @@ class Profile {
   final List<String> medals;
 
 
-  Profile({
+  const Profile({
     required this.uid,
     required this.displayName,
     this.photoUrl,
