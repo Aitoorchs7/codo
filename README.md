@@ -179,11 +179,20 @@ flutter test             # pruebas
 ## 🧪 Pruebas
 **Automáticas** (16 pruebas con `flutter test`, sin Firebase real): ruta de arranque según sesión y onboarding, preferencias con valor corrupto, un mensaje por cada error de acceso, lectores seguros de campos y progreso de un pacto con datos extremos.
 
-**Manuales** en Android y web:
+**Manuales** en Android y web. Registro completo (26 pruebas, 14/10/2026) en [`docs/pruebas.md`](docs/pruebas.md). Resumen:
 
 | Qué se probó | Esperado | Resultado Android | Resultado web |
 |---|---|---|---|
-| _pendiente_ | | | |
+| Splash con imagen y con URL rota | Imagen o estado de error, y sigue navegando | Correcto | Correcto (más rápido) |
+| Onboarding: primera vez, no se repite, «Saltar» | 3 páginas solo la primera vez | Correcto | Correcto |
+| Registro: correo usado, contraseña débil, correo inválido | Un mensaje concreto por error | Correcto | Correcto |
+| Acceso, sesión persistente y cerrar sesión | Entra, conserva la sesión y «atrás» no vuelve a Home | Correcto | Correcto |
+| Barra inferior | Cambia de sección y conserva el estado | Correcto | Correcto |
+| Pactos y medallas: datos, vacío, error, imagen rota | 4 estados sin romper | Correcto (la carga no llega a verse, va muy rápido) | Correcto |
+| Detalle de pacto | Abre el pacto correcto y vuelve | Correcto | Correcto |
+| Tema claro/oscuro, letra grande, ancho de ventana | Todo legible, sin desbordes | Correcto | Correcto |
+
+**Diferencias:** tras cerrar sesión, Android muestra dos avisos `PERMISSION_DENIED` en el log y el navegador ninguno (no se ven en pantalla; ver hallazgo 1 de `docs/pruebas.md`). «Atrás» sale de la app en Android y no hace nada en web.
 
 ## 🤖 Trabajo con IA
 Este proyecto se desarrolla con asistentes de IA, de forma documentada:
@@ -192,7 +201,7 @@ Este proyecto se desarrolla con asistentes de IA, de forma documentada:
 - [`IA.md`](IA.md): bitácora de qué pedí, qué me dio y qué corregí.
 
 ## 🗺️ Estado del proyecto
-- [ ] **Fase 1** · Arranque: splash, onboarding, cuenta, Firestore, navegación (16/10/2026). Hecho: splash, onboarding, acceso, Firestore, barra inferior, pactos, medallas y rutas con argumentos. Falta: tabla de pruebas Android/web y limpieza final
+- [ ] **Fase 1** · Arranque: splash, onboarding, cuenta, Firestore, navegación (16/10/2026). Hecho: splash, onboarding, acceso, Firestore, barra inferior, pactos, medallas y rutas con argumentos. Pruebas Android/web hechas (faltan las capturas). Falta: cierre de la fase y PDF de entrega
 - [ ] **Fase 2** · Datos que duran: Drift, sincronización, copias (04/12/2026)
 - [ ] **Fase 3** · Servicio: API, WebSocket, notificaciones, validación de compras (29/01/2027)
 - [ ] **Fase 4** · Cobrar y publicar: Billing, AdMob, seguridad, Google Play (19/02/2027)
