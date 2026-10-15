@@ -185,8 +185,8 @@ const _pages = [
     title: 'Un pacto, dos '
         'personas',
     text: 'Elegís un reto y hacéis check-in cada día.'
-        'Si uno se descuelga, perdéis los dos. Por'
-        'eso nadie se descuelga',
+        'Si uno se descuelga, perdéis los dos. '
+        'Por eso nadie se descuelga. ',
   ),
   _PageData(
     icon: Icons.emoji_events,

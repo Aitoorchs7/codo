@@ -3,8 +3,6 @@ import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/profile.dart';
 import 'package:codo/repositories/profile_repository.dart';
 import 'package:codo/screens/profile/medal_grid.dart';
-import 'package:codo/utils/example_data.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
