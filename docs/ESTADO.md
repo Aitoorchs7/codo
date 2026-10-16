@@ -1,6 +1,6 @@
 # Estado — actualizado 15/10/2026
 
-**Fase actual:** 1 · Arranque · entrega **16/10/2026** según README y este fichero (Aitor habla del 18/10: confirmar con el enunciado)
+**Fase actual:** 1 · Arranque · entrega **18/10/2026** (confirmado por Aitor; el H0 y la propuesta siguen el mismo plazo)
 **Siguiente hito:** H1 · 13/11/2026 (arquitectura, alcance y modelo de ingresos)
 
 ## Hecho
@@ -22,7 +22,7 @@
 1. Arreglar los 2 imports y los espacios del onboarding; `analyze` limpio y commit
 2. Comprobar en la consola que las reglas de `pacts`/`badges` son solo lectura
 3. Capturas de pantalla (Android y web) para el PDF
-4. Confirmar la fecha de entrega (16 o 18/10)
+4. ~~Confirmar la fecha de entrega~~ → 18/10 (hecho)
 5. PDF de entrega
 6. Traducir errores de Firestore a un fallo de dominio en Pactos y medallas (fuera del checklist)
 
@@ -35,9 +35,8 @@
 - [x] Tabla de pruebas Android/web (README + `docs/pruebas.md`; faltan capturas) · [x] Guía de arranque en el README
 
 ## Decisiones pendientes
-- Fecha de entrega: 16/10 (docs) o 18/10 (Aitor)
 - `firebase_options.dart` y `google-services.json`: entregarlos aparte al profesor + `flutterfire configure` como alternativa (ya en el README)
-- Preguntar al profesor si `DataHolder` y `FirebaseAdmin` son obligatorios (ya existe `FirestoreAdmin`)
+- Resuelto: `DataHolder` y `FirebaseAdmin` NO son obligatorios; su función se cubre con `FirestoreAdmin` + repositorios + `provider`
 - Carpeta `assets/images/imagenes app/` (4 fondos .jpg) sin añadir a git ni a `pubspec.yaml`: decidir si entra y con otro nombre (sin espacio)
 - Paleta: sincronizar `docs/CODO_PALETA_COLORES.md` con el fondo gris actual y el botón principal al 85→65 %
 - Textos ES/EN: literales en español ahora, `AppLocalizations` y `lib/l10n/` en la fase 2
