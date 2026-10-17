@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Image.asset('assets/images/logo.png', width: 104),
             const Text('Codo'),
             Image.network(
-              'https://picsum.photos/nada.jpg',
+              'https://picsum.photos/600/400',
               width: 280,
               height: 168,
               fit: BoxFit.cover,
