@@ -37,7 +37,8 @@ Los resultados son los que Aitor dio al probar. Donde dio un solo resultado para
 1. **Fila 14: avisos de Firestore al cerrar sesión (Android).** En el log aparecen dos `PERMISSION_DENIED` (`Listen ... badges` y `Listen ... pacts`). Al cerrar sesión, durante unos instantes las dos suscripciones siguen vivas sin usuario y las reglas las rechazan. No se ve en pantalla y no es un fallo de la app: son avisos del SDK. Se probó navegar antes de cerrar sesión y los avisos siguen saliendo, porque `pushNamedAndRemoveUntil` mantiene la pantalla antigua viva hasta que acaba la animación (~300 ms) y las suscripciones no se cancelan antes. Se mantiene el orden original (cerrar sesión y luego navegar), que además no deja al usuario con la sesión abierta si `signOut` fallara.
 2. **Fila 15: «atrás» no es igual.** En Android, desde la pantalla principal «atrás» sale de la app (lo normal). En web no hay nada a donde volver porque la pila de rutas solo tiene `Home`.
 3. **Fila 17: el estado de carga no se ha visto.** Firestore responde casi al instante; queda anotado como no comprobado visualmente.
-4. **Capturas:** pendientes en las dos plataformas.
+4. **Capturas:** hechas. Web (17) en `assets/images/capturas/web` y Android (12) en `assets/images/capturas/android`.
+5. **Capturas que faltan o no coinciden.** El splash con error no se capturó en Android porque la imagen carga demasiado rápido (`android_02_splash_error.png` no muestra el mensaje de error); está capturado en web (`web_02_splash.png`) y es el mismo código. Los textos del onboarding se corrigieron después de hacer las capturas (faltaban espacios) y esas capturas no se repitieron.
 
 ## Diferencias entre plataformas observadas
 - Tamaño de ventana y tipo de tema del sistema (esperado).
