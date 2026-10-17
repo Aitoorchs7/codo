@@ -53,6 +53,7 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - La IA propuso un `outlinedButtonTheme` para «Saltar»; no sabe desenfocar, así que lo sustituí por `GlassButton`.
 - **Resultado:** `lib/widgets/glass_surface.dart`, `lib/widgets/glass_button.dart`, `lib/widgets/codo_background.dart`, `lib/app/app_theme.dart`, `lib/screens/onboarding/onboarding_screen.dart`.
 
+---
 
 ### 004 · 2026-10-12 · Perfil en Firestore, modelos y repositorios
 - **Fase / hito:** Fase 1 / H0.
@@ -64,6 +65,8 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - La IA propuso `displayName` = parte del correo antes de la `@`. Después lo cambiaremos en fases posteriores.
   - Dejé los datos de ejemplo sin subir y el commit para más adelante, para no precipitarme.
 - **Resultado:** `lib/models/`, `lib/admins/firestore_admin.dart`, `lib/repositories/`, `lib/screens/home/home_screen.dart`, `test/field_readers_test.dart`.
+
+---
 
 ### 005 · 2026-10-14 · Barra inferior, pactos, medallas y rutas con argumentos
 - **Fase / hito:** Fase 1 / H0.
@@ -78,12 +81,16 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - Una vez pedí que la IA terminara por mí el final del `build` del Perfil (SizedBox y botón de cerrar sesión).
 - **Resultado:** commits 6942884, b01f246, 7de54d5 y 8b08716; `lib/widgets/codo_nav_bar.dart`, `lib/screens/{home,pacts,profile}/`, `lib/app/app_routes.dart`.
 
+---
+
 ### 006 · 2026-10-16 · Auditoría de la fase 1 y plan de entrega
 - **Fase / hito:** Fase 1 / H0.
-- **Qué pedí:** Pedi que hiciéramos un seguimiento de lo que llevamos hecho en la app para reflejarlo en el pdf
+- **Qué pedí:** Pedí que hiciéramos un seguimiento de lo que llevamos hecho en la app para reflejarlo en el pdf
 - **Qué me dio:** me dio la estructura de las carpetas para guardar las capturas de assets/images/capturas
-- **Qué corregí o descarté, y por qué:** nada
+- **Qué corregí o descarté, y por qué:** corregí los espacios mal puestos del onboarding y cambie la url del splash a una diferente de prueba para que funcione hasta que encuentre una mejor.
 - **Resultado:** capturas en `assets/images/capturas/web` y `assets/images/capturas/android`, `flutter analyze` limpio, 16 pruebas en verde y reglas de Firestore comprobadas.
+
+---
 
 ### 007 · 2026-10-16 · Primer uso de tres agentes
 - **Fase / hito:** Fase 1 / H0.
@@ -97,17 +104,19 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 - **Qué corregí o descarté, y por qué:** dije de usar algunos agentes para perfeccionar partes de la práctica y usamos 3 de los que tenemos.
 - **Resultado:** tres agentes de `claude/agents` usados cada uno con su respuesta de su acción.
 
+---
+
 ## Agentes y skills propios
 | Nombre | Tipo | Creado | Qué tarea repetida resuelve | ¿Usado? | Trabajo ahorrado (medido) |
-|---|---|---|---|---|---|
-| `revisor-codo` | Agente | 05/10/2026 | Revisar los cambios antes de un commit y ordenar los hallazgos | Sí, 16/10/2026 (~1 min) | Por estimar |
-| `auditor-rubrica` | Agente | 05/10/2026 | Comprobar el repositorio contra el checklist y la rúbrica de la fase | Sí, 16/10/2026 (~1 min) | Por estimar |
-| `tester-codo` | Agente | 05/10/2026 | Proponer casos de prueba (también los malos) y ejecutar `analyze` y `test` | Sí, 16/10/2026 (~35 s; no pudo ejecutar Flutter) | Por estimar |
-| `auditor-ui` | Agente | 05/10/2026 | Revisar pantallas contra la paleta, los 4 estados, claro/oscuro y accesibilidad | No, todavía | — |
-| `tribunal-defensa` | Agente | 05/10/2026 | Simular las preguntas del tribunal sobre código real | No, todavía | — |
-| `commits` | Skill | 05/10/2026 | Agrupar los cambios en commits pequeños y proponer los mensajes | No, todavía | — |
-| `tabla-pruebas` | Skill | 05/10/2026 | Preparar la tabla de pruebas Android/web para el PDF | No, todavía | — |
-| `bitacora-ia` | Skill | 05/10/2026 | Redactar las entradas de este fichero | No, todavía | — |
-| `/cierre` | Comando | 05/10/2026 | Cerrar la sesión: actualizar `docs/ESTADO.md` y proponer la entrada de `IA.md` | No, todavía | — |
+|---|---|---|---|---|---------------------------|
+| `revisor-codo` | Agente | 05/10/2026 | Revisar los cambios antes de un commit y ordenar los hallazgos | Sí, 16/10/2026 (~1 min) | 10 min                    |
+| `auditor-rubrica` | Agente | 05/10/2026 | Comprobar el repositorio contra el checklist y la rúbrica de la fase | Sí, 16/10/2026 (~1 min) | 30 min                    |
+| `tester-codo` | Agente | 05/10/2026 | Proponer casos de prueba (también los malos) y ejecutar `analyze` y `test` | Sí, 16/10/2026 (~35 s; no pudo ejecutar Flutter) | 15 min                    |
+| `auditor-ui` | Agente | 05/10/2026 | Revisar pantallas contra la paleta, los 4 estados, claro/oscuro y accesibilidad | No, todavía | —                         |
+| `tribunal-defensa` | Agente | 05/10/2026 | Simular las preguntas del tribunal sobre código real | No, todavía | —                         |
+| `commits` | Skill | 05/10/2026 | Agrupar los cambios en commits pequeños y proponer los mensajes | No, todavía | —                         |
+| `tabla-pruebas` | Skill | 05/10/2026 | Preparar la tabla de pruebas Android/web para el PDF | No, todavía | —                         |
+| `bitacora-ia` | Skill | 05/10/2026 | Redactar las entradas de este fichero | No, todavía | —                         |
+| `/cierre` | Comando | 05/10/2026 | Cerrar la sesión: actualizar `docs/ESTADO.md` y proponer la entrada de `IA.md` | No, todavía | —                         |
 
 Los tres agentes usados se ejecutaron desde Claude con las instrucciones de `.claude/agents`. Los tiempos son aproximados. «Creado» es la fecha del commit que los añadió.
