@@ -3,6 +3,7 @@ import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/profile.dart';
 import 'package:codo/repositories/profile_repository.dart';
 import 'package:codo/screens/profile/medal_grid.dart';
+import 'package:codo/widgets/glass_button.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -58,7 +59,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const Text('No se pudo cargar tu perfil.'),
                       const SizedBox(height: 12),
-                      FilledButton(
+                      GlassButton(
+                        primary: true,
                         onPressed: () {
                           setState(() {
                             _profile = _load();
@@ -82,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const Expanded(child: MedalGrid()),
           const SizedBox(height: 12),
-          FilledButton(onPressed: _signOut, child: const Text('Cerrar sesión')),
+          GlassButton(onPressed: _signOut, child: const Text('Cerrar sesión')),
           const SizedBox(height: 12),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:codo/models/medal.dart';
 import 'package:codo/repositories/medal_repository.dart';
+import 'package:codo/widgets/glass_button.dart';
 import 'package:flutter/material.dart';
 
 class MedalGrid extends StatefulWidget {
@@ -31,7 +32,8 @@ class _MedalGridState extends State<MedalGrid> {
                 children: [
                   const Text('No se pudieron cargar las medallas.'),
                   const SizedBox(height: 12),
-                  FilledButton(
+                  GlassButton(
+                    primary: true,
                     onPressed: () => setState(() => _medals = _repository.watchMedals()),
                     child: const Text('Reintentar'),
                   ),
