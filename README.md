@@ -202,7 +202,7 @@ Este proyecto se desarrolla con asistentes de IA, de forma documentada:
 - [`IA.md`](IA.md): bitácora de qué pedí, qué me dio y qué corregí.
 
 ## 🗺️ Estado del proyecto
-- [ ] **Fase 1** · Arranque: splash, onboarding, cuenta, Firestore, navegación (18/10/2026). Hecho: splash, onboarding, acceso, Firestore, barra inferior, pactos, medallas y rutas con argumentos. Pruebas Android/web hechas. Falta: PDF de entrega y envío
+- [X] **Fase 1** · Arranque: splash, onboarding, cuenta, Firestore, navegación (18/10/2026). Hecho: splash, onboarding, acceso, Firestore, barra inferior, pactos, medallas y rutas con argumentos. Pruebas Android/web hechas. Falta: PDF de entrega y envío
 - [ ] **Fase 2** · Datos que duran: Drift, sincronización, copias (04/12/2026)
 - [ ] **Fase 3** · Servicio: API, WebSocket, notificaciones, validación de compras (29/01/2027)
 - [ ] **Fase 4** · Cobrar y publicar: Billing, AdMob, seguridad, Google Play (19/02/2027)
