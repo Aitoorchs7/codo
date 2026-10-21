@@ -177,14 +177,14 @@ const _pages = [
     title: 'Ponerse cuesta menos '
         'acompañado',
     text: 'Publica lo que estés haciendo y tus'
-        'amigos se suman a la vez. Estudiar,'
+        'amigos se suman a la vez. Estudiar, '
         'entrenar o leer, a tu codo.',
   ),
   _PageData(
     icon: Icons.handshake,
     title: 'Un pacto, dos '
         'personas',
-    text: 'Elegís un reto y hacéis check-in cada día.'
+    text: 'Elegís un reto y hacéis check-in cada día. '
         'Si uno se descuelga, perdéis los dos. '
         'Por eso nadie se descuelga. ',
   ),
@@ -192,7 +192,7 @@ const _pages = [
     icon: Icons.emoji_events,
     title: 'Cada objetivo cuenta',
     text: 'Gana XP, sube de nivel y llena tu perfil de '
-        'medallas por lo que de verdad has'
+        'medallas por lo que de verdad has '
         'cumplido.',
   ),
 ];
