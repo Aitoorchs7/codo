@@ -35,9 +35,9 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 - **Qué me dio:** explicación de `PageController`, de `routes` frente a `onGenerateRoute`, de `shared_preferences` y de `async`/`await`/`mounted`; revisión de `app.dart` y de `_finish`; valoración del patrón de «admins» del profesor.
 - **Qué corregí o descarté, y por qué:**
   - Mi primer `_finish` no guardaba nada (variables locales que desaparecen). Lo pasé a una clase `PreferencesAdmin`, fuera de la pantalla, para que el splash lea lo mismo.
-  - Mantengo `screens/` aunque los documentos decían `views/`, porque empecé el proyecto con `screens/` y quería tener todo igual.
+  - Mantengo `screens/` aunque los documentos decían `views/` [tu motivo].
   - La IA propuso dejar las preferencias en `services/`. Lo moví todo a `admins/`, incluido `AuthService`, porque lo pide el profesor y me parece más claro.
-  - `DataHolder` y `FirebaseAdmin` no son obligatorios (confirmado el 16/10): trabajo con `FirestoreAdmin` y repositorios, por decisión mía.
+  - `DataHolder` y `FirebaseAdmin` quedan pendientes de preguntar al profesor [confirma si lo decides].
 - **Resultado:** `lib/admins/preferences_admin.dart`, `lib/app/app_routes.dart`, `lib/screens/onboarding/onboarding_screen.dart`.
 
 ---
@@ -61,7 +61,7 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 - **Qué corregí o descarté, y por qué:**
   - Mi primer `saveProfile` no escribía nada (faltaba `.set`), usaba otra colección (`"profiles"`) y `currentUser!`. Lo rehíce con `_col.doc(profile.uid).set(profile)`.
   - Para `Medal` copié `Pact` con sus campos; lo corregí y añadí yo `imageUrl` para las imágenes de la cuadrícula.
-  - La IA propuso `displayName` = parte del correo antes de la `@`. Después lo cambiaremos en fases posteriores.
+  - La IA propuso `displayName` = parte del correo antes de la `@`. Después lo cambiaremos
   - Dejé los datos de ejemplo sin subir y el commit para más adelante, para no precipitarme.
 - **Resultado:** `lib/models/`, `lib/admins/firestore_admin.dart`, `lib/repositories/`, `lib/screens/home/home_screen.dart`, `test/field_readers_test.dart`.
 
@@ -77,37 +77,7 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - Descarté `go_router` (dependencia no aprobada) y leer los argumentos con un cast.
   - Una vez pedí que la IA terminara por mí el final del `build` del Perfil (SizedBox y botón de cerrar sesión).
 - **Resultado:** commits 6942884, b01f246, 7de54d5 y 8b08716; `lib/widgets/codo_nav_bar.dart`, `lib/screens/{home,pacts,profile}/`, `lib/app/app_routes.dart`.
-
-### 006 · 2026-10-16 · Auditoría de la fase 1 y plan de entrega
-- **Fase / hito:** Fase 1 / H0.
-- **Qué pedí:** Pedi que hiciéramos un seguimiento de lo que llevamos hecho en la app para reflejarlo en el pdf
-- **Qué me dio:** me dio la estructura de las carpetas para guardar las capturas de assets/images/capturas
-- **Qué corregí o descarté, y por qué:** nada
-- **Resultado:** capturas en `assets/images/capturas/web` y `assets/images/capturas/android`, `flutter analyze` limpio, 16 pruebas en verde y reglas de Firestore comprobadas.
-
-### 007 · 2026-10-16 · Primer uso de tres agentes
-- **Fase / hito:** Fase 1 / H0.
-- **Qué pedí:** ejecutar `revisor-codo`, `auditor-rubrica` y `tester-codo` sobre el repositorio.
-- **Qué me dio:**
-  - El registro no es atómico y usa `currentUser!`.
-  - Faltan pruebas de `AuthService`, `Pact.fromFirestore` y `PactsScreen`.
-  - La cancelación de suscripciones es implícita (la hace `StreamBuilder`).
-  - 35 commits en total.
-  - La invitación del profesor estaba pendiente en ese momento.
-- **Qué corregí o descarté, y por qué:** dije de usar algunos agentes para perfeccionar partes de la práctica y usamos 3 de los que tenemos.
-- **Resultado:** tres agentes de `claude/agents` usados cada uno con su respuesta de su acción.
-
 ## Agentes y skills propios
-| Nombre | Tipo | Creado | Qué tarea repetida resuelve | ¿Usado? | Trabajo ahorrado (medido) |
-|---|---|---|---|---|---|
-| `revisor-codo` | Agente | 05/10/2026 | Revisar los cambios antes de un commit y ordenar los hallazgos | Sí, 16/10/2026 (~1 min) | Por estimar |
-| `auditor-rubrica` | Agente | 05/10/2026 | Comprobar el repositorio contra el checklist y la rúbrica de la fase | Sí, 16/10/2026 (~1 min) | Por estimar |
-| `tester-codo` | Agente | 05/10/2026 | Proponer casos de prueba (también los malos) y ejecutar `analyze` y `test` | Sí, 16/10/2026 (~35 s; no pudo ejecutar Flutter) | Por estimar |
-| `auditor-ui` | Agente | 05/10/2026 | Revisar pantallas contra la paleta, los 4 estados, claro/oscuro y accesibilidad | No, todavía | — |
-| `tribunal-defensa` | Agente | 05/10/2026 | Simular las preguntas del tribunal sobre código real | No, todavía | — |
-| `commits` | Skill | 05/10/2026 | Agrupar los cambios en commits pequeños y proponer los mensajes | No, todavía | — |
-| `tabla-pruebas` | Skill | 05/10/2026 | Preparar la tabla de pruebas Android/web para el PDF | No, todavía | — |
-| `bitacora-ia` | Skill | 05/10/2026 | Redactar las entradas de este fichero | No, todavía | — |
-| `/cierre` | Comando | 05/10/2026 | Cerrar la sesión: actualizar `docs/ESTADO.md` y proponer la entrada de `IA.md` | No, todavía | — |
-
-Los tres agentes usados se ejecutaron desde Claude con las instrucciones de `.claude/agents`. Los tiempos son aproximados. «Creado» es la fecha del commit que los añadió.
+| Nombre | Tipo | Creado | Qué tarea repetida resuelve | Trabajo ahorrado (medido) |
+|---|---|---|---|---|
+| — | — | — | — | — |

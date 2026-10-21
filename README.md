@@ -94,7 +94,6 @@ lib/
 Cada capa tiene una única responsabilidad. **Las pantallas no saben de dónde vienen los datos**: se los pide al repositorio, que decide si los lee de la base de datos local o de la nube. Así puedo cambiar Firestore por otra fuente, o probar la lógica con una base de datos en memoria, sin tocar la interfaz. Los **modelos** están separados para que la app trabaje con objetos tipados y no con mapas sueltos.
 
 ### Navegación y pantallas
-- El onboarding solo sale la primera vez: «visto» se guarda con `shared_preferences` (clave `onboarding_seen`) en `PreferencesAdmin`, y el splash lo lee y decide el destino con `startupRoute()`.
 - `HomeScreen` es la carcasa de la app: una barra inferior (`CodoNavBar`, el `NavigationBar` de Material 3) y un `IndexedStack` con las 5 secciones, que conserva el estado de cada una al cambiar de pestaña.
 - Las rutas con nombre están en un único sitio (`AppRoutes`) y se resuelven con `onGenerateRoute`. Los argumentos viajan en una clase tipada (`PactDetailArgs`); si llegan mal o la ruta no existe, se muestra una pantalla de error en vez de romper.
 - Toda pantalla que pide datos pinta cuatro casos: cargando, vacío, error con «Reintentar» y datos (por ejemplo `PactsScreen` y `MedalGrid`). Las listas escuchan un `Stream` del repositorio con `StreamBuilder`, que cancela la suscripción al cerrar la pantalla.
@@ -202,7 +201,7 @@ Este proyecto se desarrolla con asistentes de IA, de forma documentada:
 - [`IA.md`](IA.md): bitácora de qué pedí, qué me dio y qué corregí.
 
 ## 🗺️ Estado del proyecto
-- [X] **Fase 1** · Arranque: splash, onboarding, cuenta, Firestore, navegación (18/10/2026). Hecho: splash, onboarding, acceso, Firestore, barra inferior, pactos, medallas y rutas con argumentos. Pruebas Android/web hechas. Falta: PDF de entrega y envío
+- [ ] **Fase 1** · Arranque: splash, onboarding, cuenta, Firestore, navegación (16/10/2026). Hecho: splash, onboarding, acceso, Firestore, barra inferior, pactos, medallas y rutas con argumentos. Pruebas Android/web hechas (faltan las capturas). Falta: cierre de la fase y PDF de entrega
 - [ ] **Fase 2** · Datos que duran: Drift, sincronización, copias (04/12/2026)
 - [ ] **Fase 3** · Servicio: API, WebSocket, notificaciones, validación de compras (29/01/2027)
 - [ ] **Fase 4** · Cobrar y publicar: Billing, AdMob, seguridad, Google Play (19/02/2027)
