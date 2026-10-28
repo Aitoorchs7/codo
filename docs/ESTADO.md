@@ -1,45 +1,45 @@
-# Estado — actualizado 17/10/2026
+# Estado — actualizado 18/10/2026
 
-**Fase actual:** 1 · Arranque · entrega **18/10/2026** (confirmado por Aitor; el H0 y la propuesta siguen el mismo plazo)
-**Siguiente hito:** H1 · 13/11/2026 (arquitectura, alcance y modelo de ingresos)
+**Fase actual:** 1 · Arranque · cierra en el Aula **hoy 18/10, 23:59** (falta el PDF). Después empieza la fase 1b
+**Siguiente:** Fase 1b · Fotos, posición y consultas · entrega **13/11/2026** (Aula: 15/11). **Coincide con H1** (arquitectura, alcance, CLAUDE.md): cerrar la documentación de H1 antes de la última semana de la 1b (fechas: `docs/hitos.md`; rúbrica: `docs/fase1b.md`)
 
 ## Hecho
-- Proyecto Flutter, repo GitHub (`Aitoorchs7/codo`), `.gitignore` con secretos, CLAUDE.md, IA.md, README, decisiones de producto (v1) y entorno agéntico
-- Tema claro/oscuro (`AppTheme` + `CodoColors`, Onest) y cristal (`GlassSurface`, `GlassButton`, `CodoBackground`)
-- Splash con imagen de URL (3 estados) y destino según sesión y «onboarding visto» (`startupRoute`, probado); onboarding de 3 páginas
-- Acceso y registro: `AuthService` + `AuthFailure` + `AuthScreen` (un mensaje por `AuthError`); cerrar sesión desde Perfil
-- Modelos `Profile`, `Pact` y `Medal` con lectores seguros y pruebas de casos malos; `FirestoreAdmin` con `withConverter` + 3 repositorios (streams)
-- Barra inferior (`CodoNavBar`, `HomeScreen` con `IndexedStack`), `PactsScreen` con detalle, Perfil con `MedalGrid`; rutas con `onGenerateRoute` y `PactDetailArgs`
-- 6 `pacts` y 6 `badges` subidos; reglas de solo lectura comprobadas (IA.md 006)
-- `docs/pruebas.md` (26 pruebas Android/web) y capturas: web (17) y Android (12) en `assets/images/capturas/`
-- Docs de cierre de fase 1 (17/10): ESTADO, README, pruebas e IA.md (tabla de agentes, entradas 006 y 007)
+- Fase 1 hecha salvo el PDF: repo (`Aitoorchs7/codo`), tema claro/oscuro y cristal, splash, onboarding, acceso/registro (`AuthService`), `Profile`/`Pact`/`Medal` con `withConverter`, barra inferior, pactos con detalle, perfil con medallas y rutas con argumentos
+- 6 `pacts` y 6 `badges` subidos con reglas de solo lectura comprobadas (IA.md 006); `docs/pruebas.md` (26 pruebas) y capturas en `assets/images/capturas/`
+- Entorno agéntico: 5 agentes, 3 skills, `/cierre`, rules por capa y permisos en `settings.json`
+- 18/10: contexto de la 1b (`docs/fase1b.md`, `docs/hitos.md`) y decisiones de producto v1.1 (ubicación, mapa y fotos)
 - `flutter analyze` limpio y 16 pruebas en verde (17/10); 35 commits
 
-## En curso
-- Sin commit: docs, capturas (Android sin añadir a git), espacios del onboarding y URL buena del splash (en HEAD está la URL falsa `nada.jpg` de la captura de error)
-- Onboarding (`onboarding_screen.dart:179-180`): sigue faltando un espacio («tusamigos»)
-- IA.md: huecos [COMPLETAR] (006: fecha, qué pedí, qué me dio; 007: resultado y 35/36 commits) y [AITOR] (004, 006, 007)
+## En curso (fase 1, hoy)
+- Sin commit: docs, capturas Android, espacios del onboarding y URL buena del splash (en HEAD está la URL falsa `nada.jpg`)
+- Onboarding (`onboarding_screen.dart:179-180`): falta un espacio («tusamigos»)
+- IA.md: [COMPLETAR] (006, 007) y [AITOR] (004, 006, 007); entrada 008 pendiente (decisiones de la 1b)
+- PDF de entrega y envío
 
 ## Siguiente
-1. Añadir el espacio de «tus amigos» y hacer los commits propuestos
-2. Rellenar los [COMPLETAR] y [AITOR] de IA.md
-3. PDF de entrega y envío (18/10)
-4. Traducir errores de Firestore a un fallo de dominio en Pactos y medallas (fuera del checklist)
-5. Hallazgos de los agentes (fase 2): registro no atómico con `currentUser!`; pruebas de `AuthService`, `Pact.fromFirestore` y `PactsScreen`
+1. Cerrar la fase 1: commits, IA.md, PDF y envío (hoy)
+2. 1b · Emuladores de Auth y Firestore con `--dart-define` y ≥20 `live_sessions` de prueba (B7, base de lo demás)
+3. 1b · Google en Android y web, con perfil ligado y SHA/OAuth en el README (B1)
+4. 1b · Cuatro consultas, `firestore.indexes.json`, editar/borrar y reglas (B2, B3)
+5. 1b · Foto: cámara/galería, isolate con progreso y base64 en `proofs` (B4, 2 puntos)
+6. 1b · Ubicación, mapa y «cerca de mí» (B5, B6); Hosting y tabla de pruebas al final (B7)
 
-## Checklist de la fase 1
-- [x] Estructura de carpetas + README explicado (`lib/l10n/` llega en la fase 2) · [x] 15+ commits repartidos (llevamos 35)
-- [x] Splash con imagen de URL y estados · [x] Onboarding de 3 pantallas, saltable, solo la primera vez
-- [x] Firebase documentado (README) · [x] Registro y acceso con errores tratados · [x] Cerrar sesión y cancelar suscripciones
-- [x] Colecciones de perfiles y contenido (≥6 documentos) · [x] `withConverter` (en `FirestoreAdmin`)
-- [x] Rutas con nombre y paso de parámetros · [x] Barra inferior (lista de pactos + cuadrícula de medallas, 4 estados)
-- [x] Tabla de pruebas Android/web con capturas · [x] Guía de arranque en el README · [ ] PDF de entrega (falta hacerlo y enviarlo)
+## Checklist fase 1b (10 puntos; detalle en `docs/fase1b.md`)
+- [ ] B1 Google en Android y web, perfil ligado, SHA/OAuth y .gitignore (1,5)
+- [ ] B2 ≥20 documentos, 4 consultas, índice en `firestore.indexes.json`, snapshots/get justificado (1,75)
+- [ ] B3 Editar y borrar lo propio; las reglas lo impiden con lo ajeno (0,75)
+- [ ] B4 Cámara/galería, isolate con progreso, base64 <300 KB (2,0)
+- [ ] B5 `geolocator`, `GeoPoint`+`Timestamp`, comparación en el README (1,5)
+- [ ] B6 `flutter_map` + OSM, «cerca de mí» en isolate (1,5)
+- [ ] B7 Emuladores con `--dart-define`, Hosting con URL, tabla de pruebas (1,0)
+Checklist fase 1: todo [x] salvo el PDF de entrega
 
 ## Decisiones pendientes
-- `firebase_options.dart` y `google-services.json`: entregarlos aparte al profesor + `flutterfire configure` como alternativa (ya en el README)
-- Carpeta `assets/images/imagenes app/` (4 fondos .jpg) sin añadir a git ni a `pubspec.yaml`: decidir si entra y con otro nombre (sin espacio)
-- Paleta: sincronizar `docs/CODO_PALETA_COLORES.md` con el fondo gris actual y el botón principal al 85→65 %
-- Fase 2: `AppLocalizations` y `lib/l10n/`; `pacts` con participantes y reglas; `Profile.copyWith`; unicidad de `displayName`; `badges` → `medals` solo si sobra tiempo
+- ❓ Confirmar las decisiones de la 1b propuestas por la IA: ubicación aproximada, `proofs` en base64, `flutter_map`; precisión de la ubicación; qué pasa al borrar una sesión con participantes
+- `firebase_options.dart` y `google-services.json`: entregarlos aparte al profesor + `flutterfire configure` (en el README)
+- `assets/images/imagenes app/` (4 fondos .jpg) sin añadir a git ni a `pubspec.yaml`: decidir si entra y con otro nombre
+- Paleta: sincronizar `docs/CODO_PALETA_COLORES.md` con el fondo gris actual
+- Fase 2: `AppLocalizations`, `pacts` con participantes y reglas, `Profile.copyWith`
 
 ## Bloqueos
-- Ninguno técnico. Riesgo de plazo medio: queda 1 día y falta el PDF; los commits y la corrección del onboarding son ~15 min
+- Ninguno técnico. Riesgo de plazo: hoy cierra la fase 1 (PDF) y el 13/11 coinciden la 1b y H1

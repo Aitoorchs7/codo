@@ -16,6 +16,7 @@ Una tabla: `Punto de la rúbrica | Estado (✅ / 🟡 parcial / ❌) | Evidencia
 Después:
 - **Riesgos de fecha**: cuántos días quedan hasta la entrega (la fecha está en `docs/ESTADO.md` o `docs/requisitos.md`) y qué ❌ es lo más urgente.
 - **Verificación de requisitos transversales**: ningún secreto en el repo (`.gitignore` correcto), README con guía de arranque, ≥15 commits repartidos en el tiempo (en la fase 1), IA.md con entradas.
+- **Fase 1b** (si es la fase actual, rúbrica en `docs/fase1b.md`): `firestore.indexes.json` existe; etiqueta `fase-1b`; emuladores conectados por `--dart-define` y no por un booleano; `.gitignore` con los ficheros de configuración; el README tiene huellas SHA y cliente OAuth, URL pública de Hosting, qué va en isolate y por qué, snapshots frente a get por pantalla, límite de 1 MB por documento y la comparación de tecnologías de localización; historial de commits repartido en las ocho sesiones.
 - **Siguiente paso recomendado**: uno solo, el de mayor puntuación por esfuerzo.
 
 ## Reglas

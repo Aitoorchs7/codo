@@ -25,6 +25,9 @@ Cómo invocarlos: pedirlo en lenguaje natural ("pasa el auditor de rúbrica") o 
 |---|---|---|
 | `/cierre` | Actualiza `docs/ESTADO.md` y propone los commits (skill `commits`) y la entrada de `IA.md` (skill `bitacora-ia`). No hace commit ni escribe en `IA.md`. | Solo Aitor, al terminar la sesión |
 
+## Arranque de sesión
+`CLAUDE.md` tiene una sección «Al empezar una sesión»: el agente resume en 5 líneas dónde estamos (fase, días que quedan, bloque y primer paso de `docs/ESTADO.md`), mira `git status` y espera instrucciones. `docs/ESTADO.md` se carga solo con `@docs/ESTADO.md`; `docs/fase1b.md` y `docs/hitos.md` se leen solo si la tarea lo pide. Descartado un comando `/inicio`: habría que acordarse de escribirlo y se olvidaría; `/cierre` sí es manual porque modifica ficheros.
+
 ## Rules por capa (`.claude/rules/`)
 Se cargan solas cuando Claude lee ficheros que encajan con su `paths`, así que no gastan contexto el resto del tiempo. `CLAUDE.md` fija la arquitectura; las rules fijan cómo se escribe cada capa y están alineadas con los criterios de `auditor-ui` y `revisor-codo`.
 | Fichero | Se carga al tocar | Fija |
@@ -35,6 +38,7 @@ Se cargan solas cuando Claude lee ficheros que encajan con su `paths`, así que 
 | `models.md` | `lib/models/` | Inmutables, conversor para `withConverter`, datos corruptos |
 | `app.md` | `lib/app/`, `lib/main.dart` | `main()` mínimo, `MultiProvider`, rutas con nombre (`AppRoutes`) y argumentos tipados |
 | `tests.md` | `test/` | Casos malos, sin red real, nunca desactivar pruebas |
+| `device.md` | ficheros `*location*`, `*photo*`/`*image*`, `*map*` e `*isolate*` en `lib/` | Permisos y su denegación, ubicación aproximada, foto en isolate y base64, mapa con OSM (fase 1b) |
 
 Aún no hay rules de Drift ni del servidor (`server/`): se escriben al empezar las fases 2 y 3.
 
@@ -42,7 +46,7 @@ Aún no hay rules de Drift ni del servidor (`server/`): se escriben al empezar l
 Hace cumplir por la herramienta lo que `CLAUDE.md` dice en prosa. Cada regla de `Bash` tiene su gemela de `PowerShell`, porque en Windows Claude puede usar cualquiera de las dos terminales.
 - **Permitido sin preguntar:** `flutter analyze`, `flutter test`, `flutter pub get` y git de solo lectura (`status`, `diff`, `log`, `show`).
 - **Pregunta siempre:** editar `pubspec.yaml` (dependencias solo con propuesta previa) y `android/app/build.gradle.kts` (`signingConfigs`, `applicationId`).
-- **Denegado:** `git commit`, `git push`, `flutter upgrade`; leer o editar secretos (`google-services.json`, `GoogleService-Info.plist`, `firebase_options.dart`, `key.properties`, `*.jks`, `.env*`); editar generados (`*.g.dart`, `GeneratedPluginRegistrant*`) y las carpetas `ios/`, `macos/`, `linux/` y `windows/`.
+- **Denegado:** `git commit`, `git push`, `flutter upgrade`, `firebase deploy` (lo ejecuta Aitor: un deploy de reglas o de Hosting toca el proyecto real); leer o editar secretos (`google-services.json`, `GoogleService-Info.plist`, `firebase_options.dart`, `key.properties`, `*.jks`, `.env*`); editar generados (`*.g.dart`, `GeneratedPluginRegistrant*`) y las carpetas `ios/`, `macos/`, `linux/` y `windows/`.
 - **Probado el 05/10/2026:** se deniegan leer rutas con nombre de secreto (con `Read`, `cat` y `Get-Content`), escribir en ellas (`Write` y redirecciones `>`), `Write` sobre un `*.g.dart` y `git commit` en las dos terminales, incluida la variante `git -C . commit`. Sin probar a propósito: `ios/`, `macos/`, `linux/` y `windows/`, para no tocarlas.
 - **Límite conocido:** son barreras prácticas, no un blindaje. Solo reconocen comandos conocidos (`git`, `cat`, redirecciones…): un script o un programa que lea o escriba por su cuenta se las salta.
 
@@ -54,6 +58,7 @@ Hace cumplir por la herramienta lo que `CLAUDE.md` dice en prosa. Cada regla de 
 - **Permisos en `settings.json`** (descartado: confiar solo en la prosa de `CLAUDE.md`): la herramienta impide el commit, el push y el acceso a secretos aunque la IA se equivoque.
 - **`git commit` y `git push` denegados, no «preguntar»**: un «sí» por despiste rompería la regla de que el autor hace sus commits.
 - **Rutas con `Navigator` y `onGenerateRoute`** (descartado: `go_router`): no añade dependencia, cubre «rutas con nombre y parámetros» y se puede explicar línea a línea.
+- **`firebase deploy` denegado** (como `git push`): publicar reglas o Hosting afecta al proyecto real y lo decide el autor.
 - **No instalar** plugins genéricos de ventas, finanzas, RR. HH. ni marketing: no son del proyecto y solo añaden ruido.
 - **Pendiente para más adelante** (fases 3-4): `auditor-seguridad` (validación en servidor, compras idempotentes, secretos) y una skill `checklist-play-store` para la prueba cerrada.
 

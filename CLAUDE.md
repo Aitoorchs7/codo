@@ -11,6 +11,8 @@ App Flutter, proyecto integrado de 2.º DAM (autor: Aitor). Motiva a cumplir obj
 ## Documentos de consulta (léelos solo si la tarea los necesita)
 - `docs/decisiones_producto.md`: mecánicas, modelo de datos, cobros y alcance. Úsalo ante dudas de producto.
 - `docs/requisitos.md`: checklist obligatorio del proyecto. Úsalo para comprobar qué falta.
+- `docs/fase1b.md`: rúbrica de la fase en curso (7 bloques y puntos). Lee solo el bloque en el que trabajamos.
+- `docs/hitos.md`: calendario, cierres del Aula y fases. Úsalo ante dudas de fechas.
 - `README.md`, `IA.md`: no hace falta leerlos para programar.
 
 ## Cómo trabajamos
@@ -33,7 +35,7 @@ App Flutter, proyecto integrado de 2.º DAM (autor: Aitor). Motiva a cumplir obj
 lib/ app/ (MaterialApp, rutas, tema) · l10n/ · models/ · admins/ · repositories/ · screens/<sección>/ · widgets/ · utils/
 test/ · server/ (fase 3, Dart shelf) · docs/
 ```
-Stack: Firebase (Auth, Firestore `withConverter`, FCM, Remote Config, Crashlytics, App Check) · Drift · isolates · Dart shelf + WebSocket en Cloud Run · Supabase · Play Billing · AdMob + UMP.
+Stack: Firebase (Auth, Firestore `withConverter`, FCM, Remote Config, Crashlytics, App Check) · Drift · isolates · Dart shelf + WebSocket en Cloud Run · Supabase · Play Billing · AdMob + UMP. Fase 1b: `flutter_map` + OpenStreetMap, `geolocator`, emuladores de Firebase con `--dart-define` y Firebase Hosting.
 Las normas detalladas de cada capa están en `.claude/rules/` y se cargan solas al tocar esos ficheros.
 
 ## No tocar
@@ -44,6 +46,19 @@ Las normas detalladas de cada capa están en `.claude/rules/` y se cargan solas 
 
 ## Comandos
 `flutter pub get` · `flutter run` · `flutter run -d chrome` · `flutter analyze` (limpio antes de cada commit) · `flutter test` · `dart run build_runner build -d` (Drift) · `flutter build appbundle --release`
+
+## Al empezar una sesión
+1. `docs/ESTADO.md` ya está cargado: no lo releas. Si su fecha es anterior al último commit (`git log -1 --format=%ad --date=short`), avisa de que está desactualizado.
+2. Abre con 5 líneas como máximo: fase y hito actuales, días que quedan hasta la entrega, bloque de la checklist en el que estamos y primer paso de «Siguiente».
+3. Ejecuta `git status --short` y avisa si hay cambios sin commit.
+4. Si el trabajo toca un bloque de la fase, lee solo ese bloque de `docs/fase1b.md` (Grep por «Bloque N»).
+5. Pregunta qué quiere hacer Aitor hoy; no propongas cambios hasta que lo diga.
+
+## Reglas de producto de la fase 1b
+- La ubicación es opcional y aproximada; no se guarda la exacta ni en el perfil.
+- Las fotos van como miniatura base64 (<300 KB) en `proofs`, legible solo por los participantes, nunca en el documento de la sesión.
+- Los emuladores se conectan con `--dart-define`, nunca con un booleano a mano.
+- Ningún fichero de configuración ni clave va al repo. `firebase deploy` lo ejecuta Aitor, nunca el agente.
 
 ## Al terminar una sesión
 Recuerda a Aitor que ejecute `/cierre` para actualizar `docs/ESTADO.md` y preparar la entrada de `IA.md`.

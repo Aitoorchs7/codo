@@ -20,8 +20,9 @@ La rúbrica pide probar en emulador Android y en navegador, con una tabla de **q
    - Listas y cuadrículas: carga · vacío · error (sin red) · con datos.
    - Rutas con parámetros: abrir el detalle correcto.
    - Modo claro y oscuro · letra grande.
+   - Solo en la fase 1b (rúbrica en `docs/fase1b.md`): acceso con Google (éxito · cancelar · error) · cámara y galería (éxito · permiso denegado · cancelar) · ubicación (éxito · permiso denegado · GPS apagado · tiempo agotado) · compresión de la foto moviendo la pantalla · mapa y «cerca de mí» · editar y borrar lo propio y lo ajeno (las reglas lo impiden) · sin conexión · contra los emuladores · URL pública de Hosting.
 5. En "Cómo provocarlo", indica el truco concreto (modo avión del emulador, borrar la colección de prueba, cambiar la URL, `flutter run -d chrome`).
-6. Al final añade una sección "Diferencias entre plataformas a vigilar": anchos de pantalla en web, `shared_preferences` en navegador, permisos, teclado, tipografías.
+6. Al final añade una sección "Diferencias entre plataformas a vigilar": anchos de pantalla en web, `shared_preferences` en navegador, permisos, teclado, tipografías, cámara en navegador (la que haya o la galería) y GPS en el emulador.
 
 ## Salida
 Pega la tabla en el chat y ofrece guardarla en `docs/pruebas.md` (Aitor decide). Recuérdale que las capturas deben hacerse en ambos sitios.
