@@ -3,6 +3,7 @@ import 'package:codo/screens/now/now_screen.dart';
 import 'package:codo/screens/pacts/pacts_screen.dart';
 import 'package:codo/screens/profile/profile_screen.dart';
 import 'package:codo/screens/today/today_screen.dart';
+import 'package:codo/widgets/home_background.dart';
 import 'package:flutter/material.dart';
 import 'package:codo/widgets/codo_nav_bar.dart';
 
@@ -21,17 +22,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children:const [
-          TodayScreen(),
-          NowScreen(),
-          PactsScreen(),
-          FriendsScreen(),
-          ProfileScreen(),
-        ]
+      body: Stack(
+          fit: StackFit.expand,
+          children: [
+          const HomeBackground(),
+        IndexedStack(
+          index: _index,
+          children: const [
+            TodayScreen(),
+            NowScreen(),
+            PactsScreen(),
+            FriendsScreen(),
+            ProfileScreen(),
+          ]),
+          ]
       ),
-      bottomNavigationBar: CodoNavBar(selectedIndex: _index, onSelected: (i) => setState(() => _index = i)),
+          bottomNavigationBar: CodoNavBar(
+          selectedIndex: _index, onSelected: (i) => setState(() => _index = i)),
     );
   }
 }

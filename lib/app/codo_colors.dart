@@ -44,15 +44,15 @@ class CodoColors extends ThemeExtension<CodoColors> {
   final Color error, success, warning;
 
   static const dark = CodoColors(
-    bgTop: Color(0xFF2B2C2F),
-    bgBottom: Color(0xFF161719),
-    surfaceCard: Color(0x8C3A3B3F), // rgba(58,59,63,0.55)
+    bgTop: Color(0xFF121A2E),
+    bgBottom: Color(0xFF080B14),
+    surfaceCard: Color(0x9E1A2032), // rgba(26,32,50,0.62)
     surfaceCardBorder: Color(0x1AFFFFFF),
-    surfaceSolid: Color(0xFF2E2F33),
+    surfaceSolid: Color(0xFF161C2E),
     track: Color(0x14FFFFFF),
     divider: Color(0x1AFFFFFF),
     textPrimary: Color(0xFFF5F4F3),
-    textSecondary: Color(0xFFA9AAAE),
+    textSecondary: Color(0xFFA3A9BC),
     textDisabled: Color(0x52FFFFFF),
     accentText: Color(0xFF7D9BFF),
     glassFill: Color(0x17FFFFFF),

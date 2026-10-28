@@ -3,6 +3,7 @@ import 'package:codo/models/pact.dart';
 import 'package:codo/repositories/pact_repository.dart';
 import 'package:codo/screens/pacts/pact_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:codo/widgets/glass_button.dart';
 
 class PactsScreen extends StatefulWidget {
   const PactsScreen({super.key,});
@@ -34,7 +35,8 @@ class _PactsScreenState extends State<PactsScreen> {
                 children: [
                   const Text('No se pudieron cargar los pactos.'),
                   const SizedBox(height: 12),
-                  FilledButton(
+                  GlassButton(
+                    primary: true,
                     onPressed: () => setState(() => _pacts = _repository.watchPacts()),
                     child: const Text('Reintentar'),
                   ),

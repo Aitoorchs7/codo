@@ -5,11 +5,12 @@ import 'package:codo/app/codo_colors.dart';
 import 'package:codo/models/profile.dart';
 import 'package:codo/repositories/profile_repository.dart';
 import 'package:codo/screens/auth/auth_messages.dart';
-import 'package:codo/widgets/codo_background.dart';
+import 'package:codo/widgets/login_video_background.dart';
 import 'package:codo/widgets/codo_mode_switch.dart';
 import 'package:codo/widgets/glass_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:codo/app/app_theme.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -54,9 +55,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // Errores del servidor que se pintan debajo de un campo concreto.
   String? get _emailServerError => switch (_error) {
-    AuthError.emailInUse ||
-    AuthError.invalidEmail =>
-        authErrorMessage(_error!),
+    AuthError.emailInUse || AuthError.invalidEmail => authErrorMessage(_error!),
     _ => null,
   };
 
@@ -66,8 +65,8 @@ class _AuthScreenState extends State<AuthScreen> {
   // El resto de errores van en el aviso de arriba.
   bool get _showBanner =>
       _error != null &&
-          _emailServerError == null &&
-          _passwordServerError == null;
+      _emailServerError == null &&
+      _passwordServerError == null;
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -91,7 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
             xp: 0,
             medals: [],
             createdAt: DateTime.now(),
-          )
+          ),
         );
       }
       if (!mounted) return;
@@ -102,7 +101,7 @@ class _AuthScreenState extends State<AuthScreen> {
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.home,
-            (route) => false,
+        (route) => false,
       );
     } on AuthFailure catch (e) {
       if (!mounted) return;
@@ -125,14 +124,11 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_error != null) setState(() => _error = null);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<CodoColors>()!;
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
-      body: CodoBackground(
+      body: LoginVideoBackground(
         child: SafeArea(
           // La hoja de abajo llega hasta el borde de la pantalla.
           bottom: false,
@@ -141,22 +137,30 @@ class _AuthScreenState extends State<AuthScreen> {
             slivers: [
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                      child: _Entrance(
-                        duration: const Duration(milliseconds: 500),
-                        child: _buildHeader(textTheme, c),
-                      ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                          child: _Entrance(
+                            duration: const Duration(milliseconds: 500),
+                            child: _buildHeader(
+                              AppTheme.dark.textTheme,
+                              CodoColors.dark,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        _Entrance(
+                          offset: 60,
+                          duration: const Duration(milliseconds: 700),
+                          child: _buildSheet(c),
+                        ),
+                      ],
                     ),
-                    const Spacer(),
-                    _Entrance(
-                      offset: 60,
-                      duration: const Duration(milliseconds: 700),
-                      child: _buildSheet(c),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -172,11 +176,7 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         Row(
           children: [
-            // El logo tiene fondo negro: lo recortamos con esquinas redondeadas.
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset('assets/images/logo.png', width: 44),
-            ),
+            Image.asset('assets/images/logo.png', width: 44),
             const SizedBox(width: 10),
             Text('codo', style: textTheme.titleLarge),
           ],
@@ -303,8 +303,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   helperText: _isLogin ? null : 'Mínimo 6 caracteres.',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    tooltip:
-                    _obscure ? 'Mostrar contraseña' : 'Ocultar contraseña',
+                    tooltip: _obscure
+                        ? 'Mostrar contraseña'
+                        : 'Ocultar contraseña',
                     icon: Icon(
                       _obscure
                           ? Icons.visibility_outlined
@@ -357,10 +358,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       );
     }
-    return Text(
-      _isLogin ? 'Entrar' : 'Crear cuenta',
-      key: ValueKey(_isLogin),
-    );
+    return Text(_isLogin ? 'Entrar' : 'Crear cuenta', key: ValueKey(_isLogin));
   }
 }
 
