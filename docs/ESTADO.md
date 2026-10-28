@@ -9,6 +9,7 @@
 - Entorno agéntico: 5 agentes, 3 skills, `/cierre`, rules por capa y permisos en `settings.json`
 - 18/10: contexto de la 1b (`docs/fase1b.md`, `docs/hitos.md`) y decisiones de producto v1.1 (ubicación, mapa y fotos)
 - `flutter analyze` limpio y 16 pruebas en verde (17/10); 35 commits
+- 28/10: feat/ui-fondos fusionada (vídeo de login, fondo de puntos, WebP, paleta azul-negro, GlassButton)
 
 ## En curso (fase 1, hoy)
 - Sin commit: docs, capturas Android, espacios del onboarding y URL buena del splash (en HEAD está la URL falsa `nada.jpg`)
