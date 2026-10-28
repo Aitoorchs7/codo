@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codo/app/app.dart';
 import 'package:codo/firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
 
 //El main es asíncrono porque tiene que esperar la respuesta del firestore conectarse
 Future<void> main() async {
@@ -18,6 +22,13 @@ Future<void> main() async {
   que comparten varias clases para no estar cambiando variables
   en cada clase. */
   runApp(const App());
+  //si no se usa el emulador, no se conecta
+  const useEmulators = bool.fromEnvironment('USE_EMULATORS');
+  if (useEmulators) {
+    final host = (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) ? '10.0.2.2' : 'localhost';
+    await FirebaseAuth.instance.useAuthEmulator(host, 9099);
+    FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+  }
 }
 
 
