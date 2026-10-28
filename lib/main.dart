@@ -17,11 +17,6 @@ Future<void> main() async {
     //currentPlatform nos da la plataforma actual y nos conecta con ella
       options: DefaultFirebaseOptions.currentPlatform,
   );
-  /* inicializamos el firebase para que pueda funcionar al iniciarse la app
-  necesitamos un proveedor que guarda los objetos
-  que comparten varias clases para no estar cambiando variables
-  en cada clase. */
-  runApp(const App());
   //si no se usa el emulador, no se conecta
   const useEmulators = bool.fromEnvironment('USE_EMULATORS');
   if (useEmulators) {
@@ -29,6 +24,11 @@ Future<void> main() async {
     await FirebaseAuth.instance.useAuthEmulator(host, 9099);
     FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
   }
+  /* inicializamos el firebase para que pueda funcionar al iniciarse la app
+  necesitamos un proveedor que guarda los objetos
+  que comparten varias clases para no estar cambiando variables
+  en cada clase. */
+  runApp(const App());
 }
 
 
