@@ -158,7 +158,12 @@ La app necesita dos ficheros que **no están en el repositorio** (ver la tabla d
    flutterfire configure
    ```
 5. Sube los datos de ejemplo con `seedSampleData()` (`lib/utils/example_data.dart`). Es seguro repetirlo: usa ids fijos y no duplica. Mientras lo haces, las reglas deben permitir `write` en `pacts` y `badges`; vuelve a dejarlas solo en lectura al terminar.
-
+### Inicio de sesión con Google
+- **Web:** usa la ventana emergente de Firebase (`signInWithPopup`). Solo necesita que el dominio esté en *Authentication → Settings → Dominios autorizados* (`localhost` y el de Hosting vienen por defecto).
+- **Android:** usa `google_sign_in`, que muestra el selector de cuentas del móvil. Google solo acepta la petición si la app está firmada con una clave registrada, así que hay que añadir sus **huellas SHA-1 y SHA-256**:
+  ```bash
+  keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+  
 ### Ejecutar
 ```bash
 flutter run              # emulador o móvil Android
