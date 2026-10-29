@@ -14,3 +14,10 @@ DateTime readDate(Object? value) => value is Timestamp
 
 List<String> readStringList(Object? value) =>
     value is List ? value.whereType<String>().toList() : const [];
+
+DateTime? readOptionalDate(Object? value) =>
+    value is Timestamp ? value.toDate() : null;
+
+// Convierte el texto guardado ('study') en el valor del enum; si no lo reconoce, usa el de reserva
+T readEnum<T extends Enum>(Object? value, List<T> values, T fallback) =>
+    values.asNameMap()[value] ?? fallback;
