@@ -17,10 +17,10 @@ class LiveSession {
     required this.durationMinutes,
     required this.status,
     required this.participantIds,
-    required this.latitude,
-    required this.longitude,
-    required this.locationAt,
-    required this.endedAt,
+    this.latitude,
+    this.longitude,
+    this.locationAt,
+    this.endedAt,
 
 });
   final String id;
