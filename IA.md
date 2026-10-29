@@ -97,6 +97,27 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 - **Qué corregí o descarté, y por qué:** dije de usar algunos agentes para perfeccionar partes de la práctica y usamos 3 de los que tenemos.
 - **Resultado:** tres agentes de `claude/agents` usados cada uno con su respuesta de su acción.
 
+### 008 · 2026-10-28 · Inicio de la fase 1b y merge de la rama de UI
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** qué tenía de la fase 1 que sirviera para la 1b y qué faltaba, un plan por bloques y si fusionaba `feat/ui-fondos` ahora o más tarde.
+- **Qué me dio:** una tabla de lo que había y lo que faltaba en cada bloque, un plan en 7 pasos empezando por los emuladores, y la recomendación de fusionar ya porque la rama toca las pantallas de la 1b. Al revisar el merge, avisó de que el conflicto de `ESTADO.md` se había resuelto con la versión antigua y había perdido la 1b, y de que `fase1b.md` y `hitos.md` no habían entrado en el commit.
+- **Qué corregí o descarté, y por qué:** hice el merge yo antes de que me lo propusiera. Recuperé `ESTADO.md` de master y elegí qué versión de `IA.md` quedaba. [AITOR: ¿la de 7 entradas, por qué?]
+- **Resultado:** `master` con la UI integrada y los documentos de la 1b en el repo (`74cf2c4`, `41d4cd1`, `01a0b43`).
+
+### 009 · 2026-10-28 · Emuladores de Auth y Firestore con `--dart-define`
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** conectar los emuladores sin un booleano escrito a mano.
+- **Qué me dio:** `firebase init`, `bool.fromEnvironment('USE_EMULATORS')`, el host `10.0.2.2` en Android y `localhost` en web, y `usesCleartextTraffic` solo en `src/debug`. Descartó el booleano a mano (lo prohíbe la rúbrica), `.env` y `network_security_config` (más ficheros para el mismo resultado).
+- **Qué corregí o descarté, y por qué:**
+  - El comando `firebase init firestore emulators` que me dio la IA fallaba, porque el CLI solo acepta una función por comando.
+  - Borré las 13 skills de Firebase que instaló `init`, porque son de terceros y no tenían que ver con Codo.
+  - La IA me corrigió a mí: puse la conexión después de `runApp` y la moví antes.
+  - Localicé el puerto 8080 ocupado por un emulador anterior. En Android fallaba hasta que lo lancé con la bandera y recompilé.
+- **Qué aprendí / puedo explicar:** `--dart-define` fija una constante al compilar. Los emuladores tienen que conectarse antes del primer uso de Auth o Firestore, y por eso van antes de `runApp`.
+- **Resultado:** registro probado contra los emuladores en Chrome y en el emulador Android (`7aad081`, `fe564f0` y el commit del arreglo).
+
+---
+
 ## Agentes y skills propios
 | Nombre | Tipo | Creado | Qué tarea repetida resuelve | ¿Usado? | Trabajo ahorrado (medido) |
 |---|---|---|---|---|---|
