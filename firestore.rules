@@ -11,5 +11,10 @@ service cloud.firestore {
     match /badges/{id} {
       allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
     }
+    match /live_sessions/{id} {
+      allow read: if request.auth != null;
+      // Solo puedes crear sesiones a tu nombre
+      allow create: if request.auth != null && request.resource.data.creatorId == request.auth.uid;
+    }
   }
 }

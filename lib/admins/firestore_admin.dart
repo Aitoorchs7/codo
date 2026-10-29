@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codo/models/live_session.dart';
 import 'package:codo/models/medal.dart';
 import 'package:codo/models/pact.dart';
 import 'package:codo/models/profile.dart';
@@ -25,5 +26,11 @@ class FirestoreAdmin {
       _db.collection('badges').withConverter<Medal>(
         fromFirestore: Medal.fromFirestore,
         toFirestore: (medal, _) => medal.toFirestore(),
+      );
+
+  CollectionReference<LiveSession> get liveSessions =>
+      _db.collection('live_sessions').withConverter<LiveSession>(
+        fromFirestore: LiveSession.fromFirestore,
+        toFirestore: (liveSession, _) => liveSession.toFirestore(),
       );
 }
