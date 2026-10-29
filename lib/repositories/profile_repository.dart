@@ -13,4 +13,25 @@ class ProfileRepository {
     final doc = await _admin.profiles.doc(uid).get();
     return doc.data();
   }
+  Future<Profile> getOrCreateProfile({
+    required String uid,
+    required String displayName,
+    String? photoUrl,
+  }) async {
+    final profile = await getProfile(uid);
+    if (profile != null) return profile;
+    final newProfile = Profile(
+      uid: uid,
+      displayName: displayName,
+      photoUrl: photoUrl,
+      xp: 0,
+      medals: const [],
+      createdAt: DateTime.now(),
+    );
+    await saveProfile(newProfile);
+    return newProfile;
+  }
+    // 1. ¿Existe ya? → lo devuelvo tal cual (no piso su nombre ni su XP)
+    // 2. Si no: creo Profile(uid, displayName, photoUrl, xp: 0, medals: const [], createdAt: DateTime.now())
+    // 3. saveProfile(profile) y lo devuelvo
 }

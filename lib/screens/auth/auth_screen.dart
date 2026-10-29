@@ -110,6 +110,29 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) setState(() => _loading = false);
     }
   }
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _loading = true;        // primero se enseña la carga
+      _error = null;
+    });
+    try {
+      final user = await _auth.signInWithGoogle();
+      // Si es nuevo se crea el perfil; si ya existía se recupera
+      await _profiles.getOrCreateProfile(
+        uid: user.uid,
+        displayName: user.displayName ?? 'Usuario',
+        photoUrl: user.photoURL,
+      );
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (route) => false);
+    } on AuthFailure catch (e) {
+      // Cancelar no es un error: se vuelve a la pantalla sin aviso
+      if (!mounted || e.error == AuthError.cancelled) return;
+      setState(() => _error = e.error);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   void _setMode(int index) {
     if (_loading) return;
@@ -330,6 +353,11 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   child: _buildButtonContent(),
                 ),
+              ),
+              const SizedBox(height: 12),
+              GlassButton(
+                onPressed: busy ? null : _signInWithGoogle,
+                child: const Text('Continuar con Google'),
               ),
             ],
           ),
