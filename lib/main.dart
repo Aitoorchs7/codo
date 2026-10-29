@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codo/app/app.dart';
 import 'package:codo/firebase_options.dart';
+import 'package:codo/utils/example_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ Future<void> main() async {
     final host = (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) ? '10.0.2.2' : 'localhost';
     await FirebaseAuth.instance.useAuthEmulator(host, 9099);
     FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+    if (const bool.fromEnvironment('SEED_DATA')) await seedLiveSessions();
   }
   if (!kIsWeb) await GoogleSignIn.instance.initialize();
   /* inicializamos el firebase para que pueda funcionar al iniciarse la app
