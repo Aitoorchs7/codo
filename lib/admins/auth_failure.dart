@@ -2,7 +2,7 @@
 auth_service falle, aquí las recogemos del try catch
 y tomamos la decision, es decir, creamos la excepción
  */
-enum AuthError { invalidCredentials, emailInUse, weakPassword, unknown, invalidEmail, userDisabled, tooManyRequests, networkRequestFailed}
+enum AuthError { invalidCredentials, emailInUse, weakPassword, unknown, invalidEmail, userDisabled, tooManyRequests, networkRequestFailed, cancelled}
 
 class AuthFailure implements Exception {
   final AuthError error;

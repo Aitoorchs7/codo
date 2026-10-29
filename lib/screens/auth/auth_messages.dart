@@ -21,5 +21,7 @@ String authErrorMessage(AuthError error) {
     'Sin conexión. Comprueba tu red e inténtalo de nuevo.',
     AuthError.unknown =>
     'Algo ha salido mal. Inténtalo de nuevo.',
+    AuthError.cancelled =>
+    'La operación ha sido cancelada.',
   };
 }

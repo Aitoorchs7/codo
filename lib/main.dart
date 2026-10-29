@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 
 //El main es asíncrono porque tiene que esperar la respuesta del firestore conectarse
@@ -24,6 +25,7 @@ Future<void> main() async {
     await FirebaseAuth.instance.useAuthEmulator(host, 9099);
     FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
   }
+  if (!kIsWeb) await GoogleSignIn.instance.initialize();
   /* inicializamos el firebase para que pueda funcionar al iniciarse la app
   necesitamos un proveedor que guarda los objetos
   que comparten varias clases para no estar cambiando variables
