@@ -26,16 +26,17 @@ class _HomeScreenState extends State<HomeScreen> {
           fit: StackFit.expand,
           children: [
           const HomeBackground(),
-        IndexedStack(
-          index: _index,
-          children: const [
-            TodayScreen(),
-            NowScreen(),
-            PactsScreen(),
-            FriendsScreen(),
-            ProfileScreen(),
-          ]),
-          ]
+        SafeArea(
+            child: IndexedStack(
+            index: _index,
+            children: const [
+              TodayScreen(),
+              NowScreen(),
+              PactsScreen(),
+              FriendsScreen(),
+              ProfileScreen(),
+            ]),
+        )]
       ),
           bottomNavigationBar: CodoNavBar(
           selectedIndex: _index, onSelected: (i) => setState(() => _index = i)),
