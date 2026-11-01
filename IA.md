@@ -116,6 +116,28 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 - **Qué aprendí / puedo explicar:** `--dart-define` fija una constante al compilar. Los emuladores tienen que conectarse antes del primer uso de Auth o Firestore, y por eso van antes de `runApp`.
 - **Resultado:** registro probado contra los emuladores en Chrome y en el emulador Android (`7aad081`, `fe564f0` y el commit del arreglo).
 
+### 010 · 2026-10-29 · Inicio de sesión con Google (B1)
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** inicio de sesión con Google en web y Android con el perfil ligado, y entender para qué sirven las huellas SHA.
+- **Qué me dio:** dos caminos según la plataforma (`signInWithPopup` en web y `google_sign_in` en Android), la cancelación como un caso propio sin aviso y un método para crear o recuperar el perfil. Descartó `google_sign_in` en web y `signInWithProvider` en Android.
+- **Qué corregí o descarté, y por qué:**
+  - Usé sus revisiones para ajustar la estructura del método y de la pantalla hasta que `flutter analyze` salió limpio.
+  - En Android me faltaba el cliente OAuth en `google-services.json`; lo localicé con un mensaje de depuración y lo resolví volviendo a descargarlo. Descarté escribir el id del cliente en el código para no dejar configuración en el repo.
+- **Qué aprendí / puedo explicar:** Google identifica la app Android por su firma (SHA) y la web por su dominio; el token de Google se convierte en credencial de Firebase.
+- **Resultado:** Google funcionando en Chrome y en el emulador Android; README con SHA y OAuth (`f2a28ee`, `ea088a7`, `4e56c0e`).
+
+### 011 · 2026-11-01 · Pantallas de las consultas: Ahora e Historial (B2)
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** mostrar en pantalla las 4 consultas de `live_sessions` y saber si necesitaba un repositorio nuevo para Ahora.
+- **Qué me dio:** reutilizar `LiveSessionRepository` (un repositorio por colección, no por pantalla); Ahora con chips y `StreamBuilder`; una pantalla `HistoryScreen` con «Cargar más» y filtro por fechas, descartando meterla en Perfil o hacer dos pantallas.
+- **Qué corregí o descarté, y por qué:**
+  - Las rules pedían `provider`, pero ninguna pantalla lo usaba: lo quité de las rules y de `pubspec.yaml` por coherencia y para no ampliar el alcance.
+  - Vi en el móvil que la barra de estado tapaba las pestañas; lo arreglé con un `SafeArea` en `HomeScreen` en vez de en cada pestaña.
+  - Pregunté si podía trabajar solo en la nube; mantuve los emuladores porque la rúbrica se corrige con ellos.
+  - La revisión encontró dos fallos míos en los chips (`_category == _category` y `category!` con «Recientes») y los corregí.
+- **Qué aprendí / puedo explicar:** el stream se crea en `initState` y al cambiar de filtro, nunca en `build`. El historial usa `get` porque son datos pasados, y la lista la guarda el State porque cada página se añade a la anterior.
+- **Resultado:** las 4 consultas visibles en pantalla con sus 4 estados; falta el README de snapshots/get.
+
 ---
 
 ## Agentes y skills propios
