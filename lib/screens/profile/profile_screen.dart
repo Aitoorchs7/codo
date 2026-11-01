@@ -84,6 +84,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const Expanded(child: MedalGrid()),
           const SizedBox(height: 12),
+          GlassButton(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.history),
+            child: const Text('Mi historial'),
+          ),
+          const SizedBox(height: 12),
           GlassButton(onPressed: _signOut, child: const Text('Cerrar sesión')),
           const SizedBox(height: 12),
         ],

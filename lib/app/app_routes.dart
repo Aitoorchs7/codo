@@ -3,6 +3,7 @@ import 'package:codo/screens/auth/auth_screen.dart';
 import 'package:codo/screens/home/home_screen.dart';
 import 'package:codo/screens/onboarding/onboarding_screen.dart';
 import 'package:codo/screens/pacts/pact_detail_screen.dart';
+import 'package:codo/screens/profile/history_screen.dart';
 import 'package:codo/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,7 @@ class AppRoutes{
   static const splash = '/splash';
   static const home = '/home';
   static const pactDetail = '/pact-detail';
+  static const history = '/history';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -27,6 +29,7 @@ class AppRoutes{
         final args = settings.arguments;
         if (args is! PactDetailArgs) return _errorPage(settings);
         return _page(settings, PactDetailScreen(args: args));
+      case history: return _page(settings, const HistoryScreen());
       default:
         return _errorPage(settings);
     }
