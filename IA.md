@@ -138,6 +138,16 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 - **Qué aprendí / puedo explicar:** el stream se crea en `initState` y al cambiar de filtro, nunca en `build`. El historial usa `get` porque son datos pasados, y la lista la guarda el State porque cada página se añade a la anterior.
 - **Resultado:** las 4 consultas visibles en pantalla con sus 4 estados; falta el README de snapshots/get.
 
+### 012 · 2026-11-04 · Editar, terminar y borrar sesiones con reglas (B3)
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** editar y borrar mis sesiones, y que las reglas impidan tocar las de otros aunque la app no lo ofrezca.
+- **Qué me dio:** me propuso las reglas `update` (solo el creador, solo ciertos campos con `affectedKeys`, con límites) y `delete` (solo el creador y sin participantes); `SessionFailure` con un `_guard` en el repositorio; y un menú ⋮ con diálogo de edición y confirmación de borrado. Para probar las reglas me propuso peticiones REST al emulador en vez de tests con `@firebase/rules-unit-testing` (Node y dependencias nuevas). 
+- - **Qué corregí o descarté, y por qué:**
+  - Hice B3 antes que el mapa para ir en orden de la rúbrica, aunque la IA proponía B5 primero.
+  - En la prueba me salía un 500: el token de PowerShell estaba vacío, y en otra terminal faltaba `$doc`. Lo resolví comprobando `$token.Length` antes de cada petición.
+- **Qué aprendí / puedo explicar:** `resource` es el documento guardado y `request.resource` cómo quedaría. El creador se comprueba en el guardado para que nadie se apropie de una sesión cambiando `creatorId`.
+- **Resultado:** Ana edita su sesión (200); Leo recibe 403 al editar y al borrar; cambiar `creatorId` da 403.
+- 
 ---
 
 ## Agentes y skills propios
