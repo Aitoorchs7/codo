@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codo/admins/firestore_admin.dart';
 import 'package:codo/models/live_session.dart';
+import 'package:codo/repositories/session_failure.dart';
 
 class LiveSessionRepository {
   LiveSessionRepository({FirestoreAdmin? admin}) : _admin = admin ?? FirestoreAdmin();
@@ -60,4 +61,37 @@ class LiveSessionRepository {
     if (snap.docs.isNotEmpty) _lastHistoryDoc = snap.docs.last;
     return snap.docs.map((doc) => doc.data()).toList();
   }
+
+  // Editar: solo descripción y duración (las reglas rechazan cualquier otro campo)
+  Future<void> updateSession(String id,
+      {required String description, required int durationMinutes}) =>
+      _guard(() => _admin.liveSessions.doc(id).update({
+        'description': description,
+        'durationMinutes': durationMinutes,
+      }));
+
+  // Terminar: deja de estar activa pero no se borra (puede tener participantes)
+  Future<void> finishSession(String id) =>
+      _guard(() => _admin.liveSessions.doc(id).update({
+        'status': SessionStatus.finished.name,
+        'endedAt': FieldValue.serverTimestamp(),
+      }));
+
+  // Borrar: las reglas solo lo permiten si eres el creador y nadie más se ha unido
+  Future<void> deleteSession(String id) =>
+      _guard(() => _admin.liveSessions.doc(id).delete());
+  // Traduce los errores de Firestore a fallos de dominio
+  Future<void> _guard(Future<void> Function() action) async {
+    try {
+      await action();
+    } on FirebaseException catch (e) {
+      throw SessionFailure(switch (e.code) {
+        'permission-denied' => SessionError.permissionDenied,
+        'not-found' => SessionError.notFound,
+        'unavailable' => SessionError.network,
+        _ => SessionError.unknown,
+      });
+    }
+  }
+
 }
