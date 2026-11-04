@@ -107,6 +107,7 @@ Un único admin (`FirestoreAdmin`) conoce Firestore y entrega cada colección co
 | `users` | id = `uid` de la cuenta (se crea al registrarse) | `displayName`, `xp`, `badges`, `createdAt`, `photoUrl?`, `bio?` | `Profile` |
 | `pacts` | un pacto | `title`, `partnerName`, `daysDone`, `daysTotal`, `createdAt` | `Pact` |
 | `badges` | una medalla del catálogo | `name`, `description`, `xpReward`, `imageUrl` | `Medal` |
+| `live_sessions` | una sesión de «Ahora» | `creatorId`, `creatorName`, `category`, `description`, `visibility`, `startedAt`, `durationMinutes`, `status`, `participantIds`, `location?` (`GeoPoint`), `locationAt?`, `endedAt?` | `LiveSession` |
 
 En el código el concepto se llama **medalla** (`Medal`, `MedalRepository`, `Profile.medals`), pero la colección y la clave del perfil se guardan como `badges`: el conversor del modelo es el único sitio que conoce ese nombre.
 
@@ -115,18 +116,39 @@ En el código el concepto se llama **medalla** (`Medal`, `MedalRepository`, `Pro
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // cada usuario lee y escribe solo su propio perfil
+  // esto hace que cada usuario puede modificar lo suyo solo
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
-    // pactos y medallas: solo lectura para quien tenga sesión
-    match /pacts/{id}  { allow read: if request.auth != null; }
-    match /badges/{id} { allow read: if request.auth != null; }
+    match /pacts/{id} {
+        allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
+    }
+    match /badges/{id} {
+      allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
+    }
+    match /live_sessions/{id} {
+      allow read: if request.auth != null;
+      // Solo puedes crear sesiones a tu nombre
+      allow create: if request.auth != null && request.resource.data.creatorId == request.auth.uid;
+    }
   }
 }
 ```
-Pendiente para la fase 2: los pactos no tienen dueño y los lee cualquier usuario con sesión; habrá que guardar sus participantes y limitar la lectura a ellos.
+### Consultas: escuchar o leer una vez
+Las sesiones (`live_sessions`) se consultan de cuatro maneras, todas en `LiveSessionRepository`:
 
+| Consulta | Pantalla | Cómo se pide | Modo |
+|---|---|---|---|
+| `where` con dos condiciones: públicas de una categoría | Ahora (chip de categoría) | `category ==` y `visibility ==`, ordenadas por `startedAt` | `snapshots` |
+| `orderBy` + `limit`: las 10 públicas más recientes | Ahora (chip «Recientes») | `visibility ==`, `orderBy startedAt` y `limit(10)` | `snapshots` |
+| Rango sobre una fecha: mi historial entre dos días | Perfil → Mi historial (calendario) | `creatorId ==`, `startedAt >=` y `startedAt <` | `get` |
+| Paginación: mi historial de 4 en 4 | Perfil → Mi historial («Cargar más») | `startAfterDocument` del último documento leído | `get` |
+
+**Por qué cada una:**
+- **Ahora escucha (`snapshots`)**: son sesiones en directo. Mientras miras la lista alguien empieza o termina una tarea, y la lista tiene que cambiar sola sin recargar. El stream se abre al entrar y al cambiar de chip, nunca en cada `build`, para no abrir una consulta nueva en cada repintado.
+- **El historial lee una vez (`get`)**: son sesiones terminadas que ya no cambian. Escucharlas gastaría lecturas y batería para nada. Además, la paginación encaja con `get`: cada página se pide solo cuando el usuario pulsa «Cargar más».
+
+**Índices compuestos:** las consultas que combinan un `where` con un `orderBy` sobre otro campo necesitan índice. Los tres están declarados en `firestore.indexes.json` (no creados a mano en la consola) y se despliegan con `firebase deploy --only firestore:indexes`. El emulador no los exige, pero el Firestore real sí.
 ---
 
 ## 🚀 Guía de arranque (en un equipo limpio)
