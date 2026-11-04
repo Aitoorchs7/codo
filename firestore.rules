@@ -15,6 +15,20 @@ service cloud.firestore {
       allow read: if request.auth != null;
       // Solo puedes crear sesiones a tu nombre
       allow create: if request.auth != null && request.resource.data.creatorId == request.auth.uid;
+      // Solo el creador edita, solo estos campos y con valores válidos
+      allow update: if request.auth != null
+        && resource.data.creatorId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['description', 'durationMinutes', 'status', 'endedAt'])
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 140
+        && request.resource.data.durationMinutes is int
+        && request.resource.data.durationMinutes > 0
+        && request.resource.data.durationMinutes <= 480;
+      // Solo el creador borra, y solo si nadie más se ha unido
+      allow delete: if request.auth != null
+        && resource.data.creatorId == request.auth.uid
+        && resource.data.participantIds.hasOnly([request.auth.uid]);
     }
   }
 }
