@@ -108,32 +108,20 @@ Un único admin (`FirestoreAdmin`) conoce Firestore y entrega cada colección co
 | `pacts` | un pacto | `title`, `partnerName`, `daysDone`, `daysTotal`, `createdAt` | `Pact` |
 | `badges` | una medalla del catálogo | `name`, `description`, `xpReward`, `imageUrl` | `Medal` |
 | `live_sessions` | una sesión de «Ahora» | `creatorId`, `creatorName`, `category`, `description`, `visibility`, `startedAt`, `durationMinutes`, `status`, `participantIds`, `location?` (`GeoPoint`), `locationAt?`, `endedAt?` | `LiveSession` |
+| `live_sessions/{id}/proofs` | id = `uid` del participante (una prueba por persona y sesión) | `image` (JPEG en base64, < 300 KB), `createdAt` | `Proof` |
 
 En el código el concepto se llama **medalla** (`Medal`, `MedalRepository`, `Profile.medals`), pero la colección y la clave del perfil se guardan como `badges`: el conversor del modelo es el único sitio que conoce ese nombre.
 
-**Reglas de Firestore** (Firebase Console → Firestore Database → Reglas):
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-  // esto hace que cada usuario puede modificar lo suyo solo
-    match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
-    match /pacts/{id} {
-        allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
-    }
-    match /badges/{id} {
-      allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
-    }
-    match /live_sessions/{id} {
-      allow read: if request.auth != null;
-      // Solo puedes crear sesiones a tu nombre
-      allow create: if request.auth != null && request.resource.data.creatorId == request.auth.uid;
-    }
-  }
-}
-```
+**Reglas de Firestore:** están en [`firestore.rules`](firestore.rules), que carga el emulador y se despliega con `firebase deploy --only firestore:rules`. Resumen:
+
+| Ruta | Leer | Crear | Editar | Borrar |
+|---|---|---|---|---|
+| `users/{uid}` | solo el dueño | solo el dueño | solo el dueño | solo el dueño |
+| `pacts`, `badges` | cualquier usuario con sesión (temporal, para el seed) | — | — | — |
+| `live_sessions/{id}` | cualquier usuario con sesión | solo a tu nombre (`creatorId`) | solo el creador; solo `description` (≤ 140 car.), `durationMinutes` (1–480), `status` y `endedAt` | solo el creador y si nadie más se ha unido |
+| `live_sessions/{id}/proofs/{uid}` | solo los participantes de la sesión | solo la tuya, siendo participante; solo `image` (< 300 KB) y `createdAt` (hora del servidor) | igual que crear | solo la tuya |
+
+Las reglas se probaron por REST contra el emulador: Ana edita su sesión (200); Leo intenta editarla, borrarla o cambiarle el `creatorId` y recibe 403.
 ### Consultas: escuchar o leer una vez
 Las sesiones (`live_sessions`) se consultan de cuatro maneras, todas en `LiveSessionRepository`:
 
@@ -149,6 +137,36 @@ Las sesiones (`live_sessions`) se consultan de cuatro maneras, todas en `LiveSes
 - **El historial lee una vez (`get`)**: son sesiones terminadas que ya no cambian. Escucharlas gastaría lecturas y batería para nada. Además, la paginación encaja con `get`: cada página se pide solo cuando el usuario pulsa «Cargar más».
 
 **Índices compuestos:** las consultas que combinan un `where` con un `orderBy` sobre otro campo necesitan índice. Los tres están declarados en `firestore.indexes.json` (no creados a mano en la consola) y se despliegan con `firebase deploy --only firestore:indexes`. El emulador no los exige, pero el Firestore real sí.
+
+### Fotos de prueba
+Al terminar una sesión se puede añadir una foto como prueba (Perfil → Mi historial → ⋮ → «Añadir prueba»), hecha con la cámara o elegida de la galería.
+
+**Flujo:** `PhotoAdmin` abre la cámara o la galería (`image_picker`) → `PhotoCompressor` la reduce en un isolate mientras la pantalla muestra una barra de progreso → vista previa con el peso antes y después → `LiveSessionRepository.saveProof` la guarda en base64 en `live_sessions/{id}/proofs/{uid}`. El Historial enseña una miniatura en cada fila y, al tocarla, la pantalla de detalle muestra la foto en grande.
+
+**Por qué se comprime antes de guardar:**
+- Firestore no admite documentos de más de **1 MiB** (1.048.576 bytes). Una foto de cámara de un móvil actual ocupa entre 2 y 5 MB: ni siquiera cabe.
+- El base64 ocupa **4/3** de los bytes originales (cada 3 bytes se escriben como 4 caracteres). Por eso el límite de 300 KB se mide sobre el texto base64 y no sobre el JPEG: deja margen de sobra hasta el 1 MiB.
+- Cada vez que alguien lee el documento se descarga entera. Cuanto más pequeña, menos datos móviles y menos espera.
+- Ejemplo medido en el emulador: foto de cámara **[rellenar: X KB → Y KB]**; foto de galería **[rellenar: X KB → Y KB]**.
+
+**Cómo se comprime (`lib/utils/photo_compressor.dart`):** se decodifica la imagen con el paquete `image`, se endereza según su EXIF (las fotos de cámara vienen giradas), se reduce para que el lado mayor mida como mucho 800 px y se codifica en JPEG probando calidades 85, 70, 55 y 40 hasta que el base64 baja de 300 KB. Si ni con calidad 40 lo consigue, la pantalla avisa de que pruebe con otra foto.
+
+**Por qué en un isolate y con `Isolate.spawn`:** decodificar y recomprimir una foto de 12 megapíxeles tarda lo bastante como para congelar la interfaz si se hace en el hilo principal. El isolate tiene su propia memoria y se comunica solo por mensajes: recibe los bytes y un `SendPort`, y envía números (`0.3`, `0.5`…) para el progreso y al final el JPEG. `compute` o `Isolate.run` serían más cortos, pero solo devuelven el resultado al final, sin mensajes intermedios para la barra.
+
+**En el navegador no hay isolates reales:** en web, Dart no puede crear hilos con memoria propia, así que la compresión se hace en el hilo principal (`kIsWeb`) y la barra solo avanza a saltos. La lógica es la misma función (`compressSync`), que además se puede probar sin isolate.
+
+**Por qué en `proofs` y no en el documento de la sesión:** el documento de la sesión lo lee todo el mundo en «Ahora»; si llevara la foto, cada fila de esa lista descargaría hasta 300 KB. En una subcolección aparte solo se descarga cuando hace falta verla, y las reglas pueden decidir quién la lee: **solo los participantes**, mientras que la sesión es pública.
+
+**Permisos y denegación:**
+- Android: `CAMERA` en `AndroidManifest.xml`. La galería usa el selector de fotos del sistema y no necesita permiso.
+- iOS: `NSCameraUsageDescription` y `NSPhotoLibraryUsageDescription` en `ios/Runner/Info.plist`.
+- Navegador: `image_picker` abre el selector de archivos; en el móvil ofrece también la cámara.
+- Si se deniega el permiso, el SnackBar dice qué hacer: «Actívalo en Ajustes > Aplicaciones > Codo > Permisos, o elige una foto de la galería». Tras dos negativas Android ya no vuelve a preguntar, así que Ajustes es la única salida.
+
+**Costes y límites conocidos:**
+- Cada página del Historial hace 4 lecturas más, una por miniatura, y la regla de `proofs` hace otra (`get` de la sesión para comprobar los participantes). Con páginas de 4 es asumible.
+- Borrar un documento en Firestore no borra sus subcolecciones: `deleteSession` borra primero la prueba y después la sesión. No son atómicas; cuando en la fase 2 la gente pueda unirse a sesiones se cambiará a un `WriteBatch`.
+
 ---
 
 ## 🚀 Guía de arranque (en un equipo limpio)
