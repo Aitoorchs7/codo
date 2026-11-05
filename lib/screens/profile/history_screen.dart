@@ -1,11 +1,15 @@
+import 'dart:typed_data';
 import 'package:codo/admins/auth_service.dart';
 import 'package:codo/models/live_session.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 import 'package:codo/repositories/session_failure.dart';
 import 'package:codo/screens/profile/edit_session_dialog.dart';
+import 'package:codo/utils/photo_compressor.dart';
 import 'package:flutter/material.dart';
+import 'package:codo/admins/photo_admin.dart';
+import 'package:codo/admins/photo_failure.dart';
 
-enum _SessionAction { edit, finish, delete }
+enum _SessionAction { edit, finish, delete, proof }
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -15,6 +19,8 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  final _photos = PhotoAdmin();
+  final _compressor = PhotoCompressor();
   final _repository = LiveSessionRepository();
   final List<LiveSession> _sessions = [];   // se va ampliando con cada página
   bool _loading = true;
@@ -96,6 +102,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         case _SessionAction.delete:
           if (!await _confirmDelete()) return;
           await _repository.deleteSession(s.id);
+        case _SessionAction.proof:
+          await _addProof(s);
+          return;   // de momento no se guarda nada, no hace falta recargar
       }
       if (!mounted) return;
       _loadPage(reset: true);   // releer para ver el cambio
@@ -126,6 +135,80 @@ class _HistoryScreenState extends State<HistoryScreen> {
     SessionError.notFound => 'La sesión ya no existe',
     SessionError.network => 'Sin conexión. Inténtalo de nuevo',
     SessionError.unknown => 'No se pudo guardar el cambio',
+  };
+
+  Future<void> _addProof(LiveSession s) async {
+    // Hoja inferior para elegir el origen; devuelve null si la cierra
+    final source = await showModalBottomSheet<PhotoSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            leading: const Icon(Icons.photo_camera),
+            title: const Text('Hacer foto'),
+            onTap: () => Navigator.pop(context, PhotoSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library),
+            title: const Text('Elegir de la galería'),
+            onTap: () => Navigator.pop(context, PhotoSource.gallery),
+          ),
+        ]),
+      ),
+    );
+    if (source == null) return;
+    try {
+      final bytes = await _photos.pick(source);
+      if (bytes == null || !mounted) return;   // canceló la cámara o la galería
+      final small = await _compressWithProgress(bytes);
+      if (!mounted) return;
+      // Paso 1: de momento solo enseñamos la foto y lo que pesa sin comprimir
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            Image.memory(small, height: 240),
+            const SizedBox(height: 8),
+            Text('${(bytes.length / 1024).round()} KB → ${(small.length / 1024).round()} KB'),
+          ]),
+        ),
+      );
+    } on PhotoFailure catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(_photoErrorText(e.error))));
+    }
+  }
+
+  Future<Uint8List> _compressWithProgress(Uint8List bytes) async {
+    final progress = ValueNotifier<double>(0);
+    showDialog(
+      context: context,
+      barrierDismissible: false,   // no se puede cerrar a mitad
+      builder: (_) => AlertDialog(
+        title: const Text('Preparando la foto'),
+        content: ValueListenableBuilder<double>(
+          valueListenable: progress,
+          builder: (_, value, _) => LinearProgressIndicator(value: value),
+        ),
+      ),
+    );
+    try {
+      return await _compressor.compress(bytes, onProgress: (p) => progress.value = p);
+    } finally {
+      if (mounted) Navigator.pop(context);   // cierra el diálogo, salga bien o mal
+      progress.dispose();
+    }
+  }
+
+  String _photoErrorText(PhotoError e) => switch (e) {
+    PhotoError.cameraDenied =>
+    'Sin permiso de cámara. Actívalo en Ajustes > Aplicaciones > Codo > Permisos, o elige una foto de la galería',
+    PhotoError.galleryDenied =>
+    'Sin permiso de fotos. Actívalo en Ajustes > Aplicaciones > Codo > Permisos',
+    PhotoError.noCamera => 'Este dispositivo no tiene cámara. Elige una foto de la galería',
+    PhotoError.unknown => 'No se pudo abrir la foto. Inténtalo de nuevo',
+    PhotoError.compressFailed => 'No se pudo comprimir la foto. Inténtalo de nuevo',
   };
 
   @override
@@ -171,6 +254,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             tooltip: 'Opciones de la sesión',
             onSelected: (action) => _onAction(action, s),
             itemBuilder: (context) => [
+              const PopupMenuItem(value: _SessionAction.proof, child: Text('Añadir prueba')),
               const PopupMenuItem(value: _SessionAction.edit, child: Text('Editar')),
               if (s.status == SessionStatus.active)
                 const PopupMenuItem(value: _SessionAction.finish, child: Text('Terminar')),
