@@ -4,7 +4,6 @@ import 'package:codo/utils/startup_route.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
-
   const SplashScreen({super.key});
 
   @override
@@ -12,7 +11,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   //traemos las preferencias del usuario
   //para ver si la pantalla se ha visto y si no, hacer que se haya visto
   final _prefs = PreferencesAdmin();
@@ -70,9 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 return const SizedBox(
                   width: 280,
                   height: 168,
-                  child: Center(
-                    child: Text('No se pudo cargar la imagen'),
-                  ),
+                  child: Center(child: Text('No se pudo cargar la imagen')),
                 );
               },
             ),
@@ -83,5 +79,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-
-

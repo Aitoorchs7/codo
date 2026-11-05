@@ -16,30 +16,33 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   int _index = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-          fit: StackFit.expand,
-          children: [
+        fit: StackFit.expand,
+        children: [
           const HomeBackground(),
-        SafeArea(
+          SafeArea(
             child: IndexedStack(
-            index: _index,
-            children: const [
-              TodayScreen(),
-              NowScreen(),
-              PactsScreen(),
-              FriendsScreen(),
-              ProfileScreen(),
-            ]),
-        )]
+              index: _index,
+              children: const [
+                TodayScreen(),
+                NowScreen(),
+                PactsScreen(),
+                FriendsScreen(),
+                ProfileScreen(),
+              ],
+            ),
+          ),
+        ],
       ),
-          bottomNavigationBar: CodoNavBar(
-          selectedIndex: _index, onSelected: (i) => setState(() => _index = i)),
+      bottomNavigationBar: CodoNavBar(
+        selectedIndex: _index,
+        onSelected: (i) => setState(() => _index = i),
+      ),
     );
   }
 }

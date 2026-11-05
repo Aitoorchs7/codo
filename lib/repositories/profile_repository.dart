@@ -2,7 +2,8 @@ import 'package:codo/admins/firestore_admin.dart';
 import 'package:codo/models/profile.dart';
 
 class ProfileRepository {
-  ProfileRepository({FirestoreAdmin? admin}) : _admin = admin ?? FirestoreAdmin();
+  ProfileRepository({FirestoreAdmin? admin})
+    : _admin = admin ?? FirestoreAdmin();
 
   final FirestoreAdmin _admin;
 
@@ -13,6 +14,7 @@ class ProfileRepository {
     final doc = await _admin.profiles.doc(uid).get();
     return doc.data();
   }
+
   Future<Profile> getOrCreateProfile({
     required String uid,
     required String displayName,
@@ -31,7 +33,7 @@ class ProfileRepository {
     await saveProfile(newProfile);
     return newProfile;
   }
-    // 1. ¿Existe ya? → lo devuelvo tal cual (no piso su nombre ni su XP)
-    // 2. Si no: creo Profile(uid, displayName, photoUrl, xp: 0, medals: const [], createdAt: DateTime.now())
-    // 3. saveProfile(profile) y lo devuelvo
+  // 1. ¿Existe ya? → lo devuelvo tal cual (no piso su nombre ni su XP)
+  // 2. Si no: creo Profile(uid, displayName, photoUrl, xp: 0, medals: const [], createdAt: DateTime.now())
+  // 3. saveProfile(profile) y lo devuelvo
 }

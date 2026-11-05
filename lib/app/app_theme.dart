@@ -51,15 +51,15 @@ class AppTheme {
             fontWeight: FontWeight.w700,
             color: c.textPrimary,
           ),
-      // El de Material 3 trae letterSpacing 0.5; el diseño no lo tiene.
-        bodyLarge: GoogleFonts.onest(
-          fontSize: 16,
-          height: 24 / 16,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 0,
-          color: c.textPrimary,
-        ),
-    );
+          // El de Material 3 trae letterSpacing 0.5; el diseño no lo tiene.
+          bodyLarge: GoogleFonts.onest(
+            fontSize: 16,
+            height: 24 / 16,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0,
+            color: c.textPrimary,
+          ),
+        );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
@@ -73,7 +73,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: c.track,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
+        ),
         border: _fieldBorder(c.divider),
         enabledBorder: _fieldBorder(c.divider),
         disabledBorder: _fieldBorder(c.divider),

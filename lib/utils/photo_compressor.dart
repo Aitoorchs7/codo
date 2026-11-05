@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:isolate';
+
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:codo/admins/photo_failure.dart';
@@ -9,7 +10,10 @@ const maxBase64Length = 300 * 1024;
 const _maxSide = 800;
 
 class PhotoCompressor {
-  Future<Uint8List> compress(Uint8List bytes, {void Function(double)? onProgress}) async {
+  Future<Uint8List> compress(
+    Uint8List bytes, {
+    void Function(double)? onProgress,
+  }) async {
     // En web no hay isolates reales: se hace en el hilo principal
     if (kIsWeb) {
       try {
@@ -22,9 +26,9 @@ class PhotoCompressor {
     await Isolate.spawn(_worker, [port.sendPort, bytes]);
     await for (final message in port) {
       if (message is double) {
-        onProgress?.call(message);   // progreso
+        onProgress?.call(message); // progreso
       } else {
-        port.close();                 // resultado o error: se cierra el buzón
+        port.close(); // resultado o error: se cierra el buzón
         if (message is Uint8List) return message;
         break;
       }
@@ -48,11 +52,15 @@ void _worker(List<Object> args) {
 Uint8List compressSync(Uint8List bytes, void Function(double) progress) {
   final raw = img.decodeImage(bytes);
   if (raw == null) throw const FormatException('Imagen no válida');
-  final image = img.bakeOrientation(raw);   // endereza las fotos de cámara (EXIF)
+  final image = img.bakeOrientation(raw); // endereza las fotos de cámara (EXIF)
   progress(0.3);
   final resized = image.width >= image.height
-      ? (image.width > _maxSide ? img.copyResize(image, width: _maxSide) : image)
-      : (image.height > _maxSide ? img.copyResize(image, height: _maxSide) : image);
+      ? (image.width > _maxSide
+            ? img.copyResize(image, width: _maxSide)
+            : image)
+      : (image.height > _maxSide
+            ? img.copyResize(image, height: _maxSide)
+            : image);
   progress(0.5);
   const qualities = [85, 70, 55, 40];
   for (var i = 0; i < qualities.length; i++) {

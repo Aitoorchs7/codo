@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 
-class TodayScreen extends StatelessWidget{
+class TodayScreen extends StatelessWidget {
   const TodayScreen({super.key});
 
   @override

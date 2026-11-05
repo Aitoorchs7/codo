@@ -13,7 +13,9 @@ class PhotoAdmin {
   Future<Uint8List?> pick(PhotoSource source) async {
     try {
       final file = await _picker.pickImage(
-        source: source == PhotoSource.camera ? ImageSource.camera : ImageSource.gallery,
+        source: source == PhotoSource.camera
+            ? ImageSource.camera
+            : ImageSource.gallery,
       );
       if (file == null) return null;
       return await file.readAsBytes();

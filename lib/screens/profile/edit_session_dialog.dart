@@ -11,8 +11,12 @@ class EditSessionDialog extends StatefulWidget {
 
 class _EditSessionDialogState extends State<EditSessionDialog> {
   final _formKey = GlobalKey<FormState>();
-  late final _description = TextEditingController(text: widget.session.description);
-  late final _minutes = TextEditingController(text: '${widget.session.durationMinutes}');
+  late final _description = TextEditingController(
+    text: widget.session.description,
+  );
+  late final _minutes = TextEditingController(
+    text: '${widget.session.durationMinutes}',
+  );
 
   @override
   void dispose() {
@@ -25,8 +29,8 @@ class _EditSessionDialogState extends State<EditSessionDialog> {
     if (!_formKey.currentState!.validate()) return;
     // Cierra el diálogo devolviendo los datos nuevos
     Navigator.pop(context, (
-    description: _description.text.trim(),
-    minutes: int.parse(_minutes.text),
+      description: _description.text.trim(),
+      minutes: int.parse(_minutes.text),
     ));
   }
 
@@ -36,28 +40,39 @@ class _EditSessionDialogState extends State<EditSessionDialog> {
       title: const Text('Editar sesión'),
       content: Form(
         key: _formKey,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextFormField(
-            controller: _description,
-            maxLength: 140,
-            decoration: const InputDecoration(labelText: 'Descripción'),
-            validator: (v) =>
-            (v == null || v.trim().isEmpty) ? 'Escribe qué estás haciendo' : null,
-          ),
-          TextFormField(
-            controller: _minutes,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Duración (minutos)'),
-            validator: (v) {
-              final n = int.tryParse(v ?? '');
-              if (n == null || n <= 0 || n > 480) return 'Entre 1 y 480 minutos';
-              return null;
-            },
-          ),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _description,
+              maxLength: 140,
+              decoration: const InputDecoration(labelText: 'Descripción'),
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Escribe qué estás haciendo'
+                  : null,
+            ),
+            TextFormField(
+              controller: _minutes,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Duración (minutos)',
+              ),
+              validator: (v) {
+                final n = int.tryParse(v ?? '');
+                if (n == null || n <= 0 || n > 480) {
+                  return 'Entre 1 y 480 minutos';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
         TextButton(onPressed: _save, child: const Text('Guardar')),
       ],
     );

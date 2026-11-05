@@ -1,4 +1,3 @@
-
 import 'package:codo/screens/auth/auth_screen.dart';
 import 'package:codo/screens/home/home_screen.dart';
 import 'package:codo/screens/onboarding/onboarding_screen.dart';
@@ -7,7 +6,7 @@ import 'package:codo/screens/profile/history_screen.dart';
 import 'package:codo/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
-class AppRoutes{
+class AppRoutes {
   static const login = '/login';
   static const onboarding = '/onboarding';
   static const splash = '/splash';
@@ -29,7 +28,8 @@ class AppRoutes{
         final args = settings.arguments;
         if (args is! PactDetailArgs) return _errorPage(settings);
         return _page(settings, PactDetailScreen(args: args));
-      case history: return _page(settings, const HistoryScreen());
+      case history:
+        return _page(settings, const HistoryScreen());
       default:
         return _errorPage(settings);
     }
@@ -38,6 +38,8 @@ class AppRoutes{
   static MaterialPageRoute<void> _page(RouteSettings settings, Widget screen) =>
       MaterialPageRoute(settings: settings, builder: (_) => screen);
 
-  static MaterialPageRoute<void> _errorPage(RouteSettings settings) =>
-      _page(settings, const Scaffold(body: Center(child: Text('Ruta no válida'))));
+  static MaterialPageRoute<void> _errorPage(RouteSettings settings) => _page(
+    settings,
+    const Scaffold(body: Center(child: Text('Ruta no válida'))),
+  );
 }

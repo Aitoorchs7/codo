@@ -3,12 +3,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferencesAdmin {
-
   static const _onboardingSeenKey = 'onboarding_seen';
 
   // metodos para ver si la pantalla se ha visto y si no, hacer que se haya visto
   // estos datos están en shared_preferences del dispositivo que se guardan en disco
-  Future<bool> isOnboardingSeen() async{
+  Future<bool> isOnboardingSeen() async {
     // cogemos las preferencias del dispositivo
     final prefs = await SharedPreferences.getInstance();
     // vemos si ya se ha visto la pantalla
@@ -16,6 +15,7 @@ class PreferencesAdmin {
     // y devolvemos el valor que nos interesa
     return value is bool ? value : false;
   }
+
   Future<void> markAsOnboardingSeen() async {
     // tenemos que ver otra vez la preferencia para tener la variable
     // aunque este metodo solo se ejecuta si la variable ya estaba en false

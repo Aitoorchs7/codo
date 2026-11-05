@@ -53,7 +53,9 @@ class _GlassButtonState extends State<GlassButton> {
             onPressed: widget.onPressed,
             style: TextButton.styleFrom(
               foregroundColor: primary ? CodoColors.onAccent : c.textPrimary,
-              minimumSize: primary ? const Size.fromHeight(58) : const Size(0, 48),
+              minimumSize: primary
+                  ? const Size.fromHeight(58)
+                  : const Size(0, 48),
               padding: const EdgeInsets.symmetric(horizontal: 22),
               shape: const StadiumBorder(),
               textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(

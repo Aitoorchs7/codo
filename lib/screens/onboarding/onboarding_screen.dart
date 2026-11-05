@@ -28,6 +28,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onPageChanged(int index) {
     setState(() => _current = index);
   }
+
   //el finish cambia de pagina a la siguiente (login)
   //y cambia el valor de onboarding_seen a true para que
   // al entrar a la aplicacion no se vuelva a mostrar
@@ -36,6 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!mounted) return;
     Navigator.popAndPushNamed(context, AppRoutes.login);
   }
+
   //funcion que controla en 300 milisegundos el cambio de pagina, lo rapido que cambia la pagina
   // ejecuta la funcion finish si ha termionado el onboarding
   void _next() {
@@ -48,6 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     }
   }
+
   // Flutter lo llama una vez, cuando la pantalla sale del árbol para siempre.
   // Aquí se libera lo creado en el State; si no, el controlador se queda en
   // memoria (fuga) aunque la pantalla ya no exista.
@@ -59,66 +62,65 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   @override
-  Widget build(BuildContext context){
-      return Scaffold(
-        body: CodoBackground(
-          child: SafeArea(
-            child: Column(
-              children: [
-                // 1. Saltar, arriba a la derecha
-                // 1. Saltar, arriba a la derecha. En la última página se oculta
-                // pero conserva su hueco para que nada se mueva.
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Visibility(
-                      visible: _current < _pageCount - 1,
-                      maintainSize: true,
-                      maintainAnimation: true,
-                      maintainState: true,
-                      child: GlassButton(
-                        onPressed: _finish,
-                        child: const Text('Saltar'),
-                      ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CodoBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // 1. Saltar, arriba a la derecha
+              // 1. Saltar, arriba a la derecha. En la última página se oculta
+              // pero conserva su hueco para que nada se mueva.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Visibility(
+                    visible: _current < _pageCount - 1,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: GlassButton(
+                      onPressed: _finish,
+                      child: const Text('Saltar'),
                     ),
                   ),
                 ),
-                Expanded(
-                  child: PageView(
-                    controller: _controller,
-                    onPageChanged: _onPageChanged,
-                    // con un bucle recorremos las paginas que quiere mos mostrar
-                    // según el indice en el que este y si el usuario pulsa el
-                    //botón de siguiente, el indice aumenta +1 y asi sucesivamente
-                    children: [
-                      for (final p in _pages) _OnboardingPage(data: p),
-                    ],
-                  ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _controller,
+                  onPageChanged: _onPageChanged,
+                  // con un bucle recorremos las paginas que quiere mos mostrar
+                  // según el indice en el que este y si el usuario pulsa el
+                  //botón de siguiente, el indice aumenta +1 y asi sucesivamente
+                  children: [for (final p in _pages) _OnboardingPage(data: p)],
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-                  child: Column(
-                    children: [
-                      _PageDots(count: _pageCount, current: _current),
-                      const SizedBox(height: 24),
-                      GlassButton(
-                        primary: true,
-                        onPressed: _next,
-                        child: Text(
-                          _current == _pageCount - 1 ? 'Empezar' : 'Siguiente',
-                        ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                child: Column(
+                  children: [
+                    _PageDots(count: _pageCount, current: _current),
+                    const SizedBox(height: 24),
+                    GlassButton(
+                      primary: true,
+                      onPressed: _next,
+                      child: Text(
+                        _current == _pageCount - 1 ? 'Empezar' : 'Siguiente',
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
-    }
+      ),
+    );
   }
+}
+
 // los datos de las paginas que llevan de
 // la clase app_theme en el tema claro y oscuro
 class _PageData {
@@ -155,10 +157,7 @@ class _OnboardingPage extends StatelessWidget {
               child: Icon(data.icon, size: 96, color: CodoColors.accent),
             ),
           ),
-          Text(
-            data.title,
-            style: textTheme.headlineMedium,
-          ),
+          Text(data.title, style: textTheme.headlineMedium),
           const SizedBox(height: 12),
           Text(
             data.text,
@@ -170,32 +169,39 @@ class _OnboardingPage extends StatelessWidget {
     );
   }
 }
+
 // Los textos que aparecen en las paginas según su posición en la tabla
 const _pages = [
   _PageData(
     icon: Icons.groups,
-    title: 'Ponerse cuesta menos '
+    title:
+        'Ponerse cuesta menos '
         'acompañado',
-    text: 'Publica lo que estés haciendo y tus'
+    text:
+        'Publica lo que estés haciendo y tus'
         'amigos se suman a la vez. Estudiar, '
         'entrenar o leer, a tu codo.',
   ),
   _PageData(
     icon: Icons.handshake,
-    title: 'Un pacto, dos '
+    title:
+        'Un pacto, dos '
         'personas',
-    text: 'Elegís un reto y hacéis check-in cada día. '
+    text:
+        'Elegís un reto y hacéis check-in cada día. '
         'Si uno se descuelga, perdéis los dos. '
         'Por eso nadie se descuelga. ',
   ),
   _PageData(
     icon: Icons.emoji_events,
     title: 'Cada objetivo cuenta',
-    text: 'Gana XP, sube de nivel y llena tu perfil de '
+    text:
+        'Gana XP, sube de nivel y llena tu perfil de '
         'medallas por lo que de verdad has '
         'cumplido.',
   ),
 ];
+
 // Puntos de página: el activo es un punto azul más ancho.
 class _PageDots extends StatelessWidget {
   const _PageDots({required this.count, required this.current});
@@ -212,7 +218,7 @@ class _PageDots extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (var i = 0; i < count; i++)
-        // AnimatedContainer anima solo el cambio de ancho y de color.
+          // AnimatedContainer anima solo el cambio de ancho y de color.
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             margin: const EdgeInsets.symmetric(horizontal: 4),

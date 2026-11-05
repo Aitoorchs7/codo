@@ -23,43 +23,44 @@ class _MedalGridState extends State<MedalGrid> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Medal>>(
-        stream: _medals,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('No se pudieron cargar las medallas.'),
-                  const SizedBox(height: 12),
-                  GlassButton(
-                    primary: true,
-                    onPressed: () => setState(() => _medals = _repository.watchMedals()),
-                    child: const Text('Reintentar'),
-                  ),
-                ],
-              ),
-            );
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final medals = snapshot.data ?? [];
-          if (medals.isEmpty) {
-            return const Center(child: Text('Todavía no hay medallas.'));
-          }
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 160,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.8,
+      stream: _medals,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('No se pudieron cargar las medallas.'),
+                const SizedBox(height: 12),
+                GlassButton(
+                  primary: true,
+                  onPressed: () =>
+                      setState(() => _medals = _repository.watchMedals()),
+                  child: const Text('Reintentar'),
+                ),
+              ],
             ),
-            itemCount: medals.length,
-            itemBuilder: (context, index) => _MedalCard(medal: medals[index]),
           );
-        },
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final medals = snapshot.data ?? [];
+        if (medals.isEmpty) {
+          return const Center(child: Text('Todavía no hay medallas.'));
+        }
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 160,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.8,
+          ),
+          itemCount: medals.length,
+          itemBuilder: (context, index) => _MedalCard(medal: medals[index]),
+        );
+      },
     );
   }
 }
@@ -86,7 +87,7 @@ class _MedalCard extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               },
               errorBuilder: (context, error, stackTrace) =>
-              const Center(child: Icon(Icons.emoji_events_outlined)),
+                  const Center(child: Icon(Icons.emoji_events_outlined)),
             ),
           ),
           Padding(

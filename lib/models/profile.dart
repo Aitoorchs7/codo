@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codo/models/field_readers.dart';
 
 class Profile {
-
   final String uid;
   final String displayName;
   final String? photoUrl;
@@ -12,7 +11,6 @@ class Profile {
 
   final int xp;
   final List<String> medals;
-
 
   const Profile({
     required this.uid,
@@ -26,7 +24,8 @@ class Profile {
 
   factory Profile.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
-    SnapshotOptions? options){
+    SnapshotOptions? options,
+  ) {
     final data = snapshot.data();
     return Profile(
       uid: snapshot.id,
@@ -39,16 +38,16 @@ class Profile {
     );
   }
 
-  Map<String, dynamic> toFirestore(){
-    return{
+  Map<String, dynamic> toFirestore() {
+    return {
       'displayName': displayName,
       'xp': xp,
       'badges': medals,
-      'createdAt': Timestamp.fromDate(createdAt),// con esto evitamos el datetimenow()
-      if(photoUrl != null) 'photoUrl': photoUrl,
-      if(bio != null) 'bio': bio,
+      'createdAt': Timestamp.fromDate(
+        createdAt,
+      ), // con esto evitamos el datetimenow()
+      if (photoUrl != null) 'photoUrl': photoUrl,
+      if (bio != null) 'bio': bio,
     };
-
   }
 }
-

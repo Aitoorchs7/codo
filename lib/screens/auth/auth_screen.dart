@@ -110,9 +110,10 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) setState(() => _loading = false);
     }
   }
+
   Future<void> _signInWithGoogle() async {
     setState(() {
-      _loading = true;        // primero se enseña la carga
+      _loading = true; // primero se enseña la carga
       _error = null;
     });
     try {
@@ -124,7 +125,11 @@ class _AuthScreenState extends State<AuthScreen> {
         photoUrl: user.photoURL,
       );
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (route) => false);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.home,
+        (route) => false,
+      );
     } on AuthFailure catch (e) {
       // Cancelar no es un error: se vuelve a la pantalla sin aviso
       if (!mounted || e.error == AuthError.cancelled) return;

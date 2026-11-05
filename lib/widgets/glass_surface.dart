@@ -32,21 +32,21 @@ class GlassSurface extends StatelessWidget {
     // izquierda. Sin reflejos ni líneas dentro.
     final fill = tinted
         ? LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        tint!.withValues(alpha: 0.85),
-        tint!.withValues(alpha: 0.65),
-      ],
-    )
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              tint!.withValues(alpha: 0.85),
+              tint!.withValues(alpha: 0.65),
+            ],
+          )
         : LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        c.glassFill,
-        c.glassFill.withValues(alpha: c.glassFill.a * 0.5),
-      ],
-    );
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              c.glassFill,
+              c.glassFill.withValues(alpha: c.glassFill.a * 0.5),
+            ],
+          );
 
     final glass = ClipRRect(
       borderRadius: shape,
@@ -69,19 +69,19 @@ class GlassSurface extends StatelessWidget {
       ),
       child: tinted
           ? DecoratedBox(
-        // Resplandor exterior del color del cristal.
-        decoration: BoxDecoration(
-          borderRadius: shape,
-          boxShadow: [
-            BoxShadow(
-              color: tint!.withValues(alpha: 0.42),
-              offset: const Offset(0, 10),
-              blurRadius: 28,
-            ),
-          ],
-        ),
-        child: glass,
-      )
+              // Resplandor exterior del color del cristal.
+              decoration: BoxDecoration(
+                borderRadius: shape,
+                boxShadow: [
+                  BoxShadow(
+                    color: tint!.withValues(alpha: 0.42),
+                    offset: const Offset(0, 10),
+                    blurRadius: 28,
+                  ),
+                ],
+              ),
+              child: glass,
+            )
           : glass,
     );
   }

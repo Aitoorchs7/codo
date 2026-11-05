@@ -17,9 +17,9 @@ class Medal {
   final String imageUrl;
 
   factory Medal.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> snapshot,
-      SnapshotOptions? options,
-      ) {
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
     final data = snapshot.data() ?? const <String, dynamic>{};
     return Medal(
       id: snapshot.id,

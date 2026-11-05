@@ -1,8 +1,7 @@
-
 import 'package:codo/app/codo_colors.dart';
 import 'package:flutter/material.dart';
 
-class CodoBackground extends StatelessWidget{
+class CodoBackground extends StatelessWidget {
   const CodoBackground({super.key, required this.child});
 
   // Lo que se pinta encima del fondo (la pantalla).
@@ -25,5 +24,4 @@ class CodoBackground extends StatelessWidget{
       child: child,
     );
   }
-
 }

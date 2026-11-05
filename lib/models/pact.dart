@@ -23,9 +23,9 @@ class Pact {
       daysTotal <= 0 ? 0 : (daysDone / daysTotal).clamp(0.0, 1.0).toDouble();
 
   factory Pact.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> snapshot,
-      SnapshotOptions? options,
-      ) {
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
     final data = snapshot.data() ?? const <String, dynamic>{};
     return Pact(
       id: snapshot.id,

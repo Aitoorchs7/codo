@@ -2,7 +2,7 @@ import 'package:codo/models/live_session.dart';
 import 'package:flutter/material.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 
-class NowScreen extends StatefulWidget{
+class NowScreen extends StatefulWidget {
   const NowScreen({super.key});
 
   @override
@@ -20,10 +20,9 @@ class _NowScreenState extends State<NowScreen> {
     _sessions = _load();
   }
 
-  Stream<List<LiveSession>> _load() =>
-      _category == null
-          ? _repository.watchRecentPublic()
-          : _repository.watchPublicByCategory(_category!);
+  Stream<List<LiveSession>> _load() => _category == null
+      ? _repository.watchRecentPublic()
+      : _repository.watchPublicByCategory(_category!);
 
   void _select(SessionCategory? category) {
     if (category == _category) return;
@@ -33,41 +32,42 @@ class _NowScreenState extends State<NowScreen> {
     });
   }
 
-  String _label(SessionCategory category) =>
-      switch (category){
-        SessionCategory.study => 'Estudiar',
-        SessionCategory.train => 'Entrenar',
-        SessionCategory.read => 'Leer',
-        SessionCategory.work => 'Trabajar',
-        SessionCategory.other => 'Otros',
-      };
+  String _label(SessionCategory category) => switch (category) {
+    SessionCategory.study => 'Estudiar',
+    SessionCategory.train => 'Entrenar',
+    SessionCategory.read => 'Leer',
+    SessionCategory.work => 'Trabajar',
+    SessionCategory.other => 'Otros',
+  };
 
-  Widget _chip(SessionCategory? category, String text) =>
-      Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: ChoiceChip(
-          label: Text(text),
-          selected: _category == category,
-          onSelected: (_) => _select(category),
-        ),
-      );
+  Widget _chip(SessionCategory? category, String text) => Padding(
+    padding: const EdgeInsets.only(right: 8),
+    child: ChoiceChip(
+      label: Text(text),
+      selected: _category == category,
+      onSelected: (_) => _select(category),
+    ),
+  );
 
-  Widget _buildFilters() =>
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(children: [
-          _chip(null, 'Recientes'),
-          for (final c in SessionCategory.values) _chip(c, _label(c)),
-        ]),
-      );
+  Widget _buildFilters() => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Row(
+      children: [
+        _chip(null, 'Recientes'),
+        for (final c in SessionCategory.values) _chip(c, _label(c)),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      _buildFilters(),
-      Expanded(child: _buildList()),
-    ]);
+    return Column(
+      children: [
+        _buildFilters(),
+        Expanded(child: _buildList()),
+      ],
+    );
   }
 
   Widget _buildList() {
@@ -76,13 +76,16 @@ class _NowScreenState extends State<NowScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Text('No se pudieron cargar las sesiones'),
-              TextButton(
-                onPressed: () => setState(() => _sessions = _load()),
-                child: const Text('Reintentar'),
-              ),
-            ]),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('No se pudieron cargar las sesiones'),
+                TextButton(
+                  onPressed: () => setState(() => _sessions = _load()),
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
           );
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -91,7 +94,8 @@ class _NowScreenState extends State<NowScreen> {
         final sessions = snapshot.data ?? const <LiveSession>[];
         if (sessions.isEmpty) {
           return const Center(
-              child: Text('Ahora mismo no hay nadie con una sesión abierta'));
+            child: Text('Ahora mismo no hay nadie con una sesión abierta'),
+          );
         }
         return ListView.builder(
           itemCount: sessions.length,
@@ -99,8 +103,9 @@ class _NowScreenState extends State<NowScreen> {
             final s = sessions[i];
             return ListTile(
               title: Text(s.description),
-              subtitle: Text('${s.creatorName} · ${_label(s.category)} · ${s
-                  .durationMinutes} min'),
+              subtitle: Text(
+                '${s.creatorName} · ${_label(s.category)} · ${s.durationMinutes} min',
+              ),
             );
           },
         );

@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codo/models/field_readers.dart';
 
 enum SessionCategory { study, train, read, work, other }
+
 enum SessionVisibility { friends, public }
+
 enum SessionStatus { active, finished }
 
 class LiveSession {
@@ -21,8 +23,7 @@ class LiveSession {
     this.longitude,
     this.locationAt,
     this.endedAt,
-
-});
+  });
   final String id;
   final String creatorId;
   final String creatorName;
@@ -39,11 +40,11 @@ class LiveSession {
   final DateTime? endedAt;
 
   factory LiveSession.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> snapshot,
-      SnapshotOptions? options,
-      ) {
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
     final data = snapshot.data() ?? const <String, dynamic>{};
-    final location = data['location'];   // puede no venir
+    final location = data['location']; // puede no venir
     return LiveSession(
       id: snapshot.id,
       creatorId: readString(data['creatorId']),
@@ -51,9 +52,21 @@ class LiveSession {
       description: readString(data['description']),
       startedAt: readDate(data['startedAt']),
       durationMinutes: readInt(data['durationMinutes']),
-      category: readEnum(data['category'], SessionCategory.values, SessionCategory.other),
-      visibility: readEnum(data['visibility'], SessionVisibility.values, SessionVisibility.friends),
-      status: readEnum(data['status'], SessionStatus.values, SessionStatus.active),
+      category: readEnum(
+        data['category'],
+        SessionCategory.values,
+        SessionCategory.other,
+      ),
+      visibility: readEnum(
+        data['visibility'],
+        SessionVisibility.values,
+        SessionVisibility.friends,
+      ),
+      status: readEnum(
+        data['status'],
+        SessionStatus.values,
+        SessionStatus.active,
+      ),
       participantIds: readStringList(data['participantIds']),
       endedAt: readOptionalDate(data['endedAt']),
       latitude: location is GeoPoint ? location.latitude : null,
@@ -74,10 +87,12 @@ class LiveSession {
       'status': status.name,
       'participantIds': participantIds,
       'endedAt': endedAt == null ? null : Timestamp.fromDate(endedAt!),
-// La ubicación solo se escribe si existe
+      // La ubicación solo se escribe si existe
       if (latitude != null && longitude != null) ...{
         'location': GeoPoint(latitude!, longitude!),
-        'locationAt': locationAt == null ? null : Timestamp.fromDate(locationAt!),
+        'locationAt': locationAt == null
+            ? null
+            : Timestamp.fromDate(locationAt!),
       },
     };
   }

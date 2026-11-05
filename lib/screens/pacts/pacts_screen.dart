@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:codo/widgets/glass_button.dart';
 
 class PactsScreen extends StatefulWidget {
-  const PactsScreen({super.key,});
+  const PactsScreen({super.key});
 
   @override
   State<PactsScreen> createState() => _PactsScreenState();
@@ -37,7 +37,8 @@ class _PactsScreenState extends State<PactsScreen> {
                   const SizedBox(height: 12),
                   GlassButton(
                     primary: true,
-                    onPressed: () => setState(() => _pacts = _repository.watchPacts()),
+                    onPressed: () =>
+                        setState(() => _pacts = _repository.watchPacts()),
                     child: const Text('Reintentar'),
                   ),
                 ],
@@ -63,36 +64,38 @@ class _PactsScreenState extends State<PactsScreen> {
 }
 
 class _PactCard extends StatelessWidget {
-  const _PactCard({ required this.pact});
+  const _PactCard({required this.pact});
   final Pact pact;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Card(
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => Navigator.pushNamed(
-            context,
-            AppRoutes.pactDetail,
-            arguments: PactDetailArgs(pact: pact),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(
+          context,
+          AppRoutes.pactDetail,
+          arguments: PactDetailArgs(pact: pact),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(pact.title, style: textTheme.titleMedium),
+              const SizedBox(height: 4),
+              Text("Con ${pact.partnerName}", style: textTheme.bodyMedium),
+              const SizedBox(height: 12),
+              LinearProgressIndicator(value: pact.progress),
+              const SizedBox(height: 8),
+              Text(
+                "${pact.daysDone} / ${pact.daysTotal} días",
+                style: textTheme.bodySmall,
+              ),
+            ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(pact.title, style: textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text("Con ${pact.partnerName}", style: textTheme.bodyMedium),
-                const SizedBox(height: 12),
-                LinearProgressIndicator(value: pact.progress),
-                const SizedBox(height: 8),
-                Text("${pact.daysDone} / ${pact.daysTotal} días",
-                    style: textTheme.bodySmall),
-              ],
-            )
-        )
+        ),
       ),
     );
   }
