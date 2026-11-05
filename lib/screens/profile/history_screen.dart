@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:codo/admins/auth_service.dart';
 import 'package:codo/models/live_session.dart';
 import 'package:codo/repositories/live_session_repository.dart';
@@ -22,11 +23,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final _photos = PhotoAdmin();
   final _compressor = PhotoCompressor();
   final _repository = LiveSessionRepository();
-  final List<LiveSession> _sessions = [];   // se va ampliando con cada página
+  final List<LiveSession> _sessions = []; // se va ampliando con cada página
   bool _loading = true;
   bool _hasError = false;
   bool _hasMore = true;
-  DateTimeRange? _range;   // null = historial paginado
+  DateTimeRange? _range; // null = historial paginado
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _loadPage({bool reset = false}) async {
     setState(() {
-      if (reset) _sessions.clear();   // filtro nuevo: empezar de cero
+      if (reset) _sessions.clear(); // filtro nuevo: empezar de cero
       _loading = true;
       _hasError = false;
     });
@@ -48,12 +49,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ? await _repository.getHistoryPage(uid, reset: reset)
           // +1 día: el picker da el último día a las 00:00 y la consulta usa isLessThan
           : await _repository.getHistoryBetween(
-            uid, range.start, range.end.add(const Duration(days: 1)));
+              uid,
+              range.start,
+              range.end.add(const Duration(days: 1)),
+            );
       if (!mounted) return;
       setState(() {
         _sessions.addAll(page);
         // Si llega una página incompleta, ya no quedan más
-        _hasMore = range == null && page.length == LiveSessionRepository.historyPageSize;
+        _hasMore =
+            range == null &&
+            page.length == LiveSessionRepository.historyPageSize;
         _loading = false;
       });
     } catch (e) {
@@ -74,7 +80,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       lastDate: now,
       initialDateRange: _range,
     );
-    if (picked == null || !mounted) return;   // canceló o salió de la pantalla
+    if (picked == null || !mounted) return; // canceló o salió de la pantalla
     _range = picked;
     _loadPage(reset: true);
   }
@@ -94,20 +100,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
             context: context,
             builder: (_) => EditSessionDialog(session: s),
           );
-          if (result == null) return;   // canceló
-          await _repository.updateSession(s.id,
-              description: result.description, durationMinutes: result.minutes);
+          if (result == null) return; // canceló
+          await _repository.updateSession(
+            s.id,
+            description: result.description,
+            durationMinutes: result.minutes,
+          );
         case _SessionAction.finish:
           await _repository.finishSession(s.id);
         case _SessionAction.delete:
           if (!await _confirmDelete()) return;
-          await _repository.deleteSession(s.id);
+          await _repository.deleteSession(s.id, s.creatorId);
         case _SessionAction.proof:
           await _addProof(s);
-          return;   // de momento no se guarda nada, no hace falta recargar
+          return; // la lista todavía no enseña la prueba, no hace falta recargar
       }
       if (!mounted) return;
-      _loadPage(reset: true);   // releer para ver el cambio
+      _loadPage(reset: true); // releer para ver el cambio
     } on SessionFailure catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -122,12 +131,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: const Text('¿Borrar la sesión?'),
         content: const Text('No se puede deshacer.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Borrar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Borrar'),
+          ),
         ],
       ),
     );
-    return ok ?? false;   // tocar fuera del diálogo cuenta como cancelar
+    return ok ?? false; // tocar fuera del diálogo cuenta como cancelar
   }
 
   String _errorText(SessionError e) => switch (e) {
@@ -142,41 +157,70 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final source = await showModalBottomSheet<PhotoSource>(
       context: context,
       builder: (context) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(
-            leading: const Icon(Icons.photo_camera),
-            title: const Text('Hacer foto'),
-            onTap: () => Navigator.pop(context, PhotoSource.camera),
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: const Text('Elegir de la galería'),
-            onTap: () => Navigator.pop(context, PhotoSource.gallery),
-          ),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Hacer foto'),
+              onTap: () => Navigator.pop(context, PhotoSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Elegir de la galería'),
+              onTap: () => Navigator.pop(context, PhotoSource.gallery),
+            ),
+          ],
+        ),
       ),
     );
     if (source == null) return;
     try {
       final bytes = await _photos.pick(source);
-      if (bytes == null || !mounted) return;   // canceló la cámara o la galería
+      if (bytes == null || !mounted) return; // canceló la cámara o la galería
       final small = await _compressWithProgress(bytes);
       if (!mounted) return;
-      // Paso 1: de momento solo enseñamos la foto y lo que pesa sin comprimir
-      showDialog(
+      // Vista previa y confirmación antes de guardar
+      final save = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            Image.memory(small, height: 240),
-            const SizedBox(height: 8),
-            Text('${(bytes.length / 1024).round()} KB → ${(small.length / 1024).round()} KB'),
-          ]),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Guardar'),
+            ),
+          ],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.memory(small, height: 240),
+              const SizedBox(height: 8),
+              Text(
+                '${(bytes.length / 1024).round()} KB → ${(small.length / 1024).round()} KB',
+              ),
+            ],
+          ),
         ),
       );
+      if (save != true || !mounted) return;
+      final uid = (await AuthService().currentUser())?.uid;
+      if (uid == null) return;
+      await _repository.saveProof(s.id, uid, small);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Prueba guardada')));
     } on PhotoFailure catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(_photoErrorText(e.error))));
+    } on SessionFailure catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(_errorText(e.error))));
     }
   }
 
@@ -184,7 +228,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final progress = ValueNotifier<double>(0);
     showDialog(
       context: context,
-      barrierDismissible: false,   // no se puede cerrar a mitad
+      barrierDismissible: false, // no se puede cerrar a mitad
       builder: (_) => AlertDialog(
         title: const Text('Preparando la foto'),
         content: ValueListenableBuilder<double>(
@@ -194,21 +238,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
     );
     try {
-      return await _compressor.compress(bytes, onProgress: (p) => progress.value = p);
+      return await _compressor.compress(
+        bytes,
+        onProgress: (p) => progress.value = p,
+      );
     } finally {
-      if (mounted) Navigator.pop(context);   // cierra el diálogo, salga bien o mal
+      if (mounted) {
+        Navigator.pop(context); // cierra el diálogo, salga bien o mal
+      }
       progress.dispose();
     }
   }
 
   String _photoErrorText(PhotoError e) => switch (e) {
-    PhotoError.cameraDenied =>
-    'Sin permiso de cámara. Actívalo en Ajustes > Aplicaciones > Codo > Permisos, o elige una foto de la galería',
-    PhotoError.galleryDenied =>
-    'Sin permiso de fotos. Actívalo en Ajustes > Aplicaciones > Codo > Permisos',
-    PhotoError.noCamera => 'Este dispositivo no tiene cámara. Elige una foto de la galería',
+    PhotoError.cameraDenied => 'Sin permiso de cámara. Actívalo en Ajustes > Aplicaciones > Codo > Permisos, o elige una foto de la galería',
+    PhotoError.galleryDenied => 'Sin permiso de fotos. Actívalo en Ajustes > Aplicaciones > Codo > Permisos',
+    PhotoError.noCamera =>
+      'Este dispositivo no tiene cámara. Elige una foto de la galería',
     PhotoError.unknown => 'No se pudo abrir la foto. Inténtalo de nuevo',
-    PhotoError.compressFailed => 'No se pudo comprimir la foto. Inténtalo de nuevo',
+    PhotoError.compressFailed =>
+      'No se pudo comprimir la foto. Inténtalo de nuevo',
   };
 
   @override
@@ -239,13 +288,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (_loading) return const Center(child: CircularProgressIndicator());
       if (_hasError) return Center(child: _buildError());
       return Center(
-        child: Text(_range == null
-            ? 'Todavía no has hecho ninguna sesión'
-            : 'No hay sesiones entre esas fechas'),
+        child: Text(
+          _range == null
+              ? 'Todavía no has hecho ninguna sesión'
+              : 'No hay sesiones entre esas fechas',
+        ),
       );
     }
     return ListView.builder(
-      itemCount: _sessions.length + 1,   // +1: el pie con «Cargar más»
+      itemCount: _sessions.length + 1, // +1: el pie con «Cargar más»
       itemBuilder: (context, i) {
         if (i == _sessions.length) return _buildFooter();
         final s = _sessions[i];
@@ -254,16 +305,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
             tooltip: 'Opciones de la sesión',
             onSelected: (action) => _onAction(action, s),
             itemBuilder: (context) => [
-              const PopupMenuItem(value: _SessionAction.proof, child: Text('Añadir prueba')),
-              const PopupMenuItem(value: _SessionAction.edit, child: Text('Editar')),
+              const PopupMenuItem(
+                value: _SessionAction.proof,
+                child: Text('Añadir prueba'),
+              ),
+              const PopupMenuItem(
+                value: _SessionAction.edit,
+                child: Text('Editar'),
+              ),
               if (s.status == SessionStatus.active)
-                const PopupMenuItem(value: _SessionAction.finish, child: Text('Terminar')),
+                const PopupMenuItem(
+                  value: _SessionAction.finish,
+                  child: Text('Terminar'),
+                ),
               if (s.participantIds.length <= 1)
-                const PopupMenuItem(value: _SessionAction.delete, child: Text('Borrar')),
+                const PopupMenuItem(
+                  value: _SessionAction.delete,
+                  child: Text('Borrar'),
+                ),
             ],
           ),
           title: Text(s.description),
-          subtitle: Text('${_formatDate(s.startedAt)} · ${s.durationMinutes} min'),
+          subtitle: Text(
+            '${_formatDate(s.startedAt)} · ${s.durationMinutes} min',
+          ),
         );
       },
     );
@@ -281,7 +346,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Center(
-        child: TextButton(onPressed: _loadPage, child: const Text('Cargar más')),
+        child: TextButton(
+          onPressed: _loadPage,
+          child: const Text('Cargar más'),
+        ),
       ),
     );
   }

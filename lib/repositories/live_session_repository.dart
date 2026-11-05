@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codo/admins/firestore_admin.dart';
 import 'package:codo/models/live_session.dart';
+import 'package:codo/models/proof.dart';
 import 'package:codo/repositories/session_failure.dart';
 
 class LiveSessionRepository {
-  LiveSessionRepository({FirestoreAdmin? admin}) : _admin = admin ?? FirestoreAdmin();
+  LiveSessionRepository({FirestoreAdmin? admin})
+    : _admin = admin ?? FirestoreAdmin();
 
   final FirestoreAdmin _admin;
 
@@ -26,18 +31,21 @@ class LiveSessionRepository {
 
   // Consulta 2 · orderBy + limit: las últimas sesiones públicas.
   // snapshots, por el mismo motivo.
-  Stream<List<LiveSession>> watchRecentPublic({int limit = 10}) =>
-      _admin.liveSessions
-          .where('visibility', isEqualTo: SessionVisibility.public.name)
-          .orderBy('startedAt', descending: true)
-          .limit(limit)
-          .snapshots()
-          .map((snap) => snap.docs.map((doc) => doc.data()).toList());
+  Stream<List<LiveSession>> watchRecentPublic({int limit = 10}) => _admin
+      .liveSessions
+      .where('visibility', isEqualTo: SessionVisibility.public.name)
+      .orderBy('startedAt', descending: true)
+      .limit(limit)
+      .snapshots()
+      .map((snap) => snap.docs.map((doc) => doc.data()).toList());
 
   // Consulta 3 · rango sobre una fecha: mi historial entre dos días.
   // get: son sesiones pasadas, no cambian; escucharlas gastaría lecturas para nada.
   Future<List<LiveSession>> getHistoryBetween(
-      String uid, DateTime from, DateTime to) async {
+    String uid,
+    DateTime from,
+    DateTime to,
+  ) async {
     final snap = await _admin.liveSessions
         .where('creatorId', isEqualTo: uid)
         .where('startedAt', isGreaterThanOrEqualTo: from)
@@ -49,8 +57,11 @@ class LiveSessionRepository {
 
   // Consulta 4 · paginación con startAfterDocument: mi historial de 4 en 4.
   // get: cada página se pide una vez al pulsar «Cargar más».
-  Future<List<LiveSession>> getHistoryPage(String uid, {bool reset = false}) async {
-    if (reset) _lastHistoryDoc = null;   // volver a la primera página
+  Future<List<LiveSession>> getHistoryPage(
+    String uid, {
+    bool reset = false,
+  }) async {
+    if (reset) _lastHistoryDoc = null; // volver a la primera página
     var query = _admin.liveSessions
         .where('creatorId', isEqualTo: uid)
         .orderBy('startedAt', descending: true)
@@ -63,27 +74,34 @@ class LiveSessionRepository {
   }
 
   // Editar: solo descripción y duración (las reglas rechazan cualquier otro campo)
-  Future<void> updateSession(String id,
-      {required String description, required int durationMinutes}) =>
-      _guard(() => _admin.liveSessions.doc(id).update({
-        'description': description,
-        'durationMinutes': durationMinutes,
-      }));
+  Future<void> updateSession(
+    String id, {
+    required String description,
+    required int durationMinutes,
+  }) => _guard(
+    () => _admin.liveSessions.doc(id).update({
+      'description': description,
+      'durationMinutes': durationMinutes,
+    }),
+  );
 
   // Terminar: deja de estar activa pero no se borra (puede tener participantes)
-  Future<void> finishSession(String id) =>
-      _guard(() => _admin.liveSessions.doc(id).update({
-        'status': SessionStatus.finished.name,
-        'endedAt': FieldValue.serverTimestamp(),
-      }));
+  Future<void> finishSession(String id) => _guard(
+    () => _admin.liveSessions.doc(id).update({
+      'status': SessionStatus.finished.name,
+      'endedAt': FieldValue.serverTimestamp(),
+    }),
+  );
 
   // Borrar: las reglas solo lo permiten si eres el creador y nadie más se ha unido
-  Future<void> deleteSession(String id) =>
-      _guard(() => _admin.liveSessions.doc(id).delete());
+  Future<void> deleteSession(String id, String uid) => _guard(() async {
+    await _admin.proofs(id).doc(uid).delete(); // primero la hija
+    await _admin.liveSessions.doc(id).delete();
+  });
   // Traduce los errores de Firestore a fallos de dominio
-  Future<void> _guard(Future<void> Function() action) async {
+  Future<T> _guard<T>(Future<T> Function() action) async {
     try {
-      await action();
+      return await action();
     } on FirebaseException catch (e) {
       throw SessionFailure(switch (e.code) {
         'permission-denied' => SessionError.permissionDenied,
@@ -94,4 +112,16 @@ class LiveSessionRepository {
     }
   }
 
+  // Guarda (o reemplaza) mi prueba de esta sesión
+  Future<void> saveProof(String sessionId, String uid, Uint8List jpg) => _guard(
+    () => _admin
+        .proofs(sessionId)
+        .doc(uid)
+        .set(Proof(uid: uid, imageBase64: base64Encode(jpg))),
+  );
+
+  // Lee mi prueba; null si todavía no hay
+  Future<Proof?> getProof(String sessionId, String uid) => _guard(
+    () async => (await _admin.proofs(sessionId).doc(uid).get()).data(),
+  );
 }

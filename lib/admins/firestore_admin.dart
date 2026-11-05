@@ -3,34 +3,48 @@ import 'package:codo/models/live_session.dart';
 import 'package:codo/models/medal.dart';
 import 'package:codo/models/pact.dart';
 import 'package:codo/models/profile.dart';
+import 'package:codo/models/proof.dart';
 
 class FirestoreAdmin {
   FirestoreAdmin({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
 
-  CollectionReference<Profile> get profiles =>
-      _db.collection('users').withConverter<Profile>(
+  CollectionReference<Profile> get profiles => _db
+      .collection('users')
+      .withConverter<Profile>(
         fromFirestore: Profile.fromFirestore,
         toFirestore: (profile, _) => profile.toFirestore(),
       );
 
-  CollectionReference<Pact> get pacts =>
-      _db.collection('pacts').withConverter<Pact>(
+  CollectionReference<Pact> get pacts => _db
+      .collection('pacts')
+      .withConverter<Pact>(
         fromFirestore: Pact.fromFirestore,
         toFirestore: (pact, _) => pact.toFirestore(),
       );
 
-  CollectionReference<Medal> get medals =>
-      _db.collection('badges').withConverter<Medal>(
+  CollectionReference<Medal> get medals => _db
+      .collection('badges')
+      .withConverter<Medal>(
         fromFirestore: Medal.fromFirestore,
         toFirestore: (medal, _) => medal.toFirestore(),
       );
 
-  CollectionReference<LiveSession> get liveSessions =>
-      _db.collection('live_sessions').withConverter<LiveSession>(
+  CollectionReference<LiveSession> get liveSessions => _db
+      .collection('live_sessions')
+      .withConverter<LiveSession>(
         fromFirestore: LiveSession.fromFirestore,
         toFirestore: (liveSession, _) => liveSession.toFirestore(),
+      );
+
+  CollectionReference<Proof> proofs(String sessionId) => _db
+      .collection('live_sessions')
+      .doc(sessionId)
+      .collection('proofs')
+      .withConverter<Proof>(
+        fromFirestore: Proof.fromFirestore,
+        toFirestore: (proof, _) => proof.toFirestore(),
       );
 }

@@ -1,12 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-  // esto hace que cada usuario puede modificar lo suyo solo
+    // Cada usuario solo lee y modifica su propio perfil
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
     match /pacts/{id} {
-        allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
+      allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
     }
     match /badges/{id} {
       allow read: if request.auth != null; // TEMPORAL: solo para subir el seed
@@ -29,6 +29,24 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.creatorId == request.auth.uid
         && resource.data.participantIds.hasOnly([request.auth.uid]);
+
+      // Pruebas: dentro de la sesión para poder usar su {id}.
+      // Solo los participantes las ven; cada uno escribe la suya
+      match /proofs/{uid} {
+        function isParticipant() {
+          return request.auth.uid in
+            get(/databases/$(database)/documents/live_sessions/$(id)).data.participantIds;
+        }
+        allow read: if request.auth != null && isParticipant();
+        allow create, update: if request.auth != null
+          && request.auth.uid == uid
+          && isParticipant()
+          && request.resource.data.keys().hasOnly(['image', 'createdAt'])
+          && request.resource.data.image is string
+          && request.resource.data.image.size() < 307200
+          && request.resource.data.createdAt == request.time;
+        allow delete: if request.auth != null && request.auth.uid == uid;
+      }
     }
   }
 }
