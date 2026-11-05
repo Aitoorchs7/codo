@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Cámara para la foto de prueba (B4); la galería usa el selector del sistema y no necesita permiso -->
+    <uses-permission android:name="android.permission.CAMERA"/>
     <application
         android:label="codo"
         android:name="${applicationName}"
