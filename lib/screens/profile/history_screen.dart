@@ -2,9 +2,11 @@ import 'dart:typed_data';
 
 import 'package:codo/admins/auth_service.dart';
 import 'package:codo/models/live_session.dart';
+import 'package:codo/models/proof.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 import 'package:codo/repositories/session_failure.dart';
 import 'package:codo/screens/profile/edit_session_dialog.dart';
+import 'package:codo/screens/profile/sesion_detail_screen.dart';
 import 'package:codo/utils/photo_compressor.dart';
 import 'package:flutter/material.dart';
 import 'package:codo/admins/photo_admin.dart';
@@ -28,6 +30,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _hasError = false;
   bool _hasMore = true;
   DateTimeRange? _range; // null = historial paginado
+  // Una petición por sesión: el FutureBuilder no puede crear el Future en build
+  final Map<String, Future<Proof?>> _proofs = {};
+
+  Future<Proof?> _proofFor(LiveSession s) =>
+      _proofs.putIfAbsent(s.id, () => _repository.getProof(s.id, s.creatorId));
 
   @override
   void initState() {
@@ -37,7 +44,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _loadPage({bool reset = false}) async {
     setState(() {
-      if (reset) _sessions.clear(); // filtro nuevo: empezar de cero
+      if (reset){
+        _sessions.clear();
+        _proofs.clear();
+      } // filtro nuevo: empezar de cero
       _loading = true;
       _hasError = false;
     });
@@ -113,7 +123,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           await _repository.deleteSession(s.id, s.creatorId);
         case _SessionAction.proof:
           await _addProof(s);
-          return; // la lista todavía no enseña la prueba, no hace falta recargar
+          if (!mounted) return;
+          setState(() => _proofs.remove(s.id)); // olvida la miniatura vieja y la vuelve a pedir
+          return;
       }
       if (!mounted) return;
       _loadPage(reset: true); // releer para ver el cambio
@@ -224,6 +236,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  String _photoErrorText(PhotoError e) => switch (e) {
+    PhotoError.cameraDenied => 'Sin permiso de cámara. Actívalo en Ajustes > Aplicaciones > Codo > Permisos, o elige una foto de la galería',
+    PhotoError.galleryDenied => 'Sin permiso de fotos. Actívalo en Ajustes > Aplicaciones > Codo > Permisos',
+    PhotoError.noCamera =>
+    'Este dispositivo no tiene cámara. Elige una foto de la galería',
+    PhotoError.unknown => 'No se pudo abrir la foto. Inténtalo de nuevo',
+    PhotoError.compressFailed =>
+    'No se pudo comprimir la foto. Inténtalo de nuevo',
+  };
+
   Future<Uint8List> _compressWithProgress(Uint8List bytes) async {
     final progress = ValueNotifier<double>(0);
     showDialog(
@@ -250,15 +272,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  String _photoErrorText(PhotoError e) => switch (e) {
-    PhotoError.cameraDenied => 'Sin permiso de cámara. Actívalo en Ajustes > Aplicaciones > Codo > Permisos, o elige una foto de la galería',
-    PhotoError.galleryDenied => 'Sin permiso de fotos. Actívalo en Ajustes > Aplicaciones > Codo > Permisos',
-    PhotoError.noCamera =>
-      'Este dispositivo no tiene cámara. Elige una foto de la galería',
-    PhotoError.unknown => 'No se pudo abrir la foto. Inténtalo de nuevo',
-    PhotoError.compressFailed =>
-      'No se pudo comprimir la foto. Inténtalo de nuevo',
-  };
+  Widget _buildThumbnail(LiveSession s) => SizedBox(
+    width: 48,
+    height: 48,
+    child: FutureBuilder<Proof?>(
+      future: _proofFor(s),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        }
+        if (snap.hasError) {
+          return const Icon(Icons.error_outline, semanticLabel: 'No se pudo cargar la prueba');
+        }
+        final proof = snap.data;
+        if (proof == null) {
+          return const Icon(Icons.photo_outlined, semanticLabel: 'Sin prueba');
+        }
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.memory(proof.bytes, fit: BoxFit.cover, semanticLabel: 'Foto de prueba'),
+        );
+      },
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -301,6 +339,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
         if (i == _sessions.length) return _buildFooter();
         final s = _sessions[i];
         return ListTile(
+          leading: _buildThumbnail(s),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)),
+          ),
           trailing: PopupMenuButton<_SessionAction>(
             tooltip: 'Opciones de la sesión',
             onSelected: (action) => _onAction(action, s),
