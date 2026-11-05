@@ -32,7 +32,7 @@ Fase 1 pide una lista y una cuadrícula desde Firestore: la lista son los pactos
   - *Por qué amigos primero:* con amigos hay compromiso real, hace falta menos moderación y se evita el problema de las salas vacías cuando hay pocos usuarios. La opción pública le da vida a la app cuando crezca.
 - **Unirse a una sesión (decisión, se desarrolla):** desde la lista o el detalle de una sesión, pulsas **Unirme** y entras como participante haciendo lo mismo. Todos ven en tiempo real quién está, quién se une y cuánto le queda. Puedes **salir** cuando quieras. Al terminar, cada participante sube su propia prueba y recibe su XP según el tiempo que haya estado dentro.
 - **Editar y borrar:** el creador puede editar la descripción y la duración de su sesión y borrarla (con confirmación). Nadie más puede tocarla y las reglas de Firestore lo impiden aunque la interfaz no lo ofrezca. ❓ Qué pasa al borrar una sesión que ya tiene participantes (¿solo se permite si está vacía, o se cancela para todos?).
-- **Prueba al terminar:** foto hecha con la cámara en el momento (no desde la galería), con sello de hora, y una frase opcional. La ven solo los participantes de esa sesión.
+- **Prueba al terminar:** foto desde la **cámara o la galería** (la rúbrica de la fase 1b pide las dos; decidido 05/11), con sello de hora, y una frase opcional. La ven solo los participantes de esa sesión.
 - **Recompensa:** XP según el tiempo. Una sesión larga (❓ umbral, por ejemplo más de 2 h) da medalla.
 
 ### Ubicación, mapa y «cerca de mí» (decisión 18/10/2026, fase 1b)
@@ -162,4 +162,4 @@ Descartado: límite de puntos por día, porque corta las alas a quien un día es
 | En el mapa solo sesiones **públicas** con ubicación | Mostrar también las de amigos | Menos exposición; las de amigos ya están en la lista |
 | Foto como base64 en documento aparte `proofs`, solo participantes | Foto dentro del documento de la sesión; Firebase Storage | El documento de una sesión pública lo lee cualquiera; Storage exige plan Blaze y la fase no lo pide |
 | Mapa con flutter_map + OpenStreetMap | Google Maps | Gratis, sin clave de API ni Blaze; puntúa igual |
-| Foto de prueba solo con cámara; galería para el perfil | Permitir galería en la prueba | Coherente con la anti-trampa: foto hecha en el momento |
+| Foto de prueba con cámara o galería (05/11) | Solo cámara, como anti-trampa | La rúbrica de la fase 1b exige cámara y galería; el control es que los participantes ven la prueba |
