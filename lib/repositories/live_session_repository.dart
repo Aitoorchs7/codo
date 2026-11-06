@@ -73,6 +73,10 @@ class LiveSessionRepository {
     return snap.docs.map((doc) => doc.data()).toList();
   }
 
+  // Publicar: Firestore pone el id del documento; el campo id del modelo no se guarda
+  Future<void> createSession(LiveSession session) =>
+      _guard(() => _admin.liveSessions.add(session));
+
   // Editar: solo descripción y duración (las reglas rechazan cualquier otro campo)
   Future<void> updateSession(
     String id, {

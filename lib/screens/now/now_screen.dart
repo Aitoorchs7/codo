@@ -1,4 +1,6 @@
+import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/live_session.dart';
+import 'package:codo/screens/now/session_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 
@@ -33,11 +35,11 @@ class _NowScreenState extends State<NowScreen> {
   }
 
   String _label(SessionCategory category) => switch (category) {
-    SessionCategory.study => 'Estudiar',
-    SessionCategory.train => 'Entrenar',
-    SessionCategory.read => 'Leer',
-    SessionCategory.work => 'Trabajar',
-    SessionCategory.other => 'Otros',
+    SessionCategory.study => categoryLabel(category),
+    SessionCategory.train => categoryLabel(category),
+    SessionCategory.read => categoryLabel(category),
+    SessionCategory.work => categoryLabel(category),
+    SessionCategory.other => categoryLabel(category),
   };
 
   Widget _chip(SessionCategory? category, String text) => Padding(
@@ -62,10 +64,23 @@ class _NowScreenState extends State<NowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        _buildFilters(),
-        Expanded(child: _buildList()),
+        Column(
+          children: [
+            _buildFilters(),
+            Expanded(child: _buildList()),
+          ],
+        ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.extended(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.createSession),
+            icon: const Icon(Icons.add),
+            label: const Text('Nueva sesión'),
+          ),
+        ),
       ],
     );
   }

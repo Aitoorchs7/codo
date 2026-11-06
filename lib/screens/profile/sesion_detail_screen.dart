@@ -4,6 +4,12 @@ import 'package:codo/repositories/live_session_repository.dart';
 import 'package:codo/repositories/session_failure.dart';
 import 'package:flutter/material.dart';
 
+class SessionDetailArgs {
+  const SessionDetailArgs({required this.session});
+
+  final LiveSession session;
+}
+
 class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({super.key, required this.session});
 

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:codo/admins/auth_service.dart';
+import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/live_session.dart';
 import 'package:codo/models/proof.dart';
 import 'package:codo/repositories/live_session_repository.dart';
@@ -340,9 +341,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
         final s = _sessions[i];
         return ListTile(
           leading: _buildThumbnail(s),
-          onTap: () => Navigator.push(
+          onTap: () => Navigator.pushNamed(
             context,
-            MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)),
+            AppRoutes.sessionDetail,
+            arguments: SessionDetailArgs(session: s),
           ),
           trailing: PopupMenuButton<_SessionAction>(
             tooltip: 'Opciones de la sesión',
