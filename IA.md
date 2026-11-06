@@ -147,7 +147,29 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - En la prueba me salía un 500: el token de PowerShell estaba vacío, y en otra terminal faltaba `$doc`. Lo resolví comprobando `$token.Length` antes de cada petición.
 - **Qué aprendí / puedo explicar:** `resource` es el documento guardado y `request.resource` cómo quedaría. El creador se comprueba en el guardado para que nadie se apropie de una sesión cambiando `creatorId`.
 - **Resultado:** Ana edita su sesión (200); Leo recibe 403 al editar y al borrar; cambiar `creatorId` da 403.
-- 
+
+### 013 · 2026-11-07 · Foto de prueba: cámara o galería, isolate y `proofs` (B4)
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** hacer o elegir una foto al terminar una sesión, comprimirla sin congelar la app y guardarla para que solo la vean los participantes.
+- **Qué me dio:** me propuso `image_picker` + `image`, un `PhotoAdmin` que traduce los errores de permiso a `PhotoFailure`, la compresión con `Isolate.spawn` + `SendPort` para tener progreso (descartando `compute`, que solo devuelve el final), la subcolección `live_sessions/{id}/proofs/{uid}` con reglas de solo participantes, la miniatura con caché por sesión y una pantalla de detalle. También me propuso un test con una imagen de ruido puro.
+- **Qué corregí o descarté, y por qué:**
+  - Cambié la decisión de producto de «solo cámara»: la rúbrica pide cámara **y** galería.
+  - Cuando la IA añadió las dependencias y el permiso por su cuenta, se lo hice deshacer: los añadí yo para poder defenderlos.
+  - El test falló: con 800 px el ruido no bajaba de 300 KB ni a calidad 40. Se añadieron reintentos a 600 y 400 px.
+- **Qué aprendí / puedo explicar:** un isolate no comparte memoria y solo habla por mensajes. Una imagen lisa habría pasado el test sin probar nada; el peor caso es el que encuentra el fallo.
+- **Resultado:** 6 tests del compresor en verde; la prueba se guarda y se ve en la lista y en el detalle.
+
+### 014 · 2026-11-07 · Pantalla de crear sesión y pruebas en la nube
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** poder probar B4 contra la nube, donde no había ninguna sesión.
+- **Qué me dio:** primero me propuso crear 3 documentos a mano en la consola, porque subir el seed crearía cuentas reales con una contraseña que está en el repo. Para las reglas me propuso el Rules Playground en vez de REST.
+- **Qué corregí o descarté, y por qué:**
+  - Descarté los documentos a mano y pedí una pantalla mínima de crear sesión: hace falta igualmente y es la base de B5 (la ubicación se lee al publicar).
+  - Hago las pruebas en la nube porque el profesor me confirmó en persona que no puntúa los emuladores; los dejo funcionando.
+- **Qué aprendí / puedo explicar:** sin red, Firestore guarda la escritura y el `Future` no termina hasta que vuelve, así que hace falta un `.timeout` para que la pantalla no se quede colgada.
+- **Resultado:** las sesiones se crean desde Ahora y aparecen al momento por el `snapshots()`.
+
+
 ---
 
 ## Agentes y skills propios
