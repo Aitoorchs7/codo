@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codo/admins/auth_service.dart';
 import 'package:codo/models/live_session.dart';
 import 'package:codo/repositories/live_session_repository.dart';
+import 'package:codo/repositories/profile_repository.dart';
 import 'package:codo/repositories/session_failure.dart';
 import 'package:codo/screens/now/session_labels.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
   var _category = SessionCategory.study;
   var _public = true;
   var _saving = false;
+  final _profiles = ProfileRepository();
 
   @override
   void dispose() {
@@ -36,11 +38,12 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
     try {
       final user = await AuthService().currentUser();
       if (user == null) throw const SessionFailure(SessionError.permissionDenied);
+      final name = await _creatorName(user.uid, user.displayName);
       await _repository
           .createSession(LiveSession(
         id: '', // lo pone Firestore
         creatorId: user.uid,
-        creatorName: user.displayName ?? 'Sin nombre',
+        creatorName: name,
         category: _category,
         description: _description.text.trim(),
         visibility: _public ? SessionVisibility.public : SessionVisibility.friends,
@@ -67,6 +70,19 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
               ? 'Sin conexión. Inténtalo de nuevo'
               : 'No se pudo publicar la sesión')));
     }
+  }
+
+  // El nombre sale del perfil (users/{uid}), el mismo que ve el resto de la app.
+  // Si no se puede leer (sin red y sin caché), se usa el de la cuenta.
+  Future<String> _creatorName(String uid, String? accountName) async {
+    String? name;
+    try {
+      name = (await _profiles.getProfile(uid))?.displayName;
+    } on Exception {
+      name = null;
+    }
+    name ??= accountName;
+    return (name == null || name.trim().isEmpty) ? 'Sin nombre' : name.trim();
   }
 
   @override

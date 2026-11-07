@@ -34,14 +34,6 @@ class _NowScreenState extends State<NowScreen> {
     });
   }
 
-  String _label(SessionCategory category) => switch (category) {
-    SessionCategory.study => categoryLabel(category),
-    SessionCategory.train => categoryLabel(category),
-    SessionCategory.read => categoryLabel(category),
-    SessionCategory.work => categoryLabel(category),
-    SessionCategory.other => categoryLabel(category),
-  };
-
   Widget _chip(SessionCategory? category, String text) => Padding(
     padding: const EdgeInsets.only(right: 8),
     child: ChoiceChip(
@@ -57,7 +49,7 @@ class _NowScreenState extends State<NowScreen> {
     child: Row(
       children: [
         _chip(null, 'Recientes'),
-        for (final c in SessionCategory.values) _chip(c, _label(c)),
+        for (final c in SessionCategory.values) _chip(c, categoryLabel(c)),
       ],
     ),
   );
@@ -119,7 +111,7 @@ class _NowScreenState extends State<NowScreen> {
             return ListTile(
               title: Text(s.description),
               subtitle: Text(
-                '${s.creatorName} · ${_label(s.category)} · ${s.durationMinutes} min',
+                '${s.creatorName} · ${categoryLabel(s.category)} · ${s.durationMinutes} min',
               ),
             );
           },
