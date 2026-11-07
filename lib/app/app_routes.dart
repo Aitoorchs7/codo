@@ -4,14 +4,14 @@ import 'package:codo/screens/now/create_session_screen.dart';
 import 'package:codo/screens/onboarding/onboarding_screen.dart';
 import 'package:codo/screens/pacts/pact_detail_screen.dart';
 import 'package:codo/screens/profile/history_screen.dart';
-import 'package:codo/screens/profile/sesion_detail_screen.dart';
+import 'package:codo/screens/profile/session_detail_screen.dart';
 import 'package:codo/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
   static const login = '/login';
   static const onboarding = '/onboarding';
-  static const splash = '/splash';
+  static const splash = '/'; // la ruta inicial tiene que ser '/': si no, Flutter apila '/' debajo
   static const home = '/home';
   static const pactDetail = '/pact-detail';
   static const history = '/history';
