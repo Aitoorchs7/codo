@@ -169,7 +169,16 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
 - **Qué aprendí / puedo explicar:** sin red, Firestore guarda la escritura y el `Future` no termina hasta que vuelve, así que hace falta un `.timeout` para que la pantalla no se quede colgada.
 - **Resultado:** las sesiones se crean desde Ahora y aparecen al momento por el `snapshots()`.
 
-
+### 015 · 2026-11-07 · Pruebas de B4 en Android y Chrome, y fallos encontrados
+- **Fase / hito:** Fase 1b / H1.
+- **Qué pedí:** guía paso a paso para probar B4 contra la nube (Rules Playground, Android y Chrome) y montar la tabla de pruebas.
+- **Qué me dio:** me propuso las filas con su resultado esperado, cómo rellenar el Rules Playground, y los arreglos de lo que falló: la ruta inicial en `/`, el nombre del creador desde el perfil y un `.timeout` de 10 s al guardar la prueba sin red.
+- **Qué corregí o descarté, y por qué:**
+  - El fallo del botón atrás («Ruta no válida») lo encontré yo usando la app, no estaba en la lista de pruebas.
+  - Al principio la A9 parecía no funcionar: no había hecho hot restart y la app seguía con el código anterior.
+- **Qué aprendí / puedo explicar:** sin red, Firestore guarda la escritura en local y la enseña al momento (compensación de latencia), pero el `Future` no termina hasta que vuelve la red. En web no hay isolate y la compresión congela la pantalla.
+- **Resultado:** 18 filas probadas en `docs/pruebas.md`; B4 cerrado.
+- 
 ---
 
 ## Agentes y skills propios
