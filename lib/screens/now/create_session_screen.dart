@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:codo/admins/auth_service.dart';
+import 'package:codo/admins/location_admin.dart';
+import 'package:codo/admins/location_failure.dart';
 import 'package:codo/models/live_session.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 import 'package:codo/repositories/profile_repository.dart';
@@ -22,6 +24,8 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
   final _minutes = TextEditingController(text: '60');
   var _category = SessionCategory.study;
   var _public = true;
+  var _shareLocation = false;
+  final _location = LocationAdmin();
   var _saving = false;
   final _profiles = ProfileRepository();
 
@@ -37,38 +41,81 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
     setState(() => _saving = true);
     try {
       final user = await AuthService().currentUser();
-      if (user == null) throw const SessionFailure(SessionError.permissionDenied);
+      if (user == null) {
+        throw const SessionFailure(SessionError.permissionDenied);
+      }
       final name = await _creatorName(user.uid, user.displayName);
+      final pos = _shareLocation ? await _location.currentPosition() : null;
       await _repository
-          .createSession(LiveSession(
-        id: '', // lo pone Firestore
-        creatorId: user.uid,
-        creatorName: name,
-        category: _category,
-        description: _description.text.trim(),
-        visibility: _public ? SessionVisibility.public : SessionVisibility.friends,
-        startedAt: DateTime.now(),
-        durationMinutes: int.parse(_minutes.text),
-        status: SessionStatus.active,
-        participantIds: [user.uid],
-      ))
-      // Sin red, Firestore guarda la escritura y no responde hasta que vuelve:
-      // no dejamos la pantalla esperando para siempre
+          .createSession(
+            LiveSession(
+              id: '', // lo pone Firestore
+              creatorId: user.uid,
+              creatorName: name,
+              category: _category,
+              description: _description.text.trim(),
+              visibility: _public
+                  ? SessionVisibility.public
+                  : SessionVisibility.friends,
+              startedAt: DateTime.now(),
+              durationMinutes: int.parse(_minutes.text),
+              status: SessionStatus.active,
+              participantIds: [user.uid],
+              latitude: pos?.latitude,
+              longitude: pos?.longitude,
+              locationAt: pos == null ? null : DateTime.now(),
+            ),
+          )
+          // Sin red, Firestore guarda la escritura y no responde hasta que vuelve:
+          // no dejamos la pantalla esperando para siempre
           .timeout(const Duration(seconds: 10));
       if (!mounted) return;
       Navigator.pop(context);
     } on TimeoutException {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Sin conexión: se publicará al recuperar la red')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sin conexión: se publicará al recuperar la red'),
+        ),
+      );
       Navigator.pop(context);
     } on SessionFailure catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.error == SessionError.network
-              ? 'Sin conexión. Inténtalo de nuevo'
-              : 'No se pudo publicar la sesión')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.error == SessionError.network
+                ? 'Sin conexión. Inténtalo de nuevo'
+                : 'No se pudo publicar la sesión',
+          ),
+        ),
+      );
+    } on LocationFailure catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      final message = switch (e.error) {
+        LocationError.denied =>
+          'Sin permiso de ubicación. Permítelo o desactiva la opción',
+        LocationError.deniedForever =>
+          'Ubicación bloqueada. Actívala en los ajustes',
+        LocationError.serviceDisabled =>
+          'Activa el GPS para compartir la ubicación',
+        LocationError.timeout =>
+          'No se pudo obtener la ubicación. Inténtalo de nuevo',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          // Solo cuando está bloqueado: la app ya no puede volver a preguntar
+          action: e.error == LocationError.deniedForever
+              ? SnackBarAction(
+                  label: 'Ajustes',
+                  onPressed: _location.openSettings,
+                )
+              : null,
+        ),
+      );
     }
   }
 
@@ -98,7 +145,9 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
               controller: _description,
               maxLength: 140,
               decoration: const InputDecoration(labelText: '¿Qué vas a hacer?'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Escribe qué vas a hacer' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Escribe qué vas a hacer'
+                  : null,
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -119,7 +168,9 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
               decoration: const InputDecoration(labelText: 'Minutos'),
               validator: (v) {
                 final n = int.tryParse(v ?? '');
-                return (n == null || n < 1 || n > 480) ? 'Entre 1 y 480 minutos' : null;
+                return (n == null || n < 1 || n > 480)
+                    ? 'Entre 1 y 480 minutos'
+                    : null;
               },
             ),
             SwitchListTile(
@@ -129,9 +180,18 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
               value: _public,
               onChanged: (v) => setState(() => _public = v),
             ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Compartir ubicación aproximada'),
+              subtitle: const Text('Para que te encuentren cerca, unos 1 km'),
+              value: _shareLocation,
+              onChanged: (v) => setState(() => _shareLocation = v),
+            ),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: _saving ? null : _save, // desactivado mientras guarda: sin dobles envíos
+              onPressed: _saving
+                  ? null
+                  : _save, // desactivado mientras guarda: sin dobles envíos
               child: Text(_saving ? 'Publicando…' : 'Empezar sesión'),
             ),
           ],

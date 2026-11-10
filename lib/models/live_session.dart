@@ -89,11 +89,13 @@ class LiveSession {
       'endedAt': endedAt == null ? null : Timestamp.fromDate(endedAt!),
       // La ubicación solo se escribe si existe
       if (latitude != null && longitude != null) ...{
-        'location': GeoPoint(latitude!, longitude!),
+        'location': GeoPoint(_round2(latitude!), _round2(longitude!)),
         'locationAt': locationAt == null
             ? null
             : Timestamp.fromDate(locationAt!),
       },
     };
   }
+  // 2 decimales ≈ 1,1 km: sirve para «cerca de mí» sin revelar dónde vives
+  double _round2(double v) => (v * 100).round() / 100;
 }
