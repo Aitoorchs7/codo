@@ -1,6 +1,7 @@
 import 'package:codo/screens/auth/auth_screen.dart';
 import 'package:codo/screens/home/home_screen.dart';
 import 'package:codo/screens/now/create_session_screen.dart';
+import 'package:codo/screens/now/sessions_map_screen.dart';
 import 'package:codo/screens/onboarding/onboarding_screen.dart';
 import 'package:codo/screens/pacts/pact_detail_screen.dart';
 import 'package:codo/screens/profile/history_screen.dart';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const history = '/history';
   static const createSession = '/create-session';
   static const sessionDetail = '/session-detail';
+  static const sessionsMap = '/sessions-map';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -40,6 +42,8 @@ class AppRoutes {
         final args = settings.arguments;
         if (args is! SessionDetailArgs) return _errorPage(settings);
         return _page(settings, SessionDetailScreen(session: args.session));
+      case sessionsMap:
+        return _page(settings, const SessionsMapScreen());
       default:
         return _errorPage(settings);
     }

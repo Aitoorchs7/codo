@@ -60,7 +60,16 @@ class _NowScreenState extends State<NowScreen> {
       children: [
         Column(
           children: [
-            _buildFilters(),
+            Row(
+              children: [
+                Expanded(child: _buildFilters()), // los chips ocupan lo que sobra y se desplazan
+                IconButton(
+                  icon: const Icon(Icons.map_outlined),
+                  tooltip: 'Ver en el mapa',
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.sessionsMap),
+                ),
+              ],
+            ),
             Expanded(child: _buildList()),
           ],
         ),
