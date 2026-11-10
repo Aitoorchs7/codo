@@ -103,6 +103,8 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
           'Activa el GPS para compartir la ubicación',
         LocationError.timeout =>
           'No se pudo obtener la ubicación. Inténtalo de nuevo',
+        LocationError.unavailable =>
+          'No se pudo saber dónde estás. Inténtalo de nuevo'
       };
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

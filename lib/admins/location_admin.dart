@@ -44,6 +44,8 @@ class LocationAdmin {
       throw const LocationFailure(LocationError.timeout);
     } on LocationServiceDisabledException {
       throw const LocationFailure(LocationError.serviceDisabled);
+    } on PositionUpdateException {
+      throw const LocationFailure(LocationError.unavailable);
     }
   }
 }
