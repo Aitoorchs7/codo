@@ -36,7 +36,7 @@ class LocationAdmin {
     try {
       return await _geo.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
+          accuracy: LocationAccuracy.medium,
           timeLimit: Duration(seconds: 10),
         ),
       );
