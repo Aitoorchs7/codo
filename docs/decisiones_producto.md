@@ -1,6 +1,6 @@
 # Decisiones de producto — Codo
 
-Estado: **borrador v1.1 (18/10/2026)**. Se cerrará en H1 (13/11/2026). Lo marcado con ❓ está pendiente. Cambios de la v1.1: ubicación, mapa y fotos para la fase 1b (sección 4, 5, 7, 8, 11 y 12).
+Estado: **v1.2 (10/11/2026)**, alcance cerrado para H1 (13/11/2026; resumen en `docs/h1_arquitectura.md`). Lo marcado con ❓ está pendiente. Cambios de la v1.2: tablón de pactos y anuncio con recompensa pasan a ampliaciones, límite gratis de 3 pactos y servicio en Cloud Run (secciones 3, 4, 6, 7, 8, 9 y 13).
 
 ## 1. Propuesta de valor
 **En una frase:** Codo te ayuda a cumplir tus objetivos haciéndolos acompañado: ahora mismo con quien está haciendo lo mismo, o durante días con un pacto con un amigo.
@@ -19,7 +19,7 @@ Jóvenes y adultos (estudiantes, opositores, gente que entrena o quiere crear h�
 |---|---|---|
 | **Hoy** | Tu día de un vistazo, con la parte de "organizar la vida" | Objetivos de hoy (lista personal sencilla y offline), check-ins de pacto pendientes, amigos que están en Ahora y botón "Empezar ahora" |
 | **Ahora** (nombre provisional; candidato: *Codo a codo*) | Tareas en directo y acompañadas | Sesiones activas de amigos (y públicas) en tiempo real, filtros por categoría, **vista de mapa y lista «cerca de mí»** de sesiones públicas, botón **+** para publicar la tuya y opción de **unirte** a cualquier sesión que veas |
-| **Pactos** | Retos con otra persona | Lista de tus pactos activos con su progreso, invitaciones, tablón de pactos abiertos, catálogo de plantillas en **cuadrícula** y botón **+** para crear un pacto |
+| **Pactos** | Retos con otra persona | Lista de tus pactos activos con su progreso, invitaciones, catálogo de plantillas en **cuadrícula** y botón **+** para crear un pacto |
 | **Amigos** | Lo social y la competición sana | Ranking entre amigos (semana/mes/total), solicitudes y búsqueda de usuarios |
 | **Perfil** | Identidad y progreso | Nivel, medallas en **cuadrícula**, **historial de sesiones (por rango de fechas y paginado)**, ajustes y Codo Plus |
 
@@ -31,13 +31,13 @@ Fase 1 pide una lista y una cuadrícula desde Firestore: la lista son los pactos
 - **Visibilidad:** por defecto la ven los **amigos**. Opcionalmente, **pública** por categoría.
   - *Por qué amigos primero:* con amigos hay compromiso real, hace falta menos moderación y se evita el problema de las salas vacías cuando hay pocos usuarios. La opción pública le da vida a la app cuando crezca.
 - **Unirse a una sesión (decisión, se desarrolla):** desde la lista o el detalle de una sesión, pulsas **Unirme** y entras como participante haciendo lo mismo. Todos ven en tiempo real quién está, quién se une y cuánto le queda. Puedes **salir** cuando quieras. Al terminar, cada participante sube su propia prueba y recibe su XP según el tiempo que haya estado dentro.
-- **Editar y borrar:** el creador puede editar la descripción y la duración de su sesión y borrarla (con confirmación). Nadie más puede tocarla y las reglas de Firestore lo impiden aunque la interfaz no lo ofrezca. ❓ Qué pasa al borrar una sesión que ya tiene participantes (¿solo se permite si está vacía, o se cancela para todos?).
+- **Editar y borrar:** el creador puede editar la descripción y la duración de su sesión y borrarla (con confirmación). Nadie más puede tocarla y las reglas de Firestore lo impiden aunque la interfaz no lo ofrezca. Borrar solo se permite si nadie más se ha unido; si tiene participantes, se termina (decidido en B3, 04/11).
 - **Prueba al terminar:** foto desde la **cámara o la galería** (la rúbrica de la fase 1b pide las dos; decidido 05/11), con sello de hora, y una frase opcional. La ven solo los participantes de esa sesión.
 - **Recompensa:** XP según el tiempo. Una sesión larga (❓ umbral, por ejemplo más de 2 h) da medalla.
 
 ### Ubicación, mapa y «cerca de mí» (decisión 18/10/2026, fase 1b)
 - La **ubicación es opcional** y solo se pide cuando el usuario quiere añadirla a una sesión o abrir «cerca de mí», con una explicación del porqué. Si la deniega, la app funciona igual (permiso denegado, GPS apagado y tiempo agotado tratados).
-- La posición que se guarda en la sesión es **aproximada** (redondeada, ❓ precisión, por ejemplo ~500 m–1 km), nunca la exacta, como `GeoPoint` con su `Timestamp`. La posición exacta del usuario solo se usa en el móvil para calcular distancias y centrar el mapa; **no se guarda en el perfil**.
+- La posición que se guarda en la sesión es **aproximada** (redondeada a 2 decimales, ~1 km), nunca la exacta, como `GeoPoint` con su `Timestamp`. La posición exacta del usuario solo se usa en el móvil para calcular distancias y centrar el mapa; **no se guarda en el perfil**.
 - **El mapa muestra solo sesiones públicas con ubicación.** Las sesiones de amigos aparecen en la lista, no en el mapa. ❓ Si los amigos ven la posición aproximada de una sesión de amigos.
 - **«Cerca de mí»:** lista de sesiones públicas ordenada por distancia al usuario, calculada en un isolate con progreso hacia la interfaz.
 - Mapa con **flutter_map sobre OpenStreetMap** (gratis, sin clave): atribución visible y `userAgentPackageName` puesto. Tocar un marcador abre el detalle de la sesión.
@@ -45,11 +45,11 @@ Fase 1 pide una lista y una cuadrícula desde Firestore: la lista son los pactos
 
 ### Pacto (la parte principal)
 - Lo creas con el botón **+** desde cero, o desde una plantilla del catálogo: objetivo, duración (la que quieras), frecuencia de check-in (diaria) y con quién.
-- **Con quién:** un amigo (invitación) o cualquier usuario que lo acepte desde el **tablón de pactos abiertos**.
+- **Con quién:** un amigo, por invitación. El **tablón de pactos abiertos** con desconocidos pasa a ampliaciones (decisión H1, 10/11/2026).
 - **Check-in diario:** foto y nota que muestran que estás más cerca del objetivo. El compañero lo ve y puede darle el **visto bueno** o pedir explicación. Los pactos **no llevan ubicación**.
 - **Si uno no hace el check-in del día y no usa un comodín, el pacto se rompe y pierden los dos.**
 - **Al completarlo:** XP para los dos, medalla del objetivo cumplido en el perfil y opción de compartirlo.
-- ❓ Pactos de más de 2 personas → ampliación.
+- Pactos de más de 2 personas → ampliación.
 - ❓ ¿El "pedir explicación" del compañero puede llegar a invalidar el check-in, o solo es social?
 
 ### Puntos, niveles y medallas
@@ -77,10 +77,10 @@ Descartado: límite de puntos por día, porque corta las alas a quien un día es
 | Producto | Tipo Play Billing | Qué da | Precio orientativo ❓ |
 |---|---|---|---|
 | **Comodín** (packs de 1/3/5) | Consumible | Saltarte un día de check-in sin romper el pacto | 0,99 € / 2,49 € / 3,99 € |
-| **Codo Plus** | Permanente (pago único) | Sin anuncios, pactos activos ilimitados (gratis: ❓ 3) y estadísticas | 4,99 € |
+| **Codo Plus** | Permanente (pago único) | Sin anuncios, pactos activos ilimitados (gratis: 3) y estadísticas | 4,99 € |
 
 - Se valida en el servidor antes de conceder nada, se puede restaurar y lo comprado se sincroniza.
-- **Anuncios (AdMob, de prueba, con consentimiento RGPD):** banner en Amigos/Hoy e intersticial al terminar una sesión de Ahora, nunca durante. ❓ Anuncio con recompensa: ver uno = 1 comodín, como máximo 1 por semana.
+- **Anuncios (AdMob, de prueba, con consentimiento RGPD):** banner en Amigos/Hoy e intersticial al terminar una sesión de Ahora, nunca durante. El anuncio con recompensa (ver uno = 1 comodín, como máximo 1 por semana) pasa a ampliaciones.
 - Con Plus desaparecen todos los anuncios.
 - No hay azar a cambio de dinero ni puntos de pago.
 
@@ -106,7 +106,7 @@ Descartado: límite de puntos por día, porque corta las alas a quien un día es
 | Push que abre la pantalla correcta | Invitación a pacto, compañero hizo check-in, recordatorio de check-in antes de medianoche, amigo empezó una sesión |
 | Validación de compras en servidor y en transacción | Comodines y Plus registrados junto con lo que conceden |
 | Roles y reglas de seguridad | Usuario (solo lo suyo y lo de sus pactos/sesiones) y admin (denuncias) |
-| Remote Config | Activar/desactivar Ahora público, mapa público, tablón abierto y anuncio con recompensa |
+| Remote Config | Activar/desactivar Ahora público y mapa público |
 | Deep links + compartir + valoración | Enlace de invitación a pacto, compartir medalla, pedir valoración tras el primer pacto completado |
 | Sonido y animaciones con sentido | Sonido y animación al completar check-in, pacto y subida de nivel. Se silencian en ajustes |
 | Claro/oscuro, ES/EN, accesibilidad | Transversal |
@@ -118,13 +118,13 @@ Descartado: límite de puntos por día, porque corta las alas a quien un día es
   - `proofs/{uid}`: miniatura base64 (<300 KB, límite de 1 MB por documento), frase opcional y sello de hora.
   - El mismo patrón de foto base64 se usa en los `checkins` de los pactos.
 - **Supabase/PostgreSQL:** `purchases`, `entitlements` (comodines, Plus), `xp_events` (para el ranking) y `pact_templates` (catálogo).
-- **Servicio (Dart shelf en Cloud Run ❓ o Cloud Functions):** API, WebSocket de presencia, verificación de compras y envío de FCM.
+- **Servicio (Dart shelf en Cloud Run):** API, WebSocket de presencia, verificación de compras y envío de FCM.
 - **Entornos:** emuladores locales de Auth y Firestore conectados por `--dart-define`; datos de prueba exportados al repo. Hosting de Firebase para la versión web.
 
 ## 9. Alcance
-**MVP (lo que se compromete en H1):** todo lo de las secciones 3 a 7. Ahora con visibilidad amigos/pública, **crear, editar, borrar y unirse a sesiones**, **ubicación opcional aproximada, mapa de sesiones públicas y «cerca de mí»**, pactos de 2 personas con amigo o desde el tablón, check-in diario con validación del compañero, comodines, Plus, niveles y medallas, y denuncia/bloqueo.
+**MVP (lo que se compromete en H1):** todo lo de las secciones 3 a 7. Ahora con visibilidad amigos/pública, **crear, editar, borrar y unirse a sesiones**, **ubicación opcional aproximada, mapa de sesiones públicas y «cerca de mí»**, pactos de 2 personas con un amigo, check-in diario con validación del compañero, comodines, Plus, niveles y medallas, y denuncia/bloqueo.
 
-**Ampliaciones (si sobra tiempo):** pactos de grupo (3 o más), estadísticas avanzadas de Plus, más plantillas, rachas personales en Hoy y recordatorios inteligentes.
+**Ampliaciones (si sobra tiempo):** tablón de pactos con desconocidos, anuncio con recompensa, pactos de grupo (3 o más), estadísticas avanzadas de Plus, más plantillas, rachas personales en Hoy y recordatorios inteligentes.
 
 **Fuera (v2):** detección de salir de la app durante la sesión, suscripción mensual, chat libre entre usuarios.
 
@@ -163,3 +163,11 @@ Descartado: límite de puntos por día, porque corta las alas a quien un día es
 | Foto como base64 en documento aparte `proofs`, solo participantes | Foto dentro del documento de la sesión; Firebase Storage | El documento de una sesión pública lo lee cualquiera; Storage exige plan Blaze y la fase no lo pide |
 | Mapa con flutter_map + OpenStreetMap | Google Maps | Gratis, sin clave de API ni Blaze; puntúa igual |
 | Foto de prueba con cámara o galería (05/11) | Solo cámara, como anti-trampa | La rúbrica de la fase 1b exige cámara y galería; el control es que los participantes ven la prueba |
+
+## 13. Decisiones de H1 (10/11/2026)
+| Decisión | Alternativa descartada | Por qué |
+|---|---|---|
+| Pactos solo con amigos en el MVP; el tablón con desconocidos pasa a ampliaciones | Tablón de pactos abiertos en el MVP | Alcance para una persona con 4–7 h por semana, y menos moderación |
+| Anuncio con recompensa a ampliaciones | Incluirlo en el MVP | El mínimo se cubre con banner e intersticial; evita otra integración y un límite semanal en servidor |
+| Sin Plus, 3 pactos activos a la vez | 1 pacto | Deja probar la app sin frustrar y sigue dando motivo para pagar |
+| Servicio en Dart shelf sobre Cloud Run | Cloud Functions | Mismo lenguaje que la app y WebSocket propio; los dos necesitan facturación de Google Cloud |
