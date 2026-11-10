@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:codo/admins/auth_service.dart';
+import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/live_session.dart';
 import 'package:codo/models/proof.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 import 'package:codo/repositories/session_failure.dart';
 import 'package:codo/screens/profile/edit_session_dialog.dart';
-import 'package:codo/screens/profile/sesion_detail_screen.dart';
+import 'package:codo/screens/profile/session_detail_screen.dart';
 import 'package:codo/utils/photo_compressor.dart';
 import 'package:flutter/material.dart';
 import 'package:codo/admins/photo_admin.dart';
@@ -221,7 +223,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (save != true || !mounted) return;
       final uid = (await AuthService().currentUser())?.uid;
       if (uid == null) return;
-      await _repository.saveProof(s.id, uid, small);
+      // Sin red, Firestore guarda la prueba en local y no responde hasta que vuelve la conexión
+      await _repository.saveProof(s.id, uid, small).timeout(const Duration(seconds: 10));
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Prueba guardada')));
@@ -233,6 +236,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(_errorText(e.error))));
+    } on TimeoutException{
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Sin conexión: la prueba se subirá al recuperar la red')));
     }
   }
 
@@ -340,9 +347,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
         final s = _sessions[i];
         return ListTile(
           leading: _buildThumbnail(s),
-          onTap: () => Navigator.push(
+          onTap: () => Navigator.pushNamed(
             context,
-            MaterialPageRoute(builder: (_) => SessionDetailScreen(session: s)),
+            AppRoutes.sessionDetail,
+            arguments: SessionDetailArgs(session: s),
           ),
           trailing: PopupMenuButton<_SessionAction>(
             tooltip: 'Opciones de la sesión',

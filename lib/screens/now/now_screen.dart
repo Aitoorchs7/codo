@@ -1,4 +1,6 @@
+import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/live_session.dart';
+import 'package:codo/screens/now/session_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 
@@ -32,14 +34,6 @@ class _NowScreenState extends State<NowScreen> {
     });
   }
 
-  String _label(SessionCategory category) => switch (category) {
-    SessionCategory.study => 'Estudiar',
-    SessionCategory.train => 'Entrenar',
-    SessionCategory.read => 'Leer',
-    SessionCategory.work => 'Trabajar',
-    SessionCategory.other => 'Otros',
-  };
-
   Widget _chip(SessionCategory? category, String text) => Padding(
     padding: const EdgeInsets.only(right: 8),
     child: ChoiceChip(
@@ -55,17 +49,30 @@ class _NowScreenState extends State<NowScreen> {
     child: Row(
       children: [
         _chip(null, 'Recientes'),
-        for (final c in SessionCategory.values) _chip(c, _label(c)),
+        for (final c in SessionCategory.values) _chip(c, categoryLabel(c)),
       ],
     ),
   );
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        _buildFilters(),
-        Expanded(child: _buildList()),
+        Column(
+          children: [
+            _buildFilters(),
+            Expanded(child: _buildList()),
+          ],
+        ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.extended(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.createSession),
+            icon: const Icon(Icons.add),
+            label: const Text('Nueva sesión'),
+          ),
+        ),
       ],
     );
   }
@@ -104,7 +111,7 @@ class _NowScreenState extends State<NowScreen> {
             return ListTile(
               title: Text(s.description),
               subtitle: Text(
-                '${s.creatorName} · ${_label(s.category)} · ${s.durationMinutes} min',
+                '${s.creatorName} · ${categoryLabel(s.category)} · ${s.durationMinutes} min',
               ),
             );
           },
