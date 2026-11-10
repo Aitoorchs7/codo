@@ -178,7 +178,27 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - Al principio la A9 parecía no funcionar: no había hecho hot restart y la app seguía con el código anterior.
 - **Qué aprendí / puedo explicar:** sin red, Firestore guarda la escritura en local y la enseña al momento (compensación de latencia), pero el `Future` no termina hasta que vuelve la red. En web no hay isolate y la compresión congela la pantalla.
 - **Resultado:** 18 filas probadas en `docs/pruebas.md`; B4 cerrado.
-- 
+
+### 016 · 2026-11-10 · Ubicación al publicar una sesión (B5)
+- **Fase / hito:** Fase 1b.
+- **Qué pedí:** cómo leer la posición con geolocator, tratar los fallos sin colgar la pantalla y guardarla como GeoPoint + Timestamp.
+- **Qué me propuso:** un esqueleto de `LocationAdmin` con cláusulas de guarda, un `switch` con un mensaje por error, redondear a 2 decimales en `toFirestore` y la sección del README (GPS / red / combinado).
+- **Qué corregí o descarté, y por qué:**
+  - Mi primera versión metía los `throw` en un `try` cuyo `catch` convertía `deniedForever` en `denied`; me lo marcó la revisión y lo rehíce.
+  - El esqueleto usaba parámetros de geolocator anteriores a la v14; `flutter analyze` lo detectó y pasé a `LocationSettings`.
+  - Al probar en el emulador, varias sesiones salían en California: `LocationAccuracy.low` devolvía una posición vieja. Cambié a `medium` y uso `pos.timestamp` como `locationAt` para que diga cuándo se midió.
+  - Elegí `COARSE` y no `FINE`: la posición se guarda redondeada y no hace falta más.
+
+### 017 · 2026-11-10 · Mapa de sesiones con flutter_map (B6)
+- **Fase / hito:** Fase 1b.
+- **Qué pedí:** el mapa con OSM en pasos pequeños: base, marcadores y centrado en el usuario.
+- **Qué me dio:** el `FlutterMap` con sus capas (teselas, marcadores, atribución); después me sugirió el `StreamBuilder` de sesiones públicas y un `MapController` para moverlo.
+- **Qué corregí o descarté, y por qué:**
+  - Puse los avisos de carga y error dentro de las capas del mapa en vez de en el `Stack`, y faltaba el `mapController:`; lo corregí tras la revisión.
+  - Descarté Google Maps (clave y facturación) y el clustering de marcadores por tiempo: queda como límite conocido.
+  - Pregunté por Blaze y protección contra bots: lo dejo para la fase 2–3; Spark corta al llegar a la cuota y no cobra.
+- **Qué aprendí / puedo explicar:** `children` de `FlutterMap` es una pila de capas en orden de dibujo, y la posición exacta del usuario solo vive en el `State`, nunca en Firestore.
+
 ---
 
 ## Agentes y skills propios
