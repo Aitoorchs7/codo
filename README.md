@@ -167,6 +167,37 @@ Al terminar una sesión se puede añadir una foto como prueba (Perfil → Mi his
 - Cada página del Historial hace 4 lecturas más, una por miniatura, y la regla de `proofs` hace otra (`get` de la sesión para comprobar los participantes). Con páginas de 4 es asumible.
 - Borrar un documento en Firestore no borra sus subcolecciones: `deleteSession` borra primero la prueba y después la sesión. No son atómicas; cuando en la fase 2 la gente pueda unirse a sesiones se cambiará a un `WriteBatch`.
 
+### Ubicación
+Al crear una sesión se puede activar «Compartir ubicación aproximada» (apagado por defecto). Solo entonces se pide el permiso: en el momento en que el usuario decide compartir, no al abrir la app.
+
+**Flujo:** `CreateSessionScreen` → `LocationAdmin.currentPosition()` (paquete `geolocator`), que comprueba en orden: servicio de ubicación encendido → permiso (lo pide si aún no se ha decidido) → lectura de la posición con 10 s como máximo. Cada fallo sale como `LocationFailure` con su `LocationError` y la pantalla decide el texto; ninguno deja el botón bloqueado:
+
+| Caso | Qué ve el usuario |
+|---|---|
+| `denied` | Que lo permita o desactive la opción |
+| `deniedForever` (Android tras dos negativas) | Que lo active en Ajustes, con botón que los abre |
+| `serviceDisabled` (GPS apagado, también si se apaga durante la lectura) | Que active la ubicación |
+| `timeout` | Que lo intente de nuevo |
+
+**Qué se guarda:** `location` (`GeoPoint`) y `locationAt` (`Timestamp` del momento en que se midió la posición, que no es lo mismo que `startedAt`, el inicio de la sesión). Las coordenadas se redondean a **2 decimales** en `LiveSession.toFirestore`, así que ningún camino de escritura puede guardar la posición exacta: 0,01° son unos 1,1 km, suficiente para «cerca de mí» sin revelar dónde vive nadie. La posición exacta solo vive en el móvil (para centrar el mapa y calcular distancias) y nunca se guarda en el perfil. Al leer, `fromFirestore` la devuelve tipada en `latitude`, `longitude` y `locationAt`.
+
+**Tecnologías de localización:**
+
+| | GPS (satélites) | Red (wifi y antenas) | Proveedor combinado (*fused*) |
+|---|---|---|---|
+| Precisión | 3–10 m al aire libre; mala o nula en interiores | Wifi: 20–100 m; antenas: de cientos de metros a varios km | La mejor disponible según la prioridad pedida |
+| Consumo | Alto (receptor encendido); el primer fijo puede tardar 30 s o más | Bajo; casi inmediato | Ajustable: usa solo lo necesario |
+| Requisitos | Cielo visible | Wifi o cobertura, y datos | Google Play Services en Android |
+| Cuándo usarla | Navegación, rutas, deporte | Ciudad o barrio, en interiores | Casi siempre: es la recomendada |
+
+En Android, `geolocator` usa el proveedor combinado de Google Play Services (y `LocationManager` si no los hay); en iOS, Core Location ya mezcla las fuentes; en el navegador, la API de geolocalización decide el navegador (y solo funciona con HTTPS o en `localhost`).
+
+**Lo que usa Codo y por qué:** permiso `ACCESS_COARSE_LOCATION` (no `FINE`) y `LocationAccuracy.low`. Con el permiso aproximado Android ya limita la posición a un radio de 1,6 km, y como además se redondea a ~1 km, pedir el GPS solo gastaría batería y tiempo sin dar nada que se vaya a guardar. Que el usuario solo tenga que conceder la ubicación aproximada también hace más fácil que diga que sí.
+
+**Probarlo en el emulador:** el emulador no tiene GPS ni antenas reales y, hasta que se le da una posición, todas las lecturas acaban en `timeout`. Se fija en ⋯ (Extended controls) → Location → *Set location*.
+
+**Permisos declarados:** Android, `ACCESS_COARSE_LOCATION` en `AndroidManifest.xml`; iOS, `NSLocationWhenInUseUsageDescription` en `Info.plist`; en web no hay que declarar nada, el navegador pregunta solo.
+
 ---
 
 ## 🚀 Guía de arranque (en un equipo limpio)
