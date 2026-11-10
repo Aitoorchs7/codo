@@ -4,6 +4,8 @@
 <dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Codo usa la cámara para hacer la foto de prueba al terminar una sesión.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Codo usa la localizacion para mostrar tus sesiones cerca de ti en el mapa.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Codo usa tus fotos para elegir la prueba al terminar una sesión.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
