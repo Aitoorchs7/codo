@@ -57,8 +57,20 @@ Las capturas van en `assets/capturas/`, una por plataforma cuando el resultado s
 | 29 | Prueba de otro usuario | Leer `proofs` de una sesión en la que no participas (REST con otro token) | 403; en la app, «Solo los participantes de la sesión pueden ver la prueba» | | | | |
 | 30 | Foto sin conexión | Modo avión → hacer la foto y guardar | Mensaje de error de red o se sube al volver la red (anotar cuál); sin diálogo colgado | | | | |
 
-## B5 y B6 · Ubicación y mapa (pendiente: se añade cuando esté hecho)
-- Ubicación: éxito · permiso denegado · denegado para siempre · GPS apagado · tiempo agotado.
+## B5 · Ubicación
+Antes de probar en Android: fijar una posición en ⋯ → Location → *Set location*. Para repetir una denegación, restablecer el permiso (Android: Ajustes → Apps → Codo → Permisos; Chrome: candado de la barra de direcciones).
+
+| # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android: qué pasó | Navegador: qué pasó | Diferencias / notas | Captura |
+|---|---|---|---|---|---|---|---|
+| 34 | Publicar con ubicación | Activar «Compartir ubicación aproximada» → permitir → Empezar sesión | Se publica; en Firestore, `location` con 2 decimales y `locationAt` como `Timestamp` | | | | |
+| 35 | Publicar sin ubicación | Dejar la opción apagada y publicar | No se pide permiso y el documento no tiene `location` ni `locationAt` | | | | |
+| 36 | Permiso denegado | Activar la opción → «No permitir» | «Sin permiso de ubicación…»; el botón vuelve a estar activo y se puede publicar apagando la opción | | | | |
+| 37 | Denegado para siempre | Android: denegar dos veces. Chrome: bloquear en el candado | «Ubicación bloqueada…» con botón «Ajustes» que abre los ajustes de la app | | | | |
+| 38 | GPS apagado | Desactivar la ubicación del sistema y publicar con la opción activa | «Activa el GPS para compartir la ubicación»; sin quedarse en «Publicando…» | | — | En el navegador no hay servicio que apagar | |
+| 39 | Tiempo agotado | Emulador sin posición fijada (antes de *Set location*) | A los 10 s, «No se pudo obtener la ubicación…»; sin quedarse en «Publicando…» | | | | |
+| 40 | Posición no disponible | Chrome: DevTools → ⋮ → More tools → Sensors → Location → *Location unavailable* | Mensaje de error y el botón vuelve a estar activo | — | | | |
+
+## B6 · Mapa (pendiente: se añade cuando esté hecho)
 - Mapa: marcadores, atribución de OpenStreetMap visible, tocar un marcador abre el detalle.
 - «Cerca de mí»: orden por distancia y la pantalla se mueve mientras calcula.
 
