@@ -63,7 +63,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
               participantIds: [user.uid],
               latitude: pos?.latitude,
               longitude: pos?.longitude,
-              locationAt: pos == null ? null : DateTime.now(),
+              locationAt: pos?.timestamp,   // cuándo se midió, no cuándo se publica
             ),
           )
           // Sin red, Firestore guarda la escritura y no responde hasta que vuelve:
