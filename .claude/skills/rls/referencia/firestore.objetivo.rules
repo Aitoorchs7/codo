@@ -1,0 +1,147 @@
+// REGLAS OBJETIVO de Codo — referencia de la skill `rls`. NO es lo desplegado:
+// lo que corre es `firestore.rules` en la raíz. Este fichero es el ejemplo
+// canónico de estilo y el destino al que deben converger las reglas.
+// Probado el 10/11/2026: 63/63 casos de `pruebas/rules_test.py`.
+// Si cambias algo aquí, vuelve a pasar las pruebas contra este fichero.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers comunes (mismos nombres en todo el fichero) ----------
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+    // Esquema cerrado: están todas las obligatorias y no hay ninguna de más
+    function hasKeys(required, optional) {
+      return incoming().keys().hasAll(required)
+          && incoming().keys().hasOnly(required.concat(optional));
+    }
+    function isText(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+    function isIntIn(v, min, max) {
+      return v is int && v >= min && v <= max;
+    }
+
+    // ---------- users/{uid} ----------
+    // Leer: dueño · Crear: dueño, xp 0 y sin medallas · Editar: dueño, solo
+    // displayName/photoUrl/bio · Borrar: dueño. xp y badges los pone el servidor.
+    match /users/{uid} {
+      function validProfile(d) {
+        return isText(d.displayName, 1, 80)
+            && d.xp is int
+            && d.badges is list
+            && d.createdAt is timestamp
+            && (!('photoUrl' in d)
+                || (isText(d.photoUrl, 9, 500) && d.photoUrl.matches('https://.*')))
+            && (!('bio' in d) || isText(d.bio, 0, 160));
+      }
+      allow get: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && hasKeys(['displayName', 'xp', 'badges', 'createdAt'], ['photoUrl', 'bio'])
+        && validProfile(incoming())
+        && incoming().xp == 0
+        && incoming().badges.size() == 0;
+      allow update: if isOwner(uid)
+        && changedKeys().hasOnly(['displayName', 'photoUrl', 'bio'])
+        && validProfile(incoming());
+      allow delete: if isOwner(uid);
+    }
+
+    // ---------- pacts, badges ----------
+    // Solo lectura para usuarios con sesión; escribe el servidor o la consola.
+    // TEMPORAL en pacts: datos de ejemplo. Con pactos reales, leer solo los miembros.
+    match /pacts/{id} {
+      allow get, list: if signedIn();
+    }
+    match /badges/{id} {
+      allow get, list: if signedIn();
+    }
+
+    // ---------- live_sessions/{id} ----------
+    // Leer: públicas, o las tuyas, o en las que participas · Crear: a tu nombre,
+    // activa y con esquema cerrado · Editar: creador, solo contenido o terminar ·
+    // Borrar: creador si nadie más se ha unido.
+    match /live_sessions/{id} {
+      function canSee(d) {
+        return d.visibility == 'public'
+            || d.creatorId == request.auth.uid
+            || request.auth.uid in d.participantIds;
+      }
+      function validContent(d) {
+        return isText(d.description, 1, 140) && isIntIn(d.durationMinutes, 1, 480);
+      }
+      // Ubicación opcional, solo en públicas y redondeada a 2 decimales
+      function validLocation(d) {
+        return !('location' in d)
+            || (d.location is latlng
+                && d.visibility == 'public'
+                && math.abs(d.location.latitude() * 100
+                     - math.round(d.location.latitude() * 100)) < 0.001
+                && math.abs(d.location.longitude() * 100
+                     - math.round(d.location.longitude() * 100)) < 0.001
+                && (d.locationAt == null || d.locationAt is timestamp));
+      }
+
+      allow get: if signedIn() && canSee(existing());
+      allow list: if signedIn() && canSee(existing());
+
+      allow create: if signedIn()
+        && hasKeys(['creatorId', 'creatorName', 'description', 'startedAt',
+                    'durationMinutes', 'category', 'visibility', 'status',
+                    'participantIds', 'endedAt'],
+                   ['location', 'locationAt'])
+        && incoming().creatorId == request.auth.uid
+        && incoming().participantIds == [request.auth.uid]
+        && isText(incoming().creatorName, 1, 80)
+        && validContent(incoming())
+        && incoming().category in ['study', 'train', 'read', 'work', 'other']
+        && incoming().visibility in ['friends', 'public']
+        && incoming().status == 'active'
+        && incoming().endedAt == null
+        && incoming().startedAt is timestamp
+        // Pasado sí (se pudo crear sin red); futuro no (fijaría la sesión arriba)
+        && incoming().startedAt <= request.time + duration.value(5, 'm')
+        && validLocation(incoming());
+
+      allow update: if signedIn()
+        && existing().creatorId == request.auth.uid
+        && changedKeys().hasOnly(['description', 'durationMinutes', 'status', 'endedAt'])
+        && validContent(incoming())
+        && (
+          // a) solo contenido: el estado no se toca
+          !changedKeys().hasAny(['status', 'endedAt'])
+          // b) terminar: de active a finished con la hora del servidor
+          || (existing().status == 'active'
+              && incoming().status == 'finished'
+              && incoming().endedAt == request.time)
+        );
+
+      allow delete: if signedIn()
+        && existing().creatorId == request.auth.uid
+        && existing().participantIds.hasOnly([request.auth.uid]);
+
+      // ---------- live_sessions/{id}/proofs/{uid} ----------
+      // Leer: participantes · Crear/editar: la tuya, siendo participante,
+      // solo image (<300 KB) y createdAt del servidor · Borrar: la tuya.
+      match /proofs/{uid} {
+        // 1 lectura facturada por evaluación (get del padre)
+        function isParticipant() {
+          return request.auth.uid in
+            get(/databases/$(database)/documents/live_sessions/$(id)).data.participantIds;
+        }
+        allow get, list: if signedIn() && isParticipant();
+        allow create, update: if isOwner(uid)
+          && isParticipant()
+          && hasKeys(['image', 'createdAt'], [])
+          && isText(incoming().image, 1, 307199)
+          && incoming().createdAt == request.time;
+        allow delete: if isOwner(uid);
+      }
+    }
+  }
+}
