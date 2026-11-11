@@ -192,7 +192,7 @@ Al crear una sesión se puede activar «Compartir ubicación aproximada» (apaga
 
 En Android, `geolocator` usa el proveedor combinado de Google Play Services (y `LocationManager` si no los hay); en iOS, Core Location ya mezcla las fuentes; en el navegador, la API de geolocalización decide el navegador (y solo funciona con HTTPS o en `localhost`).
 
-**Lo que usa Codo y por qué:** permiso `ACCESS_COARSE_LOCATION` (no `FINE`) y `LocationAccuracy.low`. Con el permiso aproximado Android ya limita la posición a un radio de 1,6 km, y como además se redondea a ~1 km, pedir el GPS solo gastaría batería y tiempo sin dar nada que se vaya a guardar. Que el usuario solo tenga que conceder la ubicación aproximada también hace más fácil que diga que sí.
+**Lo que usa Codo y por qué:** permiso `ACCESS_COARSE_LOCATION` (no `FINE`) y `LocationAccuracy.medium`. Con el permiso aproximado Android ya limita la posición a un radio de 1,6 km, y como además se redondea a ~1 km, pedir el GPS solo gastaría batería y tiempo sin dar nada que se vaya a guardar. Que el usuario solo tenga que conceder la ubicación aproximada también hace más fácil que diga que sí. Al principio se usaba `LocationAccuracy.low`, pero en las pruebas Android devolvía la última posición guardada en vez de medir una nueva: varias sesiones creadas en sitios distintos salieron en el mismo punto, con un `locationAt` anterior a `startedAt`. `medium` pide una posición reciente sin encender el GPS.
 
 **Probarlo en el emulador:** el emulador no tiene GPS ni antenas reales y, hasta que se le da una posición, todas las lecturas acaban en `timeout`. Se fija en ⋯ (Extended controls) → Location → *Set location*.
 
