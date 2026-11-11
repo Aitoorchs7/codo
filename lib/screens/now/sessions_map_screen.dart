@@ -3,6 +3,7 @@ import 'package:codo/admins/location_failure.dart';
 import 'package:codo/app/app_routes.dart';
 import 'package:codo/models/live_session.dart';
 import 'package:codo/repositories/live_session_repository.dart';
+import 'package:codo/screens/now/nearby_screen.dart';
 import 'package:codo/screens/profile/session_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -126,6 +127,24 @@ class _SessionsMapScreenState extends State<SessionsMapScreen> {
                     title: Text('No se pudieron cargar las sesiones'),
                   ),
                 ),
+              Positioned(
+                right: 16,
+                bottom: 32, // por encima de la atribución
+                child: FilledButton.icon(
+                  // El tema pide ancho infinito (botones de formulario); aquí flota sobre el mapa
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+                  icon: const Icon(Icons.near_me),
+                  label: const Text('Cerca de mí'),
+                  // Sin tu posición no hay distancias que calcular
+                  onPressed: _me == null
+                      ? null
+                      : () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.nearby,
+                    arguments: NearbyArgs(me: _me!, sessions: located.toList()),
+                  ),
+                ),
+              ),
             ],
           ); // fin de la lista del Stack, del Stack y del return
         },

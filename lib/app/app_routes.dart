@@ -7,6 +7,7 @@ import 'package:codo/screens/pacts/pact_detail_screen.dart';
 import 'package:codo/screens/profile/history_screen.dart';
 import 'package:codo/screens/profile/session_detail_screen.dart';
 import 'package:codo/screens/splash/splash_screen.dart';
+import 'package:codo/screens/now/nearby_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -19,6 +20,7 @@ class AppRoutes {
   static const createSession = '/create-session';
   static const sessionDetail = '/session-detail';
   static const sessionsMap = '/sessions-map';
+  static const nearby = '/nearby';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -44,6 +46,10 @@ class AppRoutes {
         return _page(settings, SessionDetailScreen(session: args.session));
       case sessionsMap:
         return _page(settings, const SessionsMapScreen());
+      case nearby:
+        final args = settings.arguments;
+        if (args is! NearbyArgs) return _errorPage(settings);
+        return _page(settings, NearbyScreen(me: args.me, sessions: args.sessions));
       default:
         return _errorPage(settings);
     }
