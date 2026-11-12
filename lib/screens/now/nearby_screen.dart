@@ -42,6 +42,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
       for (final s in widget.sessions) LatLng(s.latitude!, s.longitude!),
     ];
     try {
+      final watch = Stopwatch()..start();// para medir el tiempo
       final order = await _sorter.sort(
         widget.me,
         points,
@@ -49,6 +50,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
           if (mounted) setState(() => _progress = p);
         },
       );
+      debugPrint('Cerca de mí ${points.length} sesiones en ${watch.elapsedMilliseconds} ms');
       if (!mounted) return;
       setState(() => _order = order);
     } catch (_) {
