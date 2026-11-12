@@ -55,6 +55,7 @@ Uint8List compressSync(Uint8List bytes, void Function(double) progress) {
   final raw = img.decodeImage(bytes);
   if (raw == null) throw const FormatException('Imagen no válida');
   final image = img.bakeOrientation(raw); // endereza las fotos de cámara (EXIF)
+  image.exif = img.ExifData();
   progress(0.3);
   final total = _sides.length * _qualities.length; // 12 intentos como mucho
   var step = 0;

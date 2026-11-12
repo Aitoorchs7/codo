@@ -71,4 +71,16 @@ void main() {
     expect(base64Encode(result).length, lessThan(maxBase64Length));
     expect(decoded.width, lessThan(800)); // con 800 px no cabía
   });
+  test('removes the GPS position stored in the photo metadata', () {
+    final original = img.Image(width: 100, height: 100);
+    original.exif.gpsIfd.gpsLatitude = 40.416775;
+    original.exif.gpsIfd.gpsLongitude = -3.703790;
+    final bytes = img.encodeJpg(original);
+    // Comprobación previa: la foto de partida sí lleva el GPS
+    expect(img.decodeJpg(bytes)!.exif.gpsIfd.hasGPSLatitude, isTrue);
+
+    final result = compressSync(bytes, (_) {});
+
+    expect(img.decodeJpg(result)!.exif.gpsIfd.hasGPSLatitude, isFalse);
+  });
 }
