@@ -198,6 +198,27 @@ En Android, `geolocator` usa el proveedor combinado de Google Play Services (y `
 
 **Permisos declarados:** Android, `ACCESS_COARSE_LOCATION` en `AndroidManifest.xml`; iOS, `NSLocationWhenInUseUsageDescription` en `Info.plist`; en web no hay que declarar nada, el navegador pregunta solo.
 
+### Mapa y «Cerca de mí»
+Desde Ahora, el icono del mapa abre `SessionsMapScreen`: un mapa de **`flutter_map` sobre teselas de OpenStreetMap**, con la atribución «OpenStreetMap contributors» visible y `userAgentPackageName` puesto (la política de uso de los servidores de OSM exige que cada app se identifique). No se usa Google Maps porque necesita clave de API y cuenta de facturación; OSM es gratuito y solo pide identificarse y citar la fuente.
+
+**Qué muestra:** un marcador por cada sesión pública con ubicación (las 50 más recientes; las que no tienen ubicación se filtran en el móvil) y, aparte, el marcador del usuario. Tocar un marcador abre el detalle de la sesión. Al abrir el mapa se pide la posición: si llega, el mapa se mueve hasta ella con un `MapController`; si falla (permiso denegado, GPS apagado…), se queda centrado en Madrid con un aviso y el mapa sigue siendo útil.
+
+**«Cerca de mí»:** el botón del mapa (desactivado si no se sabe dónde está el usuario) abre una lista de esas sesiones ordenada por distancia, con «≈ 3,2 km» en cada fila: aproximada porque las posiciones guardadas están redondeadas a ~1 km.
+
+**Qué se hace en un isolate y qué no:**
+- **En isolate (`lib/utils/nearby_isolate.dart`):** calcular la distancia de cada sesión al usuario (fórmula del círculo máximo de `latlong2`, Dart puro, sin plugins) y ordenarlas. Al isolate solo viajan coordenadas (`LatLng`); devuelve pares `(índice, metros)` y la pantalla recupera cada sesión por su índice. Tras cada sesión envía el progreso (`1/7`, `2/7`…), que la pantalla pinta en una barra.
+- **Fuera del isolate:** leer las sesiones de Firestore y pedir la posición. Son esperas de red o del sistema, no cálculo: no bloquean la interfaz (son asíncronas) y además usan plugins, que un isolate no puede llamar.
+- **Por qué, si no hace falta:** ordenar unas decenas de sesiones no congela nada; el isolate se usa aquí para medirlo y saberlo. Tiempos medidos con un `Stopwatch` alrededor de todo el proceso (en modo debug, 7 sesiones, tres veces cada uno):
+
+| | 1.ª vez | 2.ª | 3.ª |
+|---|---|---|---|
+| Android (emulador, con isolate) | 73 ms | 61 ms | 57 ms |
+| Chrome (sin isolate, hilo principal) | 22 ms | 17 ms | 17 ms |
+
+  Android tarda **más** con isolate que Chrome sin él: casi todo el tiempo es arrancar el isolate y copiar los mensajes, no calcular siete distancias. Con pocos datos, un isolate cuesta más de lo que ahorra; compensa cuando el cálculo dura lo bastante como para notarse en la interfaz (más de un fotograma, ~16 ms), como al comprimir una foto. Por eso en web, donde no hay isolates reales, la misma función `sortSync` corre directamente en el hilo principal.
+
+**Límite conocido:** dos sesiones a menos de ~1 km acaban en el mismo punto redondeado y sus marcadores se apilan; se agruparán (*clustering*) en la fase 2.
+
 ---
 
 ## 🚀 Guía de arranque (en un equipo limpio)
