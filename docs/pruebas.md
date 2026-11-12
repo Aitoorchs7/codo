@@ -50,42 +50,4 @@ Los resultados son los que Aitor dio al probar. Donde dio un solo resultado para
 
 # Registro de pruebas — Fase 1b
 
-**Fecha:** 07/11/2026 · **Probó:** Aitor · **Contra:** Firebase en la nube (el profesor confirmó que no puntúa las pruebas en emuladores)
-**Android:** emulador · **Navegador:** Google Chrome (`flutter run -d chrome`) · **Capturas:** `docs/capturas/fase1b/`
-
-| # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android | Navegador | Diferencias / notas | Captura |
-|---|---|---|---|---|---|---|---|
-| 1 | Publicar una sesión | Ahora → Nueva sesión → Empezar sesión | Aparece al momento en Ahora | Correcto | Correcto | Ninguna | |
-| 2 | Sesión no pública | Interruptor «Pública» apagado | No sale en Ahora | Correcto | Correcto | Ninguna | |
-| 3 | Sale en Mi historial | Perfil → Mi historial | Salen las sesiones creadas | Correcto | Correcto | Ninguna | |
-| 4 | Validación al crear | Descripción vacía / 0 minutos | Mensaje bajo cada campo, no se publica | Correcto | Correcto | Ninguna | |
-| 5 | Crear sin red | Modo avión → crear sesión | Aviso «se publicará al recuperar la red» y la sesión sale en Ahora | Correcto: sale desde la caché local y se sube al volver la red | Correcto | Compensación de latencia de Firestore | `p05_android_crear_sin_red_*` |
-| 6 | Reglas: leer la prueba de otro | Rules Playground, `get` en `live_sessions/{id}/proofs/{uid}` con UID `leo-falso` | Denegado | Se rechazó la lectura simulada | — | Probado en la consola de Firebase | `p06_reglas_ajena_denegada` |
-| 7 | Reglas: leer la prueba propia | Rules Playground con el uid del dueño | Permitido | Se autorizó la lectura simulada | — | Probado en la consola de Firebase | `p07_reglas_propia_permitida` |
-| 8 | Foto con cámara | Mi historial → ⋮ → Añadir prueba → Hacer foto | Barra, peso antes/después y «Prueba guardada» | 133 KB → 62 KB, guardada | Abre el selector de archivos | El navegador de escritorio no abre la webcam con `image_picker` | `p08_android_camara_133_62` |
-| 9 | Foto de galería | Añadir prueba → Elegir de la galería | Igual que 8 | 133 KB → 62 KB | Fotos grandes: 2401 KB → 94 KB (4K) y 1908 KB → 61 KB | | `p09_web_galeria_1908_61` |
-| 10 | Cancelar la elección | Cerrar la cámara o el selector sin elegir | No pasa nada | Correcto | Correcto | Ninguna | |
-| 11 | Compresión moviendo la pantalla | Girar el emulador o hacer scroll mientras comprime | La barra sigue sin tirones | La barra sigue sin tirones | Se congela ~1,5 s sin barra y después sale la vista previa | En web no hay isolates: se comprime en el hilo que pinta (README, «Fotos de prueba») | |
-| 12 | Detalle con y sin prueba | Tocar una fila del historial | Foto grande / «Todavía no hay prueba de esta sesión» | Correcto | Correcto | Ninguna | |
-| 13 | Cámara denegada | Ajustes → Aplicaciones → codo → Permisos → Cámara → No permitir | SnackBar que dice qué hacer | «Sin permiso de cámara. Actívalo en Ajustes > Aplicaciones > Codo > Permisos, o elige una foto de la galería» | — | En web no se pide permiso: se usa el selector de archivos | `p13_android_camara_denegada` |
-| 14 | Galería con la cámara denegada | Tras 13 → Elegir de la galería | Funciona | Correcto | — | La galería no necesita permiso | |
-| 15 | Historial sin red | Modo avión / DevTools → Red → Sin conexión | No se rompe | Lista cargada; las pruebas ya vistas salen de la caché y las demás con icono de error | Lista cargada; primero salieron las pruebas ya vistas y la que no tenía con error; en otra entrada salieron todas con error | En web la caché es solo de memoria y no siempre conserva las miniaturas | `p15_web_historial_sin_red` |
-| 16 | Guardar prueba sin red | Sin red → Guardar → esperar 10 s | Aviso «la prueba se subirá al recuperar la red» y se sube al volver | Aviso a los 10 s, miniatura desde la caché, se sube al volver | Aviso a los 10 s; al volver la red aparecen las miniaturas | Antes del arreglo se quedaba sin responder | `p16_web_prueba_*` |
-| 17 | «Atrás» desde Home | Pulsar atrás en Home | Sale de la app | Correcto tras el arreglo | — | Antes mostraba «Ruta no válida» (ver hallazgo 1) | |
-| 18 | Editar y borrar lo ajeno (B3) | REST contra el emulador con el token de Leo | 403 | 403 al editar, al borrar y al cambiar `creatorId` (04/11) | — | Probado en el emulador | `../b3_ana_200.png` |
-| 19 | Google: éxito · cancelar · error | | | | | | |
-| 20 | Ubicación: éxito · denegada · GPS apagado · tiempo agotado | | | | | | |
-| 21 | Mapa y «cerca de mí» | | | | | | |
-| 22 | URL pública de Hosting | | | | | | |
-
-## Hallazgos (fase 1b)
-1. **Fila 17: «atrás» mostraba «Ruta no válida».** `initialRoute` era `/splash`; Flutter apila también `/` debajo y, como no existía, generaba la página de error. Se cambió la ruta del splash a `/`.
-2. **Fila 16: guardar la prueba sin red se quedaba sin responder.** Firestore guarda la escritura en local y el `Future` no termina hasta que vuelve la red. Se añadió un `.timeout` de 10 s con aviso, igual que al crear sesión.
-3. **Fallo encontrado al revisar las capturas:** las sesiones salían con «Sin nombre» o con el nombre vacío porque `displayName` de la cuenta llegaba `null` o `""`. Ahora el nombre sale del perfil (`users/{uid}`).
-4. **Fila 11:** la congelación en web es la diferencia esperada entre plataformas; en Android el isolate mantiene la interfaz fluida.
-
-## Diferencias entre plataformas observadas (fase 1b)
-- Cámara: en el navegador de escritorio se abre el selector de archivos.
-- Compresión: en web congela la pantalla ~1,5 s; en Android la barra avanza.
-- Permisos: en web no hay permiso de cámara que denegar.
-- Sin red: Android conserva en disco las pruebas ya vistas; en web la caché es solo de memoria.
+Se ha trasladado entero (resultados del 07/11, hallazgos y diferencias) a [`pruebas_fase1b.md`](pruebas_fase1b.md), para que la fase 1b tenga un solo registro.
