@@ -264,6 +264,33 @@ flutter test             # pruebas
 ```
 **Primer arranque:** en la pantalla de acceso, regístrate con un correo y una contraseña. Se crea tu perfil en `users/{uid}` y entras en la app.
 
+### Ejecutar contra los emuladores de Firebase (sin tocar la nube)
+Requisitos: [Firebase CLI](https://firebase.google.com/docs/cli) (`npm install -g firebase-tools`) y Java 11 o superior, que necesitan los emuladores.
+
+```bash
+# 1. Arranca Auth (9099) y Firestore (8080) con los datos de prueba del repositorio
+firebase emulators:start --import=emulator-data
+
+# 2. En otra terminal, la app conectada a los emuladores
+flutter run --dart-define=USE_EMULATORS=true              # Android
+flutter run -d chrome --dart-define=USE_EMULATORS=true    # navegador
+```
+
+- **Cómo se elige el entorno:** `main.dart` lee la bandera de compilación con `bool.fromEnvironment('USE_EMULATORS')`. Sin la bandera, la app va a la nube; nunca hay un booleano que cambiar a mano en el código. En Android usa `10.0.2.2` (la dirección del ordenador visto desde el emulador) y en web `localhost`.
+- **Datos de prueba:** `emulator-data/` (en el repositorio) trae usuarios de Auth y las sesiones de Firestore. Se cargan con el `--import` del paso 1, un solo comando.
+- **Ver los datos:** la interfaz de los emuladores está en <http://localhost:4000>.
+- **Guardar cambios en los datos de prueba:** `firebase emulators:start --import=emulator-data --export-on-exit=emulator-data`. Al parar con Ctrl+C se vuelven a exportar.
+
+### Versión web en Firebase Hosting
+**URL pública:** <https://codo-941ac.web.app>
+
+Se publica la compilación web de la app (contra la nube, sin la bandera de emuladores):
+```bash
+flutter build web --release
+firebase deploy --only hosting
+```
+`firebase.json` sirve la carpeta `build/web` y redirige todas las rutas a `index.html`, para que al recargar una pantalla interna no salga un 404. El inicio de sesión con Google funciona en esa URL porque los dominios de Hosting (`*.web.app` y `*.firebaseapp.com`) están autorizados por defecto en Authentication.
+
 ### Ficheros que NO están en el repositorio (y por qué)
 | Fichero | Para qué sirve | Por qué no se sube |
 |---|---|---|
@@ -275,9 +302,11 @@ flutter test             # pruebas
 ---
 
 ## 🧪 Pruebas
-**Automáticas** (16 pruebas con `flutter test`, sin Firebase real): ruta de arranque según sesión y onboarding, preferencias con valor corrupto, un mensaje por cada error de acceso, lectores seguros de campos y progreso de un pacto con datos extremos.
+**Automáticas** (26 pruebas con `flutter test`, sin Firebase real): ruta de arranque según sesión y onboarding, preferencias con valor corrupto, un mensaje por cada error de acceso, lectores seguros de campos, progreso de un pacto con datos extremos, compresión de fotos (también ruido puro, bytes que no son imagen y que se borra el GPS del EXIF) y orden por distancia de «Cerca de mí».
 
-**Manuales** en Android y web. Registro completo (26 pruebas, 14/10/2026) en [`docs/pruebas.md`](docs/pruebas.md). Resumen:
+**Manuales de la fase 1b** (Android y navegador, con permisos denegados y sin conexión): [`docs/pruebas_fase1b.md`](docs/pruebas_fase1b.md).
+
+**Manuales de la fase 1** en Android y web. Registro completo (26 pruebas, 14/10/2026) en [`docs/pruebas.md`](docs/pruebas.md). Resumen:
 
 | Qué se probó | Esperado | Resultado Android | Resultado web |
 |---|---|---|---|
