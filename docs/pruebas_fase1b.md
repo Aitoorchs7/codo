@@ -8,35 +8,35 @@ Las capturas van en `docs/capturas/fase1b/`, una por plataforma cuando el result
 ## B1 · Acceso con Google
 | # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android: qué pasó | Navegador: qué pasó | Diferencias / notas | Captura |
 |---|---|---|---|---|---|---|---|
-| 1 | Google la primera vez | Entrar con una cuenta de Google que nunca ha entrado | Entra a Home y se crea `users/{uid}` (visible en la UI del emulador, puerto 4000) | | | | |
-| 2 | Google con perfil existente | Cerrar sesión y volver a entrar con la misma cuenta | Entra y recupera el mismo perfil, sin duplicarlo | | | | |
-| 3 | Cancelar Google | Abrir el selector de cuentas y cerrarlo (atrás / cerrar la ventana emergente) | Vuelve al acceso **sin mensaje de error** | | | | |
-| 4 | Google sin conexión | Modo avión (Android) / DevTools → Network → Offline (web) y pulsar Google | Mensaje de error de red, sin quedarse cargando | | | | |
+| 1 | Google la primera vez | Entrar con una cuenta de Google que nunca ha entrado | Entra a Home y se crea `users/{uid}` (visible en la UI del emulador, puerto 4000) | Entra y se crea `users/{uid}` con los datos básicos |  |  |  |
+| 2 | Google con perfil existente | Cerrar sesión y volver a entrar con la misma cuenta | Entra y recupera el mismo perfil, sin duplicarlo | Entra directamente con el mismo perfil, sin crear otro |  |  |  |
+| 3 | Cancelar Google | Abrir el selector de cuentas y cerrarlo (atrás / cerrar la ventana emergente) | Vuelve al acceso **sin mensaje de error** | Vuelve al acceso sin mensaje de error |  | El botón se queda cargando unos segundos más antes de volver |  |
+| 4 | Google sin conexión | Modo avión (Android) / DevTools → Network → Offline (web) y pulsar Google | Mensaje de error de red, sin quedarse cargando | Mensaje de sin conexión, sin quedarse cargando |  |  | `p04_android_google_sin_red` |
 
 ## B2 · Consultas
 | # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android: qué pasó | Navegador: qué pasó | Diferencias / notas | Captura |
 |---|---|---|---|---|---|---|---|
-| 5 | Ahora · Recientes | Abrir Ahora con los datos del seed | Sesiones activas públicas, las más recientes primero y con límite | | | | |
-| 6 | Ahora · filtro por categoría | Pulsar cada chip de categoría | Solo sesiones de esa categoría (`where` con dos condiciones) | | | | |
-| 7 | Ahora en directo (snapshots) | Con Ahora abierta, cambiar el `status` de una sesión en la UI del emulador | La lista se actualiza sola, sin recargar | | | | |
-| 8 | Ahora vacío | Filtrar por una categoría sin sesiones activas | «Ahora mismo no hay nadie con una sesión abierta» | | | | |
+| 5 | Ahora · Recientes | Abrir Ahora con los datos del seed | Sesiones activas públicas, las más recientes primero y con límite | Salen ordenadas por fecha de creación, de la más nueva a la más antigua |  |  |  |
+| 6 | Ahora · filtro por categoría | Pulsar cada chip de categoría | Solo sesiones de esa categoría (`where` con dos condiciones) | Solo salen las sesiones de la categoría elegida |  |  |  |
+| 7 | Ahora en directo (snapshots) | Con Ahora abierta, cambiar el `status` de una sesión en la UI del emulador | La lista se actualiza sola, sin recargar | Al cambiar en la consola la categoría de una sesión (de `study` a `read`), la lista se actualiza sola sin recargar |  |  |  |
+| 8 | Ahora vacío | Filtrar por una categoría sin sesiones activas | «Ahora mismo no hay nadie con una sesión abierta» | «Ahora mismo no hay nadie con una sesión abierta» |  |  | `p08_android_ahora_vacio` |
 | 9 | Ahora con error | Parar el emulador de Firestore con la pantalla abierta | «No se pudieron cargar las sesiones» + «Reintentar» | | | | |
-| 10 | Historial paginado | Perfil → Mi historial → «Cargar más» hasta el final | Cada página trae las siguientes sin repetir; al final desaparece el botón | | | | |
-| 11 | Historial por rango de fechas | Icono de filtro → elegir un rango con sesiones | Solo sesiones entre esas fechas (incluido el último día) | | | | |
-| 12 | Rango sin resultados | Elegir un rango sin sesiones | «No hay sesiones entre esas fechas»; «Quitar filtro» vuelve a la lista | | | | |
+| 10 | Historial paginado | Perfil → Mi historial → «Cargar más» hasta el final | Cada página trae las siguientes sin repetir; al final desaparece el botón | Va cargando de 4 en 4 hasta que no quedan más, sin repetir ninguna |  |  |  |
+| 11 | Historial por rango de fechas | Icono de filtro → elegir un rango con sesiones | Solo sesiones entre esas fechas (incluido el último día) | Con el rango del 7/11 solo salen las sesiones de ese día |  |  |  |
+| 12 | Rango sin resultados | Elegir un rango sin sesiones | «No hay sesiones entre esas fechas»; «Quitar filtro» vuelve a la lista | «No hay sesiones entre esas fechas» |  |  | `p12_android_rango_vacio` |
 | 13 | Historial sin conexión | Modo avión y abrir Mi historial | «No se pudo cargar el historial» + «Reintentar», que funciona al volver la red | Lista cargada: las pruebas ya vistas salen de la caché y las demás con icono de error | Lista cargada; primero salieron las pruebas ya vistas y la que no tenía, con error; en otra entrada salieron todas con error | No sale el error con «Reintentar»: Firestore sirve la lista desde la caché. En web la caché es solo de memoria y no siempre conserva las miniaturas | `p15_web_historial_sin_red` |
 
 ## B3 · Editar y borrar
 | # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android: qué pasó | Navegador: qué pasó | Diferencias / notas | Captura |
 |---|---|---|---|---|---|---|---|
-| 14 | Editar lo propio | Historial → ⋮ → Editar, cambiar descripción y duración → Guardar | Se guarda y la lista lo muestra | | | | |
-| 15 | Validación al editar | Descripción vacía / duración 0 o 500 | «Escribe qué estás haciendo» / «Entre 1 y 480 minutos»; no se guarda | | | | |
-| 16 | Terminar una sesión | ⋮ → Terminar en una sesión en curso | Pasa a «Terminada» con `endedAt` | | | | |
-| 17 | Borrar lo propio | ⋮ → Borrar → confirmar | Pide confirmación («No se puede deshacer») y desaparece | | | | |
-| 18 | Borrar con participantes | ⋮ → Borrar en una sesión con más participantes | SnackBar «No puedes modificar esta sesión»; la sesión sigue | | | | |
+| 14 | Editar lo propio | Historial → ⋮ → Editar, cambiar descripción y duración → Guardar | Se guarda y la lista lo muestra | Al guardar se actualizan la descripción y la duración en la lista |  |  |  |
+| 15 | Validación al editar | Descripción vacía / duración 0 o 500 | «Escribe qué estás haciendo» / «Entre 1 y 480 minutos»; no se guarda | Salen los mensajes de validación y no se guarda |  |  | `p15_android_editar_validacion` |
+| 16 | Terminar una sesión | ⋮ → Terminar en una sesión en curso | Pasa a «Terminada» con `endedAt` | Pasa a «Terminada»; en Firestore `status` pasa a `finished` y `endedAt` tiene la fecha |  |  |  |
+| 17 | Borrar lo propio | ⋮ → Borrar → confirmar | Pide confirmación («No se puede deshacer») y desaparece | Avisa de que no se puede deshacer y la sesión desaparece de Firestore |  |  |  |
+| 18 | Borrar con participantes | ⋮ → Borrar en una sesión con más participantes | SnackBar «No puedes modificar esta sesión»; la sesión sigue | SnackBar «Esta sesión no se puede eliminar»; la sesión sigue |  |  | `p18_android_borrar_participantes` |
 | 19 | Editar lo ajeno | Petición REST al emulador con el token de otro usuario (Leo sobre la sesión de Ana) | 403 de las reglas | — | — | Probado el 04/11: Ana 200, Leo 403. Captura de la pestaña Requests | |
 | 20 | Cambiar `creatorId` | Petición REST que modifica `creatorId` | 403 (`affectedKeys`) | — | — | Probado el 04/11 | |
-| 21 | Editar sin conexión | Modo avión → editar y guardar | SnackBar «Sin conexión. Inténtalo de nuevo» o el cambio queda pendiente y se sube al volver la red (anotar cuál) | | | | |
+| 21 | Editar sin conexión | Modo avión → editar y guardar | SnackBar «Sin conexión. Inténtalo de nuevo» o el cambio queda pendiente y se sube al volver la red (anotar cuál) | El cambio queda pendiente sin aviso; al volver la conexión se sube solo y aparece actualizado |  | Firestore guarda la escritura en local (compensación de latencia) |  |
 
 ## B4 · Foto de prueba
 | # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android: qué pasó | Navegador: qué pasó | Diferencias / notas | Captura |
@@ -56,8 +56,8 @@ Antes de probar en Android: fijar una posición en ⋯ → Location → *Set loc
 
 | # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android: qué pasó | Navegador: qué pasó | Diferencias / notas | Captura |
 |---|---|---|---|---|---|---|---|
-| 34 | Publicar con ubicación | Activar «Compartir ubicación aproximada» → permitir → Empezar sesión | Se publica; en Firestore, `location` con 2 decimales y `locationAt` como `Timestamp` | Se publica al instante en Firestore y aparece en Ahora con todos sus datos | Pide el permiso de ubicación y se publica igual que en Android | En los dos, varias sesiones creadas en el mismo sitio comparten el punto redondeado y en el mapa solo se ve un marcador (límite conocido, ver README) | |
-| 35 | Publicar sin ubicación | Dejar la opción apagada y publicar | No se pide permiso y el documento no tiene `location` ni `locationAt` | | | | |
+| 34 | Publicar con ubicación | Activar «Compartir ubicación aproximada» → permitir → Empezar sesión | Se publica; en Firestore, `location` con 2 decimales y `locationAt` como `Timestamp` | Se publica al instante en Firestore con `location` redondeada a 2 decimales y aparece en Ahora con todos sus datos | Pide el permiso de ubicación y se publica igual que en Android | En los dos, varias sesiones creadas en el mismo sitio comparten el punto redondeado y en el mapa solo se ve un marcador (límite conocido, ver README) |  |
+| 35 | Publicar sin ubicación | Dejar la opción apagada y publicar | No se pide permiso y el documento no tiene `location` ni `locationAt` | No pide permiso y se publica; en Firestore el documento no tiene `location` ni `locationAt` |  | Ninguna |  |
 | 36 | Permiso denegado | Activar la opción → «No permitir» | «Sin permiso de ubicación…»; el botón vuelve a estar activo y se puede publicar apagando la opción | | | | |
 | 37 | Denegado para siempre | Android: denegar dos veces. Chrome: bloquear en el candado | «Ubicación bloqueada…» con botón «Ajustes» que abre los ajustes de la app | | | | |
 | 38 | GPS apagado | Desactivar la ubicación del sistema y publicar con la opción activa | «Activa el GPS para compartir la ubicación»; sin quedarse en «Publicando…» | | — | En el navegador no hay servicio que apagar | |
@@ -83,7 +83,7 @@ Antes: 3 o más sesiones públicas con ubicación en sitios distintos (en Androi
 | # | Qué se prueba | Cómo provocarlo | Resultado esperado | Android: qué pasó | Navegador: qué pasó | Diferencias / notas | Captura |
 |---|---|---|---|---|---|---|---|
 | 31 | Arranque contra emuladores | Seguir solo los comandos del README en un clon limpio | Arranca con los datos importados (24 sesiones) | | | | |
-| 32 | Sin la bandera | `flutter run` sin `--dart-define` | Se conecta a la nube, no a los emuladores (anotar qué se ve) | | | | |
+| 32 | Sin la bandera | `flutter run` sin `--dart-define` | Se conecta a la nube, no a los emuladores (anotar qué se ve) | Se conecta a la nube: salen las sesiones de Firebase, no las del emulador |  |  |  |
 | 33 | URL pública de Hosting | Abrir <https://codo-941ac.web.app> en otro navegador o en incógnito | Carga la app y deja entrar | — | | | |
 
 ## Crear sesión y navegación (07/11)
