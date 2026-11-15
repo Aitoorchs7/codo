@@ -199,6 +199,26 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - Pregunté por Blaze y protección contra bots: lo dejo para la fase 2–3; Spark corta al llegar a la cuota y no cobra.
 - **Qué aprendí / puedo explicar:** `children` de `FlutterMap` es una pila de capas en orden de dibujo, y la posición exacta del usuario solo vive en el `State`, nunca en Firestore.
 
+### 018 · 2026-11-12 · «Cerca de mí», EXIF y Hosting (B6, B4, B7)
+- **Fase / hito:** Fase 1b.
+- **Qué pedí:** terminar B6 con la lista ordenada en un isolate, revisar el hallazgo del EXIF de la auditoría y preparar B7.
+- **Qué me propuso:** `NearbySorter` copiando el patrón de `PhotoCompressor` (isolate con progreso + `sortSync` probable), medir con `Stopwatch`, borrar el EXIF con `image.exif = ExifData()` y una prueba que falla sin el arreglo, y las secciones del README de emuladores y Hosting.
+- **Qué corregí o descarté, y por qué:**
+  - El mapa dejaba de responder: el tema daba a los `FilledButton` ancho infinito y el botón flotante no tenía tamaño; lo arreglé con `minimumSize` solo en ese botón.
+  - Medí con `elapsedMicroseconds` pero lo etiqueté como ms; lo detecté al ver «72943 ms» y lo corregí.
+  - `firebase.json` no tenía `hosting`; lo añadí y desplegué yo.
+- **Qué aprendí / puedo explicar:** con 7 sesiones el isolate tarda más (57–73 ms) que sin él (17–22 ms): el coste es arrancarlo; solo compensa si el cálculo pasa de un fotograma (~16 ms).
+
+### 019 · 2026-11-14 · Pruebas en Android y navegador, y PDF de entrega
+- **Fase / hito:** Fase 1b.
+- **Qué pedí:** ir prueba a prueba en Android y Chrome y que la IA anotara mis resultados en la tabla.
+- **Qué me dio:** el orden de las pruebas para montar cada entorno una sola vez, la tabla unificada en `pruebas_fase1b.md` y el PDF de entrega.
+- **Qué corregí o descarté, y por qué:**
+  - Descubrimos que B1–B3 nunca se habían anotado; los probé todos.
+  - En la prueba 40 la IA dudó de mi captura; la repetí con el permiso concedido y salió el mensaje correcto. Con el permiso sin decidir, `geolocator_web` convierte cualquier error en «bloqueado».
+  - Quitar un permiso desde Ajustes cierra la app («Lost connection»): es Android, no un fallo.
+- **Qué aprendí / puedo explicar:** sin servidor, Firestore sirve la lista desde la caché y el `Stream` no da error, por eso la prueba 9 no se reproduce.
+
 ---
 
 ## Agentes y skills propios
