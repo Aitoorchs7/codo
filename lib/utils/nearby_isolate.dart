@@ -1,5 +1,6 @@
 import 'dart:isolate';
 
+import 'package:codo/utils/progress_callback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -10,7 +11,7 @@ class NearbySorter {
   Future<List<Nearby>> sort(
       LatLng me,
       List<LatLng> points, {
-        void Function(double)? onProgress,
+        ProgressCallback? onProgress,
       }) async {
     // En web no hay isolates reales: igual que con las fotos
     if (kIsWeb) return sortSync(me, points, onProgress ?? (_) {});
@@ -39,7 +40,7 @@ void _worker(List<Object> args) {
 }
 
 // Pública para poder probarla sin isolate
-List<Nearby> sortSync(LatLng me, List<LatLng> points, void Function(double) progress) {
+List<Nearby> sortSync(LatLng me, List<LatLng> points, ProgressCallback progress) {
   const distance = Distance();
   final result = <Nearby>[];
   for (var i = 0; i < points.length; i++) {

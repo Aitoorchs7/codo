@@ -7,6 +7,7 @@ import 'package:codo/models/live_session.dart';
 import 'package:codo/models/proof.dart';
 import 'package:codo/repositories/live_session_repository.dart';
 import 'package:codo/repositories/session_failure.dart';
+import 'package:codo/screens/now/session_labels.dart';
 import 'package:codo/screens/profile/edit_session_dialog.dart';
 import 'package:codo/screens/profile/session_detail_screen.dart';
 import 'package:codo/utils/photo_compressor.dart';
@@ -15,6 +16,10 @@ import 'package:codo/admins/photo_admin.dart';
 import 'package:codo/admins/photo_failure.dart';
 
 enum _SessionAction { edit, finish, delete, proof }
+
+// Devuelve un filtro que «recuerda» la categoría elegida (null = todas)
+bool Function(LiveSession) byCategory(SessionCategory? category) =>
+        (s) => category == null || s.category == category;
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -32,6 +37,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _hasError = false;
   bool _hasMore = true;
   DateTimeRange? _range; // null = historial paginado
+  SessionCategory? _category; // null = todas
   // Una petición por sesión: el FutureBuilder no puede crear el Future en build
   final Map<String, Future<Proof?>> _proofs = {};
 
@@ -340,11 +346,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       );
     }
-    return ListView.builder(
-      itemCount: _sessions.length + 1, // +1: el pie con «Cargar más»
+    final visible = _sessions.where(byCategory(_category)).toList();
+    final totalMinutes = visible.fold<int>(0, (sum, s) => sum + s.durationMinutes);
+    return Column(
+      children: [
+      Wrap(
+      spacing: 8,
+      children: [
+        ChoiceChip(
+          label: const Text('Todas'),
+          selected: _category == null,
+          onSelected: (_) => setState(() => _category = null),
+        ),
+        for (final c in SessionCategory.values)
+          ChoiceChip(
+            label: Text(categoryLabel(c)),
+            selected: _category == c,
+            onSelected: (_) => setState(() => _category = c),
+          ),
+      ],
+    ),
+    Text('$totalMinutes min en total'),
+    Expanded(child:
+    ListView.builder(
+      itemCount: visible.length + 1, // +1: el pie con «Cargar más»
       itemBuilder: (context, i) {
-        if (i == _sessions.length) return _buildFooter();
-        final s = _sessions[i];
+        if (i == visible.length) return _buildFooter();
+        final s = visible[i];
         return ListTile(
           leading: _buildThumbnail(s),
           onTap: () => Navigator.pushNamed(
@@ -382,6 +410,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         );
       },
+    )),
+    ]
     );
   }
 

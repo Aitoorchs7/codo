@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:codo/utils/progress_callback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:codo/admins/photo_failure.dart';
@@ -13,7 +14,7 @@ const _qualities = [85, 70, 55, 40];
 class PhotoCompressor {
   Future<Uint8List> compress(
     Uint8List bytes, {
-    void Function(double)? onProgress,
+        ProgressCallback? onProgress,
   }) async {
     // En web no hay isolates reales: se hace en el hilo principal
     if (kIsWeb) {
@@ -51,7 +52,7 @@ void _worker(List<Object> args) {
 
 
 // Pública para poder probarla sin isolate
-Uint8List compressSync(Uint8List bytes, void Function(double) progress) {
+Uint8List compressSync(Uint8List bytes, ProgressCallback progress) {
   final raw = img.decodeImage(bytes);
   if (raw == null) throw const FormatException('Imagen no válida');
   final image = img.bakeOrientation(raw); // endereza las fotos de cámara (EXIF)
