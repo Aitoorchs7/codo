@@ -219,6 +219,16 @@ Registro de cómo uso asistentes, agentes y skills en Codo. No se apunta todo, *
   - Quitar un permiso desde Ajustes cierra la app («Lost connection»): es Android, no un fallo.
 - **Qué aprendí / puedo explicar:** sin servidor, Firestore sirve la lista desde la caché y el `Stream` no da error, por eso la prueba 9 no se reproduce.
 
+### 020 · 2026-11-16 · Plan de la Fase 3 y paso a Blaze
+- **Fase / hito:** Fase 3 (H3, adelantada al 29/11).
+- **Qué pedí:** comprobar si da tiempo a la Fase 3, una tabla de lo que falta y ayuda para activar Blaze e inicializar las funciones en Python.
+- **Qué me dio:** la tabla de 8 bloques con lo que encaja en Codo, un calendario por días, los pasos para Blaze con presupuesto y la revisión de lo que generó `firebase init`.
+- **Qué corregí o descarté, y por qué:**
+  - Entre Blaze y el emulador elegí Blaze con un presupuesto de 5 €, para que las push y la función programada funcionen de verdad.
+  - Pregunté por un sistema como el de un compañero que bloquea a quien abusa. Lo dejé para la Fase 4: no puntúa ahora y no frena las lecturas directas a Firestore, que se frenan con reglas y App Check.
+  - Cambié `max_instances=10` por 3 y fijé `europe-west1`.
+- **Qué aprendí / puedo explicar:** un presupuesto en Google Cloud avisa pero no corta el gasto; lo que lo limita es `max_instances` y no dejar funciones en bucle.
+
 ---
 
 ## Agentes y skills propios
