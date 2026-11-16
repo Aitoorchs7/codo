@@ -1,44 +1,45 @@
-# Estado — actualizado 15/11/2026
+# Estado — actualizado 16/11/2026
 
-**Fase actual:** 1b entregada (etiqueta `fase-1b` en `c019f4c`, subida a GitHub; PDF al Aula hoy 15/11). **Siguiente:** Fase 2 · Datos que duran, entrega **04/12/2026** (Aula: 06/12), junto con H2 · Prototipo con datos que duran (18/12). Fechas: `docs/hitos.md`
-**Fase 1:** cerrada y entregada (18/10)
+**Fase actual:** 3 · El servicio, entrega **29/11/2026** (H3, etiqueta `fase-3`); se adelantó y va **antes** que la Fase 2 (04/12, Aula 06/12). Rúbrica y plan por días: `docs/fase3.md`. Fechas: `docs/hitos.md`
+**Fases 1 y 1b:** cerradas y entregadas (18/10 y 15/11, etiqueta `fase-1b` en `c019f4c`)
 
 ## Hecho
-- Fase 1 completa; entorno agéntico con 5 agentes, 4 skills (incluida `rls`), `/cierre` y rules por capa
-- B1–B4: Google, 4 consultas con índices, editar/borrar con reglas, foto en isolate con base64 < 300 KB; **EXIF (GPS) borrado al comprimir**, con prueba
-- B5: `LocationAdmin` (`COARSE`, `medium`, 10 s) con 5 fallos de dominio; `GeoPoint` a 2 decimales + `locationAt` = `pos.timestamp`; README GPS/red/combinado
-- B6: mapa `flutter_map` + OSM (atribución, `userAgentPackageName`, marcadores → detalle, centrado en el usuario); «Cerca de mí» en isolate con progreso y tiempos medidos (Android 57–73 ms con isolate, Chrome 17–22 ms sin él)
-- B7: README de arranque con emuladores (`--dart-define`, `--import=emulator-data`) y Hosting en https://codo-941ac.web.app
-- Tabla de pruebas única en `docs/pruebas_fase1b.md` (55 filas, Android y Chrome, con capturas) y PDF en `docs/entrega/`
-- H1 documentado (`docs/h1_arquitectura.md`); auditoría de seguridad en `docs/seguridad_auditoria.md`
-- `flutter analyze` limpio y 26 pruebas en verde (15/11); 126 commits
+- Fase 1 y 1b completas (B1–B7 de 1b, tabla de pruebas de 55 filas y PDF en `docs/entrega/`); H1 documentado; auditoría en `docs/seguridad_auditoria.md`
+- Entorno agéntico: 5 agentes, 4 skills (incluida `rls`), `/cierre` y rules por capa
+- Fase 3 planificada: `docs/fase3.md` (8 bloques, puntos y días) y fechas corregidas en `docs/hitos.md`
+- Proyecto en **plan Blaze** con presupuesto y alerta de 5 €
+- `functions/` en Python 3.14 (`python314`), emulador de Functions en el 5001, `set_global_options(max_instances=3, region="europe-west1")`; venv y `*.local` fuera de git
+- `flutter analyze` limpio y 26 pruebas en verde (16/11); 130 commits
 
 ## En curso
-- Nada de código. Sin commit: 2 capturas sin usar (`p9_android_ahora_emulador.png`, `p_ahora_con_ubicacion_desactivada.png`) y este ESTADO
+- Nada de código. Sin commit: `docs/fase3.md`, `docs/hitos.md` y este ESTADO
 
 ## Siguiente
-1. Subir el PDF `docs/entrega/Codo_fase1b_Aitor_Chicano.pdf` al Aula (hoy)
-2. Leer el enunciado de la Fase 2 y su rúbrica; crear `docs/fase2.md` como se hizo con `fase1b.md`
-3. Decidir qué hallazgos altos de la auditoría entran en la Fase 2 (V-01 `friends` en reglas, V-03 XP/medallas, V-04/V-05 abuso)
-4. Añadir `pacts` y `badges` a `emulator-data/` y corregir el comentario «TEMPORAL» de sus reglas
+1. B1: typedef de función propio y closure con estado en el proyecto; anotarlos en el README con `map`/`where`/`fold`/`sort` y los callbacks que ya hay
+2. B2: cliente de Open-Meteo (`http`, `fromJson`, timeout, reintento, estados) con URL por `--dart-define`
+3. B3 + B4: `joinSession` (`on_call`) con plazas en `@firestore.transactional` y script de 50 llamadas con y sin transacción
+4. B3: función de Firestore (XP al crear prueba, cierra V-03) y programada (cerrar pactos caducados)
+5. Decidir el caso de Stripe (propuesta: donación de prueba) antes del 25/11
+6. Crear el subagente revisor del servidor (cliente que miente, dos llamadas a la vez)
 
-## Checklist fase 1b (10 puntos; detalle en `docs/fase1b.md`)
-- [x] B1 Google en Android y web, perfil ligado, SHA/OAuth y .gitignore (1,5)
-- [x] B2 ≥20 documentos, 4 consultas, índice en `firestore.indexes.json`, snapshots/get justificado (1,75)
-- [x] B3 Editar y borrar lo propio; las reglas lo impiden con lo ajeno (0,75)
-- [x] B4 Cámara/galería, isolate con progreso, base64 <300 KB (2,0)
-- [x] B5 `geolocator`, `GeoPoint`+`Timestamp`, comparación en el README (1,5)
-- [x] B6 `flutter_map` + OSM, «cerca de mí» en isolate (1,5)
-- [x] B7 Emuladores con datos exportados, Hosting con URL y tabla de pruebas (1,0)
+## Checklist fase 3 (10 puntos; detalle en `docs/fase3.md`)
+- [ ] B1 Funciones como valores (0,5) (hay callbacks y `sort`/`fold`; falta typedef de función, closure y README)
+- [ ] B2 API REST pública con estados y `--dart-define` (1,0)
+- [ ] B3 Tres funciones Python (HTTP, Firestore, programada) + README FaaS (1,25) (solo `functions/` inicializado)
+- [ ] B4 Transacción en el servidor + script de 50 llamadas + README (1,5)
+- [ ] B5 FCM: permiso, token, `onTokenRefresh`, 3 estados, abrir pantalla, envío desde función (1,5)
+- [ ] B5b Stripe prueba: PaymentIntent, webhook con firma y transacción, pago rechazado (1,5)
+- [ ] B6 WebSocket Dart (`shelf`) + cliente, 2 clientes y reconexión (1,25)
+- [ ] B7 Desplegado, ruta de salud, colección de peticiones y registros (0,75) (Blaze activo)
+- [ ] B8 Diagrama de 4 modelos, commits pequeños, `fase-3` y `.gitignore` (0,75)
 
 ## Decisiones pendientes
-- Auditoría (4 altas): V-02 (EXIF) resuelto; quedan `friends` sin aplicar en reglas, XP/medallas escritos por el usuario y freno al abuso
-- Freno al abuso (16/11): proyecto en **Blaze** con presupuesto de 5 € y `max_instances`. En la fase 3, solo usuario identificado obligatorio y validación en cada función. App Check, límite por usuario y bloqueo automático se dejan para la **fase 4**; el apagado de facturación por presupuesto se descarta porque tumba Hosting y Firestore
-- Miniatura en `proofs` y no en el documento de la sesión (la rúbrica dice «dentro del documento»): justificado en el README por el límite de 1 MB y la privacidad; preparar la respuesta para la defensa
-- Marcadores en el mismo punto se apilan: clustering en la fase 2
-- Web: la compresión congela ~1,5 s; mejora opcional
-- Unirse a sesiones (fase 2): ampliar la regla `update` para `participantIds` y pasar `deleteSession` a `WriteBatch`
-- Textos como literales, sin `l10n`
+- Caso de Stripe: Comodín y Plus son digitales (Play Billing, fase 4); propuesta de donación de prueba
+- Auditoría: quedan V-01 (`friends` sin aplicar en reglas) y V-03 (XP/medallas escritos por el usuario; se resuelve con la función de Firestore)
+- Freno al abuso (16/11): en la fase 3, usuario identificado obligatorio y validación en cada función. App Check, límite por usuario y bloqueo automático, en la **fase 4**; apagar la facturación por presupuesto se descarta porque tumba Hosting y Firestore
+- Unirse a sesiones: se hará con `joinSession` en el servidor (B4); revisar la regla `update` de `participantIds` y pasar `deleteSession` a `WriteBatch`
+- Miniatura en `proofs` y no en la sesión: preparar la respuesta para la defensa
+- Pendiente para la fase 2: clustering de marcadores, `pacts` y `badges` en `emulator-data/`, comentario «TEMPORAL» de sus reglas; Drift aún no está en `pubspec.yaml`
 
 ## Bloqueos
-- Ninguno. Fase 2: 19 días hasta el 04/12
+- Ninguno. Fase 3: 13 días hasta el 29/11 con 10 puntos por hacer; después, solo 5 días hábiles para la Fase 2 (riesgo alto)
