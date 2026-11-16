@@ -32,7 +32,8 @@
 - [x] B7 Emuladores con datos exportados, Hosting con URL y tabla de pruebas (1,0)
 
 ## Decisiones pendientes
-- Auditoría (4 altas): V-02 (EXIF) resuelto; quedan `friends` sin aplicar en reglas, XP/medallas escritos por el usuario y freno al abuso (App Check en fase 2–3; Spark corta la cuota, no cobra)
+- Auditoría (4 altas): V-02 (EXIF) resuelto; quedan `friends` sin aplicar en reglas, XP/medallas escritos por el usuario y freno al abuso
+- Freno al abuso (16/11): proyecto en **Blaze** con presupuesto de 5 € y `max_instances`. En la fase 3, solo usuario identificado obligatorio y validación en cada función. App Check, límite por usuario y bloqueo automático se dejan para la **fase 4**; el apagado de facturación por presupuesto se descarta porque tumba Hosting y Firestore
 - Miniatura en `proofs` y no en el documento de la sesión (la rúbrica dice «dentro del documento»): justificado en el README por el límite de 1 MB y la privacidad; preparar la respuesta para la defensa
 - Marcadores en el mismo punto se apilan: clustering en la fase 2
 - Web: la compresión congela ~1,5 s; mejora opcional
