@@ -68,6 +68,9 @@ class _NetLabScreenState extends State<NetLabScreen>
       if (!mounted) return; // si se cerró la pantalla (cancelled), no se pinta nada
       setState(() => _error = e.error);
     } finally {
+      // Si el bloqueo acaba justo antes de este punto, el hueco se ve en el SIGUIENTE
+      // fotograma: hay que esperarlo antes de dejar de medir
+      await WidgetsBinding.instance.endOfFrame;
       _measuring = false;
       if (mounted) setState(() => _loading = false);
     }
