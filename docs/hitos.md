@@ -1,6 +1,6 @@
 # Hitos y calendario — Proyecto integrado DAM 2026/27
 
-Fuentes: Cronograma_Proyecto_DAM.pdf, proyecto_fase1b.pdf, Fase3_El_servicio.pdf y calendario del Aula Virtual (captura del 18/10/2026). **16/11/2026: la Fase 3 (H3) se adelanta al 29/11/2026, antes que la Fase 2**; la validación de compras pasa a la Fase 4. Calculado hacia atrás desde el 19/03/2027 (fin de la actividad lectiva; después empiezan las prácticas en empresa). No hay prórroga.
+Fuentes: Cronograma_Proyecto_DAM.pdf, proyecto_fase1b.pdf, Fase3_El_servicio.pdf y calendario del Aula Virtual (captura del 18/10/2026). **16/11/2026: la Fase 3 (H3) se adelanta y va antes que la Fase 2. 24/11/2026: nuevos plazos, Fase 3 el 20/12/2026 y Fase 2 el 17/01/2027**; la validación de compras pasa a la Fase 4. Calculado hacia atrás desde el 19/03/2027 (fin de la actividad lectiva; después empiezan las prácticas en empresa). No hay prórroga.
 
 ## Hitos en orden de trabajo
 | Hito | Fecha | Qué tiene que estar hecho |
@@ -8,8 +8,8 @@ Fuentes: Cronograma_Proyecto_DAM.pdf, proyecto_fase1b.pdf, Fase3_El_servicio.pdf
 | **H0 · Propuesta** | **16/10/2026** | Una página: app o juego, nombre provisional, qué ofrece y a quién, cómo gana dinero. Repositorio creado con el profesor invitado. Coincide con la entrega de la **fase 1**. Sin propuesta aceptada no se sigue. Se puede cambiar de idea hasta H1, no después. |
 | **H1 · Arquitectura, alcance y modelo de ingresos** | **13/11/2026** | Diagrama de capas, tecnologías justificadas, lista de requisitos marcada con lo que vas a hacer, productos de pago y anuncios previstos, y el **CLAUDE.md/AGENTS.md**. **El alcance comprometido aquí no se rebaja después** (se puede ampliar). **Coincide el mismo día con la entrega de la fase 1b.** |
 | Fase 1b (entrega) | 13/11/2026 | Google, consultas, cámara, posición, mapa, hosting y emuladores. 8 sesiones. Etiqueta `fase-1b`. |
-| **H3 · El servicio funcionando** | **29/11/2026** | API pública, funciones serverless (Python), transacciones, Stripe en prueba, notificaciones y tiempo real, con credenciales fuera del repo. Entrega de la **fase 3** (etiqueta `fase-3`). Detalle: `docs/fase3.md`. |
-| Fase 2 (entrega) | 04/12/2026 | Datos que duran. |
+| **H3 · El servicio funcionando** | **20/12/2026** | API pública, funciones serverless (Python), transacciones, Stripe en prueba, notificaciones y tiempo real, con credenciales fuera del repo. Entrega de la **fase 3** (etiqueta `fase-3`). Detalle: `docs/fase3.md`. |
+| Fase 2 (entrega) | 17/01/2027 | Datos que duran. |
 | **H2 · Prototipo con datos que duran** | **18/12/2026** | La app arranca, se navega entera y guarda de verdad, también sin conexión. Lo alimentan la fase 1b y la fase 2. Quien llegue a Navidad sin nada que arranque no llega a marzo. |
 | **H4 · Cobros, integración y prueba cerrada** | **19/02/2027** | Los tres módulos en el mismo producto, compras validadas en el servidor y anuncios de prueba integrados, .aab firmado subido a la prueba cerrada. Entrega de la **fase 4**. |
 | Inicio prueba cerrada (límite) | 22/02/2027 | Para cumplir 14 días antes de la defensa. |
@@ -24,8 +24,8 @@ La fecha del hito es la de referencia; el Aula cierra el domingo posterior a cad
 |---|---|---|---|
 | Fase 1: arranque de la aplicación | 24/09/2026 | domingo 18/10/2026, 23:59 | 16/10/2026 |
 | Fase 1b: fotos, posición y consultas | 09/10/2026 | domingo 15/11/2026, 23:59 | 13/11/2026 |
-| Fase 3: el servicio | 29/09/2026 | domingo 29/11/2026, 23:59 | 29/11/2026 |
-| Fase 2: datos que duran | 29/09/2026 | domingo 06/12/2026, 23:59 | 04/12/2026 |
+| Fase 3: el servicio | 29/09/2026 | domingo 20/12/2026, 23:59 | 20/12/2026 |
+| Fase 2: datos que duran | 29/09/2026 | domingo 17/01/2027, 23:59 | 17/01/2027 |
 | Fase 4: cobrar y publicar | 29/09/2026 | domingo 21/02/2027, 23:59 | 19/02/2027 |
 | Versión candidata, documentación y presentación | 29/09/2026 | domingo 07/03/2027, 23:59 | 05/03/2027 |
 
@@ -39,8 +39,8 @@ La fecha del hito es la de referencia; el Aula cierra el domingo posterior a cad
 |---|---|---|---|
 | 1 · Arranque de la aplicación | Entrada, cuenta, datos y navegación | 16/10/2026 | 0489 PMDM |
 | 1b · Fotos, posición y consultas | Google, consultas, cámara, mapa, hosting y emuladores | 13/11/2026 | 0489 PMDM |
-| 3 · El servicio | API pública, funciones serverless, transacciones, Stripe, notificaciones y tiempo real | 29/11/2026 | 0490 PSP |
-| 2 · Datos que duran | Persistencia local, sincronización, copias, offline | 04/12/2026 | 0486 AD |
+| 3 · El servicio | API pública, funciones serverless, transacciones, Stripe, notificaciones y tiempo real | 20/12/2026 | 0490 PSP |
+| 2 · Datos que duran | Persistencia local, sincronización, copias, offline | 17/01/2027 | 0486 AD |
 | 4 · Cobrar y publicar | Compras validadas en el servidor, anuncios, seguridad, .aab firmado, prueba cerrada | 19/02/2027 | los tres |
 
 Cada fase se entrega con una etiqueta git (`fase-1b`, `fase-2`, `fase-3`, `fase-4`) y un PDF corto al Aula Virtual con capturas, vídeos enlazados y tablas de prueba. La fase 1b además lleva la URL del hosting.

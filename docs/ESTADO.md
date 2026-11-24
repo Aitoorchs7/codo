@@ -1,6 +1,6 @@
 # Estado — actualizado 16/11/2026
 
-**Fase actual:** 3 · El servicio, entrega **29/11/2026** (H3, etiqueta `fase-3`); se adelantó y va **antes** que la Fase 2 (04/12, Aula 06/12). Rúbrica y plan por días: `docs/fase3.md`. Fechas: `docs/hitos.md`
+**Fase actual:** 3 · El servicio, entrega **20/12/2026** (H3, etiqueta `fase-3`); va **antes** que la Fase 2 (17/01/2027). Plazos cambiados el 24/11. En paralelo: actividad AI2 de PSP en la rama `feat/ai2-red-isolates`. Rúbrica y plan por días: `docs/fase3.md`. Fechas: `docs/hitos.md`
 **Fases 1 y 1b:** cerradas y entregadas (18/10 y 15/11, etiqueta `fase-1b` en `c019f4c`)
 
 ## Hecho
@@ -42,4 +42,4 @@
 - Pendiente para la fase 2: clustering de marcadores, `pacts` y `badges` en `emulator-data/`, comentario «TEMPORAL» de sus reglas; Drift aún no está en `pubspec.yaml`
 
 ## Bloqueos
-- Ninguno. Fase 3: 13 días hasta el 29/11 con 10 puntos por hacer; después, solo 5 días hábiles para la Fase 2 (riesgo alto)
+- Ninguno. Con los nuevos plazos (Fase 3 el 20/12 y Fase 2 el 17/01) el riesgo de calendario baja
