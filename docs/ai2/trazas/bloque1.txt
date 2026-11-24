@@ -11,7 +11,26 @@ isolateRun     914 ms      —                       210 ms               no se 
 cancellable    982 ms      —                       196 ms               no se para
 
 («Mayor hueco entre fotogramas» salió 43 ms en ambos modos: la medida dejaba de
-contar antes del fotograma afectado. Corregido; pendiente repetir la medida.)
+contar antes del fotograma afectado. Corregido con endOfFrame y repetido abajo.)
+
+--- Repetición con 20 años (~6,03 MB), medida del hueco corregida ---
+Modo          Red (await)  jsonDecode (principal)  Decodificar+resumir  Mayor hueco entre fotogramas
+mainThread    1681 ms      85 ms                   145 ms               289 ms  (≈17 fotogramas perdidos)
+isolateRun    1839 ms      —                       404 ms                60 ms
+
+t+      0 ms  #arch1  GET archivo de 20 años (mainThread)
+t+   1681 ms  #arch1  red: 1681 ms, 6321680 bytes
+t+   1767 ms  #arch1  jsonDecode en hilo principal: 85 ms
+t+   1912 ms  #arch1  resumen listo (mainThread): 145 ms, 175344 horas
+t+  20186 ms  #arch2  GET archivo de 20 años (isolateRun)
+t+  22026 ms  #arch2  red: 1839 ms, 6321680 bytes
+t+  22431 ms  #arch2  resumen listo (isolateRun): 404 ms, 175344 horas
+
+Lectura: en el hilo principal la pantalla se queda 289 ms sin pintar (85 + 145 ms de
+cálculo seguido, más el fotograma que ya iba en curso). Con Isolate.run el cálculo
+tarda más (404 ms) pero el peor hueco baja a 60 ms: lo que queda no es el jsonDecode,
+sino el trabajo del hilo principal al pasar 6 MB de texto al isolate y repintar el
+resultado. Una mejora posible sería descargar los bytes dentro del propio isolate.
 
 --- Traza completa ---
 t+      0 ms  #arch1  GET archivo de 10 años (mainThread)

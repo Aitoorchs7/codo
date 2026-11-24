@@ -1,0 +1,480 @@
+AI2 · Bloque 2 · Varias peticiones a la vez
+Equipo: PC del instituto · Windows 11 · flutter run --profile -d windows · 24/11/2026
+Recurso: Open-Meteo forecast, `current=temperature_2m` (~300 bytes por respuesta)
+Carga: 32 puntos distintos de una rejilla sobre la península (URL distinta en cada una)
+Pool: RequestPool (lib/utils/request_pool.dart) · reintentos: 3 · espera 200·2^(n-1) ms
+
+--- Tiempo total según K ---
+K    Sin fallos provocados   Con fallos (1 de cada 5 falla la 1.ª vez)   Ideal (T1 / K)
+1    2156 ms                 3519 ms                                      2156 ms
+4     680 ms  (×3,2)         1196 ms                                       539 ms
+8     427 ms  (×5,0)          780 ms                                       270 ms
+16    360 ms  (×6,0)          559 ms                                       135 ms
+(32/32 terminadas en las 8 pasadas: ninguna acabó en «fallida».)
+
+--- Lectura de la curva ---
+- K=1: las 32 van una detrás de otra. Cada petición tarda ~50-70 ms (latencia de ida y
+  vuelta) y la primera 315 ms, porque abre la conexión (DNS + TCP + TLS).
+- K=1→4: casi ×4 (×3,2). El trabajo es casi todo ESPERA a la red, no cálculo: mientras
+  una espera, las otras también pueden esperar. Por eso un solo hilo con await basta.
+- K=8→16: la mejora se aplana (427 → 360 ms en vez de bajar a la mitad):
+  · con 32 tareas y K=16 solo hay 2 «rondas»: manda la petición más lenta de cada ronda
+    (en K=16, #k16-p110 tardó 290 ms y #k16-p99 tuvo que reintentarse);
+  · cada trabajador nuevo abre su propia conexión TLS, que es lo más caro;
+  · el servidor empieza a frenar: con K=16 apareció un fallo REAL (ver #k16-p99).
+- Conclusión: la curva baja deprisa y se aplana. Pasado K≈8 se gana poco y se arriesga
+  a que el servidor limite. Para esta app, K=4-8 es el punto razonable.
+- Con fallos provocados, cada fallo añade 50 ms + la espera de 200 ms + el reintento.
+  Con K=1 se pagan todos seguidos (+1,4 s); con K alto se solapan con el resto.
+
+--- Fallo REAL durante la pasada sin fallos provocados (K=16) ---
+t+   3271 ms  #k16-p99  en curso (trabajador 3, intento 1)
+t+   3364 ms  #k16-p99  falló (server); reintento en 200 ms
+t+   3567 ms  #k16-p99  en curso (trabajador 3, intento 2)
+t+   3626 ms  #k16-p99  terminada
+→ El servidor respondió con un código distinto de 200; el pool lo reintentó a los 200 ms
+  y la segunda vez fue bien. Mientras el trabajador 3 esperaba, los otros 15 siguieron.
+
+--- Fallos provocados, ejemplo de estados completos (K=8) ---
+t+ 139581 ms  #k8-p197  en cola
+t+ 139590 ms  #k8-p197  en curso (trabajador 5, intento 1)
+t+ 139643 ms  #k8-p197  falló (server); reintento en 200 ms
+t+ 139846 ms  #k8-p197  en curso (trabajador 5, intento 2)
+t+ 139944 ms  #k8-p197  terminada
+
+======================================================================================
+TRAZA 1 · sin fallos provocados (K = 1, 4, 8, 16)
+Nota: las 32 líneas «en cola» de cada pasada se resumen en una sola; el resto, literal.
+======================================================================================
+t+      0 ms  #pool  K=1 · 32 peticiones · empieza
+t+  5-8   ms  #k1-p1 … #k1-p32  en cola (32 líneas)
+t+      9 ms  #k1-p1  en curso (trabajador 1, intento 1)
+t+    324 ms  #k1-p1  terminada
+t+    324 ms  #k1-p2  en curso (trabajador 1, intento 1)
+t+    398 ms  #k1-p2  terminada
+t+    399 ms  #k1-p3  en curso (trabajador 1, intento 1)
+t+    451 ms  #k1-p3  terminada
+t+    452 ms  #k1-p4  en curso (trabajador 1, intento 1)
+t+    504 ms  #k1-p4  terminada
+t+    504 ms  #k1-p5  en curso (trabajador 1, intento 1)
+t+    577 ms  #k1-p5  terminada
+t+    577 ms  #k1-p6  en curso (trabajador 1, intento 1)
+t+    637 ms  #k1-p6  terminada
+t+    637 ms  #k1-p7  en curso (trabajador 1, intento 1)
+t+    691 ms  #k1-p7  terminada
+t+    691 ms  #k1-p8  en curso (trabajador 1, intento 1)
+t+    763 ms  #k1-p8  terminada
+t+    764 ms  #k1-p9  en curso (trabajador 1, intento 1)
+t+    815 ms  #k1-p9  terminada
+t+    816 ms  #k1-p10  en curso (trabajador 1, intento 1)
+t+    867 ms  #k1-p10  terminada
+t+    867 ms  #k1-p11  en curso (trabajador 1, intento 1)
+t+    916 ms  #k1-p11  terminada
+t+    916 ms  #k1-p12  en curso (trabajador 1, intento 1)
+t+    966 ms  #k1-p12  terminada
+t+    967 ms  #k1-p13  en curso (trabajador 1, intento 1)
+t+   1018 ms  #k1-p13  terminada
+t+   1020 ms  #k1-p14  en curso (trabajador 1, intento 1)
+t+   1109 ms  #k1-p14  terminada
+t+   1109 ms  #k1-p15  en curso (trabajador 1, intento 1)
+t+   1164 ms  #k1-p15  terminada
+t+   1164 ms  #k1-p16  en curso (trabajador 1, intento 1)
+t+   1217 ms  #k1-p16  terminada
+t+   1218 ms  #k1-p17  en curso (trabajador 1, intento 1)
+t+   1297 ms  #k1-p17  terminada
+t+   1297 ms  #k1-p18  en curso (trabajador 1, intento 1)
+t+   1348 ms  #k1-p18  terminada
+t+   1348 ms  #k1-p19  en curso (trabajador 1, intento 1)
+t+   1398 ms  #k1-p19  terminada
+t+   1399 ms  #k1-p20  en curso (trabajador 1, intento 1)
+t+   1471 ms  #k1-p20  terminada
+t+   1472 ms  #k1-p21  en curso (trabajador 1, intento 1)
+t+   1526 ms  #k1-p21  terminada
+t+   1527 ms  #k1-p22  en curso (trabajador 1, intento 1)
+t+   1581 ms  #k1-p22  terminada
+t+   1581 ms  #k1-p23  en curso (trabajador 1, intento 1)
+t+   1631 ms  #k1-p23  terminada
+t+   1631 ms  #k1-p24  en curso (trabajador 1, intento 1)
+t+   1681 ms  #k1-p24  terminada
+t+   1681 ms  #k1-p25  en curso (trabajador 1, intento 1)
+t+   1731 ms  #k1-p25  terminada
+t+   1731 ms  #k1-p26  en curso (trabajador 1, intento 1)
+t+   1806 ms  #k1-p26  terminada
+t+   1806 ms  #k1-p27  en curso (trabajador 1, intento 1)
+t+   1859 ms  #k1-p27  terminada
+t+   1860 ms  #k1-p28  en curso (trabajador 1, intento 1)
+t+   1913 ms  #k1-p28  terminada
+t+   1913 ms  #k1-p29  en curso (trabajador 1, intento 1)
+t+   1963 ms  #k1-p29  terminada
+t+   1963 ms  #k1-p30  en curso (trabajador 1, intento 1)
+t+   2032 ms  #k1-p30  terminada
+t+   2032 ms  #k1-p31  en curso (trabajador 1, intento 1)
+t+   2097 ms  #k1-p31  terminada
+t+   2099 ms  #k1-p32  en curso (trabajador 1, intento 1)
+t+   2155 ms  #k1-p32  terminada
+t+   2156 ms  #pool  K=1 · 2156 ms · 32/32 terminadas
+t+   2157 ms  #pool  K=4 · 32 peticiones · empieza
+t+ 2159-2161 ms  #k4-p33 … #k4-p64  en cola (32 líneas)
+t+   2161 ms  #k4-p33  en curso (trabajador 1, intento 1)
+t+   2162 ms  #k4-p34  en curso (trabajador 2, intento 1)
+t+   2162 ms  #k4-p35  en curso (trabajador 3, intento 1)
+t+   2163 ms  #k4-p36  en curso (trabajador 4, intento 1)
+t+   2244 ms  #k4-p33  terminada
+t+   2245 ms  #k4-p37  en curso (trabajador 1, intento 1)
+t+   2300 ms  #k4-p37  terminada
+t+   2301 ms  #k4-p38  en curso (trabajador 1, intento 1)
+t+   2346 ms  #k4-p36  terminada
+t+   2347 ms  #k4-p39  en curso (trabajador 4, intento 1)
+t+   2378 ms  #k4-p34  terminada
+t+   2378 ms  #k4-p40  en curso (trabajador 2, intento 1)
+t+   2388 ms  #k4-p35  terminada
+t+   2388 ms  #k4-p41  en curso (trabajador 3, intento 1)
+t+   2409 ms  #k4-p38  terminada
+t+   2409 ms  #k4-p42  en curso (trabajador 1, intento 1)
+t+   2435 ms  #k4-p39  terminada
+t+   2435 ms  #k4-p43  en curso (trabajador 4, intento 1)
+t+   2443 ms  #k4-p40  terminada
+t+   2443 ms  #k4-p44  en curso (trabajador 2, intento 1)
+t+   2467 ms  #k4-p42  terminada
+t+   2467 ms  #k4-p45  en curso (trabajador 1, intento 1)
+t+   2475 ms  #k4-p41  terminada
+t+   2475 ms  #k4-p46  en curso (trabajador 3, intento 1)
+t+   2505 ms  #k4-p43  terminada
+t+   2506 ms  #k4-p47  en curso (trabajador 4, intento 1)
+t+   2518 ms  #k4-p44  terminada
+t+   2519 ms  #k4-p48  en curso (trabajador 2, intento 1)
+t+   2543 ms  #k4-p45  terminada
+t+   2544 ms  #k4-p49  en curso (trabajador 1, intento 1)
+t+   2549 ms  #k4-p46  terminada
+t+   2550 ms  #k4-p50  en curso (trabajador 3, intento 1)
+t+   2575 ms  #k4-p47  terminada
+t+   2576 ms  #k4-p51  en curso (trabajador 4, intento 1)
+t+   2581 ms  #k4-p48  terminada
+t+   2582 ms  #k4-p52  en curso (trabajador 2, intento 1)
+t+   2605 ms  #k4-p49  terminada
+t+   2606 ms  #k4-p53  en curso (trabajador 1, intento 1)
+t+   2611 ms  #k4-p50  terminada
+t+   2611 ms  #k4-p54  en curso (trabajador 3, intento 1)
+t+   2638 ms  #k4-p51  terminada
+t+   2638 ms  #k4-p55  en curso (trabajador 4, intento 1)
+t+   2643 ms  #k4-p52  terminada
+t+   2643 ms  #k4-p56  en curso (trabajador 2, intento 1)
+t+   2668 ms  #k4-p53  terminada
+t+   2668 ms  #k4-p57  en curso (trabajador 1, intento 1)
+t+   2673 ms  #k4-p54  terminada
+t+   2673 ms  #k4-p58  en curso (trabajador 3, intento 1)
+t+   2703 ms  #k4-p55  terminada
+t+   2703 ms  #k4-p59  en curso (trabajador 4, intento 1)
+t+   2707 ms  #k4-p56  terminada
+t+   2708 ms  #k4-p60  en curso (trabajador 2, intento 1)
+t+   2737 ms  #k4-p57  terminada
+t+   2738 ms  #k4-p61  en curso (trabajador 1, intento 1)
+t+   2743 ms  #k4-p58  terminada
+t+   2744 ms  #k4-p62  en curso (trabajador 3, intento 1)
+t+   2772 ms  #k4-p59  terminada
+t+   2772 ms  #k4-p63  en curso (trabajador 4, intento 1)
+t+   2780 ms  #k4-p60  terminada
+t+   2780 ms  #k4-p64  en curso (trabajador 2, intento 1)
+t+   2807 ms  #k4-p61  terminada
+t+   2810 ms  #k4-p62  terminada
+t+   2833 ms  #k4-p63  terminada
+t+   2837 ms  #k4-p64  terminada
+t+   2837 ms  #pool  K=4 · 680 ms · 32/32 terminadas
+t+   2838 ms  #pool  K=8 · 32 peticiones · empieza
+t+ 2838-2842 ms  #k8-p65 … #k8-p96  en cola (32 líneas)
+t+   2843 ms  #k8-p65  en curso (trabajador 1, intento 1)
+t+   2843 ms  #k8-p66  en curso (trabajador 2, intento 1)
+t+   2843 ms  #k8-p67  en curso (trabajador 3, intento 1)
+t+   2844 ms  #k8-p68  en curso (trabajador 4, intento 1)
+t+   2844 ms  #k8-p69  en curso (trabajador 5, intento 1)
+t+   2845 ms  #k8-p70  en curso (trabajador 6, intento 1)
+t+   2846 ms  #k8-p71  en curso (trabajador 7, intento 1)
+t+   2846 ms  #k8-p72  en curso (trabajador 8, intento 1)
+t+   2905 ms  #k8-p65  terminada
+t+   2906 ms  #k8-p73  en curso (trabajador 1, intento 1)
+t+   2914 ms  #k8-p67  terminada
+t+   2914 ms  #k8-p74  en curso (trabajador 3, intento 1)
+t+   2941 ms  #k8-p68  terminada
+t+   2941 ms  #k8-p75  en curso (trabajador 4, intento 1)
+t+   2946 ms  #k8-p66  terminada
+t+   2946 ms  #k8-p76  en curso (trabajador 2, intento 1)
+t+   2992 ms  #k8-p73  terminada
+t+   2992 ms  #k8-p77  en curso (trabajador 1, intento 1)
+t+   3001 ms  #k8-p74  terminada
+t+   3001 ms  #k8-p78  en curso (trabajador 3, intento 1)
+t+   3006 ms  #k8-p75  terminada
+t+   3006 ms  #k8-p79  en curso (trabajador 4, intento 1)
+t+   3008 ms  #k8-p76  terminada
+t+   3009 ms  #k8-p80  en curso (trabajador 2, intento 1)
+t+   3046 ms  #k8-p69  terminada
+t+   3046 ms  #k8-p81  en curso (trabajador 5, intento 1)
+t+   3048 ms  #k8-p72  terminada
+t+   3048 ms  #k8-p82  en curso (trabajador 8, intento 1)
+t+   3063 ms  #k8-p77  terminada
+t+   3063 ms  #k8-p83  en curso (trabajador 1, intento 1)
+t+   3068 ms  #k8-p78  terminada
+t+   3068 ms  #k8-p84  en curso (trabajador 3, intento 1)
+t+   3072 ms  #k8-p79  terminada
+t+   3073 ms  #k8-p85  en curso (trabajador 4, intento 1)
+t+   3075 ms  #k8-p80  terminada
+t+   3075 ms  #k8-p86  en curso (trabajador 2, intento 1)
+t+   3092 ms  #k8-p70  terminada
+t+   3093 ms  #k8-p87  en curso (trabajador 6, intento 1)
+t+   3117 ms  #k8-p81  terminada
+t+   3117 ms  #k8-p88  en curso (trabajador 5, intento 1)
+t+   3123 ms  #k8-p82  terminada
+t+   3123 ms  #k8-p89  en curso (trabajador 8, intento 1)
+t+   3127 ms  #k8-p71  terminada
+t+   3127 ms  #k8-p90  en curso (trabajador 7, intento 1)
+t+   3129 ms  #k8-p83  terminada
+t+   3129 ms  #k8-p91  en curso (trabajador 1, intento 1)
+t+   3147 ms  #k8-p84  terminada
+t+   3148 ms  #k8-p92  en curso (trabajador 3, intento 1)
+t+   3156 ms  #k8-p87  terminada
+t+   3156 ms  #k8-p93  en curso (trabajador 6, intento 1)
+t+   3159 ms  #k8-p85  terminada
+t+   3159 ms  #k8-p94  en curso (trabajador 4, intento 1)
+t+   3161 ms  #k8-p86  terminada
+t+   3161 ms  #k8-p95  en curso (trabajador 2, intento 1)
+t+   3184 ms  #k8-p88  terminada
+t+   3185 ms  #k8-p96  en curso (trabajador 5, intento 1)
+t+   3191 ms  #k8-p89  terminada
+t+   3193 ms  #k8-p91  terminada
+t+   3231 ms  #k8-p90  terminada
+t+   3235 ms  #k8-p93  terminada
+t+   3240 ms  #k8-p92  terminada
+t+   3241 ms  #k8-p94  terminada
+t+   3261 ms  #k8-p95  terminada
+t+   3264 ms  #k8-p96  terminada
+t+   3265 ms  #pool  K=8 · 427 ms · 32/32 terminadas
+t+   3266 ms  #pool  K=16 · 32 peticiones · empieza
+t+ 3266-3270 ms  #k16-p97 … #k16-p128  en cola (32 líneas)
+t+   3270 ms  #k16-p97  en curso (trabajador 1, intento 1)
+t+   3270 ms  #k16-p98  en curso (trabajador 2, intento 1)
+t+   3271 ms  #k16-p99  en curso (trabajador 3, intento 1)
+t+   3271 ms  #k16-p100  en curso (trabajador 4, intento 1)
+t+   3271 ms  #k16-p101  en curso (trabajador 5, intento 1)
+t+   3272 ms  #k16-p102  en curso (trabajador 6, intento 1)
+t+   3272 ms  #k16-p103  en curso (trabajador 7, intento 1)
+t+   3272 ms  #k16-p104  en curso (trabajador 8, intento 1)
+t+   3272 ms  #k16-p105  en curso (trabajador 9, intento 1)
+t+   3273 ms  #k16-p106  en curso (trabajador 10, intento 1)
+t+   3273 ms  #k16-p107  en curso (trabajador 11, intento 1)
+t+   3273 ms  #k16-p108  en curso (trabajador 12, intento 1)
+t+   3273 ms  #k16-p109  en curso (trabajador 13, intento 1)
+t+   3274 ms  #k16-p110  en curso (trabajador 14, intento 1)
+t+   3274 ms  #k16-p111  en curso (trabajador 15, intento 1)
+t+   3274 ms  #k16-p112  en curso (trabajador 16, intento 1)
+t+   3348 ms  #k16-p101  terminada
+t+   3349 ms  #k16-p113  en curso (trabajador 5, intento 1)
+t+   3358 ms  #k16-p97  terminada
+t+   3358 ms  #k16-p114  en curso (trabajador 1, intento 1)
+t+   3364 ms  #k16-p99  falló (server); reintento en 200 ms
+t+   3366 ms  #k16-p103  terminada
+t+   3366 ms  #k16-p115  en curso (trabajador 7, intento 1)
+t+   3369 ms  #k16-p98  terminada
+t+   3369 ms  #k16-p116  en curso (trabajador 2, intento 1)
+t+   3372 ms  #k16-p104  terminada
+t+   3373 ms  #k16-p117  en curso (trabajador 8, intento 1)
+t+   3376 ms  #k16-p102  terminada
+t+   3376 ms  #k16-p118  en curso (trabajador 6, intento 1)
+t+   3448 ms  #k16-p100  terminada
+t+   3449 ms  #k16-p119  en curso (trabajador 4, intento 1)
+t+   3469 ms  #k16-p113  terminada
+t+   3469 ms  #k16-p120  en curso (trabajador 5, intento 1)
+t+   3474 ms  #k16-p114  terminada
+t+   3474 ms  #k16-p121  en curso (trabajador 1, intento 1)
+t+   3478 ms  #k16-p116  terminada
+t+   3478 ms  #k16-p122  en curso (trabajador 2, intento 1)
+t+   3479 ms  #k16-p115  terminada
+t+   3480 ms  #k16-p123  en curso (trabajador 7, intento 1)
+t+   3481 ms  #k16-p117  terminada
+t+   3481 ms  #k16-p124  en curso (trabajador 8, intento 1)
+t+   3482 ms  #k16-p118  terminada
+t+   3482 ms  #k16-p125  en curso (trabajador 6, intento 1)
+t+   3505 ms  #k16-p107  terminada
+t+   3506 ms  #k16-p126  en curso (trabajador 11, intento 1)
+t+   3513 ms  #k16-p112  terminada
+t+   3513 ms  #k16-p127  en curso (trabajador 16, intento 1)
+t+   3517 ms  #k16-p105  terminada
+t+   3517 ms  #k16-p128  en curso (trabajador 9, intento 1)
+t+   3518 ms  #k16-p106  terminada
+t+   3532 ms  #k16-p109  terminada
+t+   3536 ms  #k16-p111  terminada
+t+   3538 ms  #k16-p108  terminada
+t+   3542 ms  #k16-p119  terminada
+t+   3543 ms  #k16-p120  terminada
+t+   3544 ms  #k16-p121  terminada
+t+   3545 ms  #k16-p123  terminada
+t+   3546 ms  #k16-p122  terminada
+t+   3547 ms  #k16-p124  terminada
+t+   3548 ms  #k16-p125  terminada
+t+   3563 ms  #k16-p126  terminada
+t+   3565 ms  #k16-p110  terminada
+t+   3567 ms  #k16-p99  en curso (trabajador 3, intento 2)
+t+   3590 ms  #k16-p127  terminada
+t+   3594 ms  #k16-p128  terminada
+t+   3626 ms  #k16-p99  terminada
+t+   3626 ms  #pool  K=16 · 360 ms · 32/32 terminadas
+
+======================================================================================
+TRAZA 2 · con fallos provocados (pasadas K=8 y K=16; K=1 y K=4 solo en la captura)
+======================================================================================
+t+ 139581 ms  #pool  K=8 · 32 peticiones · empieza
+t+ 139581-139584 ms  #k8-p193 … #k8-p224  en cola (32 líneas)
+t+ 139584 ms  #k8-p193  en curso (trabajador 1, intento 1)
+t+ 139585 ms  #k8-p194  en curso (trabajador 2, intento 1)
+t+ 139587 ms  #k8-p195  en curso (trabajador 3, intento 1)
+t+ 139589 ms  #k8-p196  en curso (trabajador 4, intento 1)
+t+ 139590 ms  #k8-p197  en curso (trabajador 5, intento 1)
+t+ 139591 ms  #k8-p198  en curso (trabajador 6, intento 1)
+t+ 139592 ms  #k8-p199  en curso (trabajador 7, intento 1)
+t+ 139592 ms  #k8-p200  en curso (trabajador 8, intento 1)
+t+ 139643 ms  #k8-p197  falló (server); reintento en 200 ms
+t+ 139662 ms  #k8-p196  terminada
+t+ 139662 ms  #k8-p201  en curso (trabajador 4, intento 1)
+t+ 139682 ms  #k8-p195  terminada
+t+ 139683 ms  #k8-p202  en curso (trabajador 3, intento 1)
+t+ 139684 ms  #k8-p194  terminada
+t+ 139685 ms  #k8-p203  en curso (trabajador 2, intento 1)
+t+ 139689 ms  #k8-p193  terminada
+t+ 139690 ms  #k8-p204  en curso (trabajador 1, intento 1)
+t+ 139734 ms  #k8-p201  terminada
+t+ 139734 ms  #k8-p205  en curso (trabajador 4, intento 1)
+t+ 139750 ms  #k8-p202  falló (server); reintento en 200 ms
+t+ 139754 ms  #k8-p204  terminada
+t+ 139754 ms  #k8-p206  en curso (trabajador 1, intento 1)
+t+ 139760 ms  #k8-p203  terminada
+t+ 139760 ms  #k8-p207  en curso (trabajador 2, intento 1)
+t+ 139784 ms  #k8-p200  terminada
+t+ 139785 ms  #k8-p208  en curso (trabajador 8, intento 1)
+t+ 139811 ms  #k8-p207  falló (server); reintento en 200 ms
+t+ 139813 ms  #k8-p198  terminada
+t+ 139814 ms  #k8-p209  en curso (trabajador 6, intento 1)
+t+ 139819 ms  #k8-p205  terminada
+t+ 139820 ms  #k8-p210  en curso (trabajador 4, intento 1)
+t+ 139823 ms  #k8-p206  terminada
+t+ 139823 ms  #k8-p211  en curso (trabajador 1, intento 1)
+t+ 139844 ms  #k8-p208  terminada
+t+ 139844 ms  #k8-p212  en curso (trabajador 8, intento 1)
+t+ 139846 ms  #k8-p197  en curso (trabajador 5, intento 2)
+t+ 139876 ms  #k8-p209  terminada
+t+ 139877 ms  #k8-p213  en curso (trabajador 6, intento 1)
+t+ 139896 ms  #k8-p210  terminada
+t+ 139897 ms  #k8-p214  en curso (trabajador 4, intento 1)
+t+ 139899 ms  #k8-p212  falló (server); reintento en 200 ms
+t+ 139919 ms  #k8-p211  terminada
+t+ 139920 ms  #k8-p215  en curso (trabajador 1, intento 1)
+t+ 139944 ms  #k8-p197  terminada
+t+ 139944 ms  #k8-p216  en curso (trabajador 5, intento 1)
+t+ 139949 ms  #k8-p213  terminada
+t+ 139950 ms  #k8-p217  en curso (trabajador 6, intento 1)
+t+ 139952 ms  #k8-p202  en curso (trabajador 3, intento 2)
+t+ 139957 ms  #k8-p214  terminada
+t+ 139957 ms  #k8-p218  en curso (trabajador 4, intento 1)
+t+ 139976 ms  #k8-p215  terminada
+t+ 139976 ms  #k8-p219  en curso (trabajador 1, intento 1)
+t+ 140002 ms  #k8-p217  falló (server); reintento en 200 ms
+t+ 140006 ms  #k8-p216  terminada
+t+ 140006 ms  #k8-p220  en curso (trabajador 5, intento 1)
+t+ 140010 ms  #k8-p202  terminada
+t+ 140010 ms  #k8-p221  en curso (trabajador 3, intento 1)
+t+ 140027 ms  #k8-p207  en curso (trabajador 2, intento 2)
+t+ 140048 ms  #k8-p218  terminada
+t+ 140048 ms  #k8-p222  en curso (trabajador 4, intento 1)
+t+ 140050 ms  #k8-p219  terminada
+t+ 140050 ms  #k8-p223  en curso (trabajador 1, intento 1)
+t+ 140076 ms  #k8-p220  terminada
+t+ 140077 ms  #k8-p224  en curso (trabajador 5, intento 1)
+t+ 140100 ms  #k8-p221  terminada
+t+ 140102 ms  #k8-p222  falló (server); reintento en 200 ms
+t+ 140102 ms  #k8-p212  en curso (trabajador 8, intento 2)
+t+ 140108 ms  #k8-p207  terminada
+t+ 140111 ms  #k8-p223  terminada
+t+ 140112 ms  #k8-p199  terminada
+t+ 140160 ms  #k8-p224  terminada
+t+ 140184 ms  #k8-p212  terminada
+t+ 140213 ms  #k8-p217  en curso (trabajador 6, intento 2)
+t+ 140267 ms  #k8-p217  terminada
+t+ 140303 ms  #k8-p222  en curso (trabajador 4, intento 2)
+t+ 140361 ms  #k8-p222  terminada
+t+ 140361 ms  #pool  K=8 · 780 ms · 32/32 terminadas
+t+ 140361 ms  #pool  K=16 · 32 peticiones · empieza
+t+ 140361-140363 ms  #k16-p225 … #k16-p256  en cola (32 líneas)
+t+ 140364 ms  #k16-p225  en curso (trabajador 1, intento 1)
+t+ 140364 ms  #k16-p226  en curso (trabajador 2, intento 1)
+t+ 140364 ms  #k16-p227  en curso (trabajador 3, intento 1)
+t+ 140365 ms  #k16-p228  en curso (trabajador 4, intento 1)
+t+ 140365 ms  #k16-p229  en curso (trabajador 5, intento 1)
+t+ 140365 ms  #k16-p230  en curso (trabajador 6, intento 1)
+t+ 140365 ms  #k16-p231  en curso (trabajador 7, intento 1)
+t+ 140366 ms  #k16-p232  en curso (trabajador 8, intento 1)
+t+ 140366 ms  #k16-p233  en curso (trabajador 9, intento 1)
+t+ 140366 ms  #k16-p234  en curso (trabajador 10, intento 1)
+t+ 140366 ms  #k16-p235  en curso (trabajador 11, intento 1)
+t+ 140367 ms  #k16-p236  en curso (trabajador 12, intento 1)
+t+ 140367 ms  #k16-p237  en curso (trabajador 13, intento 1)
+t+ 140367 ms  #k16-p238  en curso (trabajador 14, intento 1)
+t+ 140367 ms  #k16-p239  en curso (trabajador 15, intento 1)
+t+ 140368 ms  #k16-p240  en curso (trabajador 16, intento 1)
+t+ 140416 ms  #k16-p229  falló (server); reintento en 200 ms
+t+ 140417 ms  #k16-p234  falló (server); reintento en 200 ms
+t+ 140419 ms  #k16-p239  falló (server); reintento en 200 ms
+t+ 140450 ms  #k16-p228  terminada
+t+ 140450 ms  #k16-p241  en curso (trabajador 4, intento 1)
+t+ 140460 ms  #k16-p227  terminada
+t+ 140460 ms  #k16-p242  en curso (trabajador 3, intento 1)
+t+ 140473 ms  #k16-p232  terminada
+t+ 140474 ms  #k16-p243  en curso (trabajador 8, intento 1)
+t+ 140478 ms  #k16-p226  terminada
+t+ 140478 ms  #k16-p244  en curso (trabajador 2, intento 1)
+t+ 140480 ms  #k16-p231  terminada
+t+ 140481 ms  #k16-p245  en curso (trabajador 7, intento 1)
+t+ 140502 ms  #k16-p225  terminada
+t+ 140502 ms  #k16-p246  en curso (trabajador 1, intento 1)
+t+ 140536 ms  #k16-p244  falló (server); reintento en 200 ms
+t+ 140549 ms  #k16-p230  terminada
+t+ 140549 ms  #k16-p247  en curso (trabajador 6, intento 1)
+t+ 140554 ms  #k16-p241  terminada
+t+ 140554 ms  #k16-p248  en curso (trabajador 4, intento 1)
+t+ 140559 ms  #k16-p242  terminada
+t+ 140559 ms  #k16-p249  en curso (trabajador 3, intento 1)
+t+ 140561 ms  #k16-p243  terminada
+t+ 140561 ms  #k16-p250  en curso (trabajador 8, intento 1)
+t+ 140562 ms  #k16-p245  terminada
+t+ 140562 ms  #k16-p251  en curso (trabajador 7, intento 1)
+t+ 140577 ms  #k16-p246  terminada
+t+ 140577 ms  #k16-p252  en curso (trabajador 1, intento 1)
+t+ 140600 ms  #k16-p235  terminada
+t+ 140600 ms  #k16-p253  en curso (trabajador 11, intento 1)
+t+ 140606 ms  #k16-p233  terminada
+t+ 140606 ms  #k16-p254  en curso (trabajador 9, intento 1)
+t+ 140608 ms  #k16-p240  terminada
+t+ 140608 ms  #k16-p255  en curso (trabajador 16, intento 1)
+t+ 140611 ms  #k16-p249  falló (server); reintento en 200 ms
+t+ 140612 ms  #k16-p236  terminada
+t+ 140612 ms  #k16-p256  en curso (trabajador 12, intento 1)
+t+ 140614 ms  #k16-p237  terminada
+t+ 140628 ms  #k16-p229  en curso (trabajador 5, intento 2)
+t+ 140628 ms  #k16-p234  en curso (trabajador 10, intento 2)
+t+ 140629 ms  #k16-p239  en curso (trabajador 15, intento 2)
+t+ 140638 ms  #k16-p248  terminada
+t+ 140640 ms  #k16-p238  terminada
+t+ 140642 ms  #k16-p250  terminada
+t+ 140642 ms  #k16-p251  terminada
+t+ 140657 ms  #k16-p254  falló (server); reintento en 200 ms
+t+ 140659 ms  #k16-p252  terminada
+t+ 140679 ms  #k16-p253  terminada
+t+ 140682 ms  #k16-p255  terminada
+t+ 140685 ms  #k16-p256  terminada
+t+ 140693 ms  #k16-p239  terminada
+t+ 140718 ms  #k16-p234  terminada
+t+ 140722 ms  #k16-p229  terminada
+t+ 140742 ms  #k16-p244  en curso (trabajador 2, intento 2)
+t+ 140747 ms  #k16-p247  terminada
+t+ 140802 ms  #k16-p244  terminada
+t+ 140813 ms  #k16-p249  en curso (trabajador 3, intento 2)
+t+ 140859 ms  #k16-p254  en curso (trabajador 9, intento 2)
+t+ 140882 ms  #k16-p249  terminada
+t+ 140920 ms  #k16-p254  terminada
+t+ 140920 ms  #pool  K=16 · 559 ms · 32/32 terminadas
