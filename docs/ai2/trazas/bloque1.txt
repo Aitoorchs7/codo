@@ -1,0 +1,58 @@
+AI2 · Bloque 1 · Esperar o calcular
+Equipo: PC del instituto · Windows 11 · flutter run --profile -d windows · 24/11/2026
+Recurso: Open-Meteo archive (10 años por hora, ~3,02 MB) · coordenadas genéricas (Madrid)
+Nota: la primera prueba se hizo en Chrome y se descartó, porque en web no hay isolates
+reales (los tres modos corren en el hilo principal).
+
+--- Medidas (de las capturas) ---
+Modo          Red (await)  jsonDecode (principal)  Decodificar+resumir  Rueda
+mainThread    1141 ms      46 ms                   49 ms                se para un instante
+isolateRun     914 ms      —                       210 ms               no se para
+cancellable    982 ms      —                       196 ms               no se para
+
+(«Mayor hueco entre fotogramas» salió 43 ms en ambos modos: la medida dejaba de
+contar antes del fotograma afectado. Corregido; pendiente repetir la medida.)
+
+--- Traza completa ---
+t+      0 ms  #arch1  GET archivo de 10 años (mainThread)
+t+   1140 ms  #arch1  red: 1141 ms, 3169007 bytes
+t+   1188 ms  #arch1  jsonDecode en hilo principal: 46 ms
+t+   1238 ms  #arch1  resumen listo (mainThread): 49 ms, 87672 horas
+t+  27468 ms  #arch2  GET archivo de 10 años (isolateRun)
+t+  28383 ms  #arch2  red: 914 ms, 3169008 bytes
+t+  28593 ms  #arch2  resumen listo (isolateRun): 210 ms, 87672 horas
+t+  84133 ms  #arch3  GET archivo de 10 años (cancellable)
+t+  85115 ms  #arch3  red: 982 ms, 3169007 bytes
+t+  85119 ms  #arch3  isolate creado
+t+  85313 ms  #arch3  resumen listo (cancellable): 196 ms, 87672 horas
+t+  85313 ms  #arch3  isolate terminado (onExit)
+t+  85314 ms  #arch3  puertos cerrados; abiertos ahora: 0
+t+  93346 ms  #arch4  GET archivo de 10 años (cancellable)
+t+  94471 ms  #arch4  red: 1125 ms, 3169008 bytes
+t+  94475 ms  #arch4  isolate creado
+t+  94536 ms  #arch4  pantalla cerrada: kill al isolate
+t+  94712 ms  #arch4  isolate terminado (onExit)
+t+  94712 ms  #arch4  puertos cerrados; abiertos ahora: 0
+t+ 100852 ms  #arch5  GET archivo de 10 años (cancellable)
+t+ 102044 ms  #arch5  red: 1191 ms, 3169008 bytes
+t+ 102046 ms  #arch5  isolate creado
+t+ 102252 ms  #arch5  resumen listo (cancellable): 207 ms, 87672 horas
+t+ 102253 ms  #arch5  isolate terminado (onExit)
+t+ 102253 ms  #arch5  puertos cerrados; abiertos ahora: 0
+t+ 115232 ms  #arch6  GET archivo de 10 años (cancellable)
+t+ 116154 ms  #arch6  red: 922 ms, 3169007 bytes
+t+ 116165 ms  #arch6  isolate creado
+t+ 116364 ms  #arch6  pantalla cerrada: kill al isolate
+t+ 116369 ms  #arch6  isolate terminado (onExit)
+t+ 116369 ms  #arch6  puertos cerrados; abiertos ahora: 0
+
+--- Lectura ---
+1. La red tarda ~20 veces más que el jsonDecode (≈1000 ms frente a 46 ms) y aun así
+   no congela: con await el hilo queda libre mientras llegan los bytes. El jsonDecode
+   es más corto pero es cálculo: ocupa el hilo y la rueda se para. Por eso la red va
+   con await y la decodificación, en un isolate.
+2. En isolate el trabajo total tarda MÁS (≈200 ms frente a 95 ms) por crear el isolate
+   y pasarle 3 MB de texto. Al usuario no le importa: el hilo de la pantalla no espera.
+3. #arch4 y #arch6: se cerró la pantalla con el isolate trabajando. kill → onExit →
+   puertos cerrados, y el contador vuelve a 0. #arch3 y #arch5 son el caso normal: el
+   isolate termina solo tras devolver el resumen y también deja 0 puertos.
