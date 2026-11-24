@@ -1,6 +1,7 @@
 import 'package:codo/admins/weather_failure.dart';
 import 'package:codo/repositories/weather_repository.dart';
 import 'package:codo/utils/net_log.dart';
+import 'package:codo/utils/request_pool.dart';
 import 'package:flutter/material.dart';
 
 // Pantalla de pruebas de AI2 (PSP): no sale en la versión release.
@@ -33,6 +34,44 @@ class _NetLabScreenState extends State<NetLabScreen>
   bool _loading = false;
   WeatherError? _error;
   DecodeReport? _report;
+
+  // Bloque 2: pool de K peticiones
+  bool _injectFailures = false;
+  bool _poolRunning = false;
+  final List<PoolReport> _bench = [];
+  Map<RequestState, int> _counts = {};
+
+  // Mismas 32 peticiones con K = 1, 4, 8 y 16, una pasada detrás de otra
+  Future<void> _runBench() async {
+    setState(() {
+      _poolRunning = true;
+      _bench.clear();
+    });
+    try {
+      for (final k in const [1, 4, 8, 16]) {
+        final report = await _repository.loadGrid(
+          k: k,
+          failEvery: _injectFailures ? 5 : null,
+          onChange: _onPoolChange,
+        );
+        if (!mounted) return;
+        setState(() => _bench.add(report));
+      }
+    } finally {
+      if (mounted) setState(() => _poolRunning = false);
+    }
+  }
+
+  // Cuenta cuántas peticiones hay en cada estado cada vez que una cambia
+  void _onPoolChange(List<PoolTask<double>> tasks) {
+    if (!mounted) return;
+    setState(() {
+      _counts = {
+        for (final s in RequestState.values)
+          s: tasks.where((t) => t.state == s).length,
+      };
+    });
+  }
 
   @override
   void initState() {
@@ -152,6 +191,32 @@ class _NetLabScreenState extends State<NetLabScreen>
               '${report.summary.hours} h · media ${report.summary.avgTemp.toStringAsFixed(1)} °C'
               ' · máx ${report.summary.maxTemp.toStringAsFixed(1)} °C'
               ' · lluvia ${report.summary.totalRain.toStringAsFixed(0)} mm',
+              style: text.bodyLarge,
+            ),
+          const Divider(height: 32),
+          Text('Bloque 2 · K peticiones a la vez', style: text.titleMedium),
+          SwitchListTile(
+            title: const Text('Provocar fallos (1 de cada 5 falla la 1.ª vez)'),
+            value: _injectFailures,
+            onChanged: _poolRunning ? null : (v) => setState(() => _injectFailures = v),
+          ),
+          FilledButton(
+            onPressed: _poolRunning ? null : _runBench,
+            child: Text(_poolRunning ? 'Midiendo…' : 'Medir K = 1, 4, 8 y 16'),
+          ),
+          const SizedBox(height: 8),
+          if (_counts.isNotEmpty)
+            Text(
+              'En cola ${_counts[RequestState.queued]} · '
+              'en curso ${_counts[RequestState.running]} · '
+              'terminadas ${_counts[RequestState.done]} · '
+              'fallidas ${_counts[RequestState.failed]}',
+              style: text.bodyLarge,
+            ),
+          for (final r in _bench)
+            Text(
+              'K = ${r.k.toString().padLeft(2)} → ${r.totalMs} ms '
+              '(${r.done} bien, ${r.failed} fallidas)',
               style: text.bodyLarge,
             ),
           const SizedBox(height: 16),
