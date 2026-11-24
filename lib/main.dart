@@ -27,7 +27,12 @@ Future<void> main() async {
     FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
     if (const bool.fromEnvironment('SEED_DATA')) await seedLiveSessions();
   }
-  if (!kIsWeb) await GoogleSignIn.instance.initialize();
+  // google_sign_in solo existe en móvil (y web, que no lo necesita aquí);
+  // en Windows lanza UnimplementedError y la app no llegaba a arrancar
+  final isMobile = !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+  if (isMobile) await GoogleSignIn.instance.initialize();
   /* inicializamos el firebase para que pueda funcionar al iniciarse la app
   necesitamos un proveedor que guarda los objetos
   que comparten varias clases para no estar cambiando variables
