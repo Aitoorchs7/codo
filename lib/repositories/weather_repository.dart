@@ -4,6 +4,7 @@ import 'package:codo/admins/weather_admin.dart';
 import 'package:codo/admins/weather_failure.dart';
 import 'package:codo/models/weather_summary.dart';
 import 'package:codo/utils/net_log.dart';
+import 'package:codo/utils/request_pool.dart';
 import 'package:codo/utils/weather_isolate.dart';
 import 'package:flutter/foundation.dart';
 
@@ -26,6 +27,20 @@ class DecodeReport {
     required this.decodeMs,
     required this.workMs,
     required this.summary,
+  });
+}
+
+// Resultado de una pasada del pool (una fila de la tabla K / tiempo)
+class PoolReport {
+  final int k;
+  final int totalMs;
+  final int done;
+  final int failed;
+  const PoolReport({
+    required this.k,
+    required this.totalMs,
+    required this.done,
+    required this.failed,
   });
 }
 
@@ -83,6 +98,58 @@ class WeatherRepository {
       workMs: workMs,
       summary: summary,
     );
+  }
+
+  // ── Bloque 2 · Varias peticiones a la vez ──
+
+  // Rejilla de puntos sobre la península: [count] peticiones distintas
+  // (URL distinta para que el servidor no devuelva lo mismo de caché)
+  static List<(double, double)> grid(int count) => [
+        for (var i = 0; i < count; i++)
+          (36.5 + (i ~/ 8) * 0.9, -8.5 + (i % 8) * 1.4),
+      ];
+
+  // Pide la temperatura actual de [count] puntos con K a la vez.
+  // [failEvery]: si no es null, la 1.ª vez de cada N-ésima petición falla a propósito
+  Future<PoolReport> loadGrid({
+    required int k,
+    int count = 32,
+    int? failEvery,
+    void Function(List<PoolTask<double>> tasks)? onChange,
+  }) async {
+    final points = grid(count);
+    final tasks = <PoolTask<double>>[];
+    for (var i = 0; i < points.length; i++) {
+      final (lat, lon) = points[i];
+      final inject = failEvery != null && (i + 1) % failEvery == 0;
+      var firstTry = true;
+      tasks.add(PoolTask(NetLog.newId('k$k-p'), () async {
+        if (inject && firstTry) {
+          firstTry = false;
+          // Fallo provocado: simula un 500 del servidor en el primer intento
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          throw const WeatherFailure(WeatherError.server);
+        }
+        final body = await _admin.fetchCurrentBody(lat: lat, lon: lon);
+        // JSON de ~300 bytes: decodificarlo en el hilo principal no se nota
+        final json = jsonDecode(body) as Map<String, dynamic>;
+        return ((json['current'] as Map)['temperature_2m'] as num).toDouble();
+      }));
+    }
+
+    final pool = RequestPool(
+      k: k,
+      // Solo se reintenta lo que puede arreglarse solo; un JSON roto seguirá roto
+      shouldRetry: (e) => e is WeatherFailure && e.error != WeatherError.badData,
+      onChange: onChange == null ? null : () => onChange(tasks),
+    );
+    final watch = Stopwatch()..start();
+    NetLog.log('pool', 'K=$k · $count peticiones · empieza');
+    await pool.runAll(tasks);
+    final ms = watch.elapsedMilliseconds;
+    final done = tasks.where((t) => t.state == RequestState.done).length;
+    NetLog.log('pool', 'K=$k · $ms ms · $done/$count terminadas');
+    return PoolReport(k: k, totalMs: ms, done: done, failed: count - done);
   }
 
   // La pantalla lo llama al cerrarse: mata el isolate si sigue vivo y cierra el cliente HTTP

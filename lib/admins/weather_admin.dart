@@ -13,13 +13,17 @@ class WeatherAdmin {
     'WEATHER_ARCHIVE_URL',
     defaultValue: 'https://archive-api.open-meteo.com/v1/archive',
   );
+  static const _forecastUrl = String.fromEnvironment(
+    'WEATHER_FORECAST_URL',
+    defaultValue: 'https://api.open-meteo.com/v1/forecast',
+  );
 
   // Devuelve el JSON como TEXTO: así la red y el jsonDecode se miden por separado
   Future<String> fetchArchiveBody({
     required double lat,
     required double lon,
     int years = 3,
-  }) async {
+  }) {
     // El archivo va con unos días de retraso: terminamos hace una semana
     final end = DateTime.now().subtract(const Duration(days: 7));
     final start = DateTime(end.year - years, end.month, end.day);
@@ -33,9 +37,24 @@ class WeatherAdmin {
           'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m',
     });
 
+    return _get(uri, const Duration(seconds: 20));
+  }
+
+  // Petición pequeña (unos cientos de bytes): la temperatura de ahora en un punto.
+  // Es la que se lanza muchas veces en el pool del bloque 2.
+  Future<String> fetchCurrentBody({required double lat, required double lon}) {
+    final uri = Uri.parse(_forecastUrl).replace(queryParameters: {
+      'latitude': lat.toStringAsFixed(2),
+      'longitude': lon.toStringAsFixed(2),
+      'current': 'temperature_2m',
+    });
+    return _get(uri, const Duration(seconds: 10));
+  }
+
+  // GET común: traduce los errores de red y de servidor a WeatherFailure
+  Future<String> _get(Uri uri, Duration timeout) async {
     try {
-      final response =
-          await _client.get(uri).timeout(const Duration(seconds: 20));
+      final response = await _client.get(uri).timeout(timeout);
       if (response.statusCode != 200) {
         throw const WeatherFailure(WeatherError.server);
       }
