@@ -4,6 +4,7 @@ import 'package:codo/models/profile.dart';
 import 'package:codo/repositories/profile_repository.dart';
 import 'package:codo/screens/profile/medal_grid.dart';
 import 'package:codo/widgets/glass_button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -89,6 +90,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Mi historial'),
           ),
           const SizedBox(height: 12),
+          // Laboratorio de AI2: solo en debug y profile, nunca en la versión publicada
+          if (!kReleaseMode) ...[
+            GlassButton(
+              onPressed: () => Navigator.pushNamed(context, AppRoutes.netLab),
+              child: const Text('Laboratorio de red'),
+            ),
+            const SizedBox(height: 12),
+          ],
           GlassButton(onPressed: _signOut, child: const Text('Cerrar sesión')),
           const SizedBox(height: 12),
         ],

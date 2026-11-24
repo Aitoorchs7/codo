@@ -5,6 +5,7 @@ import 'package:codo/screens/now/sessions_map_screen.dart';
 import 'package:codo/screens/onboarding/onboarding_screen.dart';
 import 'package:codo/screens/pacts/pact_detail_screen.dart';
 import 'package:codo/screens/profile/history_screen.dart';
+import 'package:codo/screens/profile/net_lab_screen.dart';
 import 'package:codo/screens/profile/session_detail_screen.dart';
 import 'package:codo/screens/splash/splash_screen.dart';
 import 'package:codo/screens/now/nearby_screen.dart';
@@ -21,6 +22,7 @@ class AppRoutes {
   static const sessionDetail = '/session-detail';
   static const sessionsMap = '/sessions-map';
   static const nearby = '/nearby';
+  static const netLab = '/net-lab'; // AI2 de PSP; solo fuera de release
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -50,6 +52,8 @@ class AppRoutes {
         final args = settings.arguments;
         if (args is! NearbyArgs) return _errorPage(settings);
         return _page(settings, NearbyScreen(me: args.me, sessions: args.sessions));
+      case netLab:
+        return _page(settings, const NetLabScreen());
       default:
         return _errorPage(settings);
     }
