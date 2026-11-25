@@ -1,0 +1,45 @@
+AI2 · Bloque 3 · No pedir dos veces lo mismo
+Equipo: PC del instituto · Windows 11 · flutter test · 25/11/2026
+Recurso: WeatherRepository.currentTemp (temperatura actual de un punto, Open-Meteo)
+Prueba: test/duplicate_calls_test.dart
+  - 100 ejecuciones; en cada una, un repositorio nuevo (caché vacía).
+  - «Hoy» y «Ahora» piden a la vez el mismo punto (40.42, -3.70) con Future.wait
+    sobre el MISMO repositorio.
+  - Servidor falso (MockClient de package:http) que tarda 20 ms, como una red rápida.
+  - Duplicadas = llamadas reales al admin (realCalls) - 1, sumadas en las 100 vueltas.
+
+--- ANTES (caché simple: comprobar → await → guardar) ---
+$ flutter test test/duplicate_calls_test.dart
+00:00 +0: two screens asking at once make no duplicate calls (100 runs)
+Llamadas duplicadas en 100 ejecuciones: 100
+  Expected: <0>
+    Actual: <100>
+Some tests failed.
+
+Lectura: las 100 ejecuciones duplican. La primera llamada mira la caché (vacía),
+suma 1 y hace await: suelta el hilo. La segunda entra, mira la caché (sigue vacía,
+porque la primera aún no ha guardado) y también sale a la red. No son dos hilos
+pisándose: es el await entre «comprobar» y «guardar» (sección crítica sin proteger).
+
+--- DESPUÉS (mapa compartido de peticiones en curso: _inFlight) ---
+$ flutter test test/duplicate_calls_test.dart
+00:00 +0: two screens asking at once make no duplicate calls (100 runs)
+Llamadas duplicadas en 100 ejecuciones: 0
+All tests passed!
+
+Cómo se protege (lib/repositories/weather_repository.dart, currentTemp):
+  1. ¿Está en la caché?            → devolver el valor (sin red)
+  2. ¿Hay una petición en curso?   → devolver ESE MISMO Future (la 2.ª pantalla se engancha)
+  3. Si no: crear la petición (_fetchTemp) y apuntarla en _inFlight
+  4. Al acabar, bien o mal (whenComplete), quitarla de _inFlight
+currentTemp no tiene ningún await: entre «mirar _inFlight» y «apuntarse» no se suelta
+el hilo, así que nadie se puede colar. Toda la espera está dentro de _fetchTemp.
+whenComplete y no then: si la red falla, la entrada se borra igual; si no, la petición
+fallida se quedaría en el mapa y todas las pantallas siguientes heredarían el error.
+
+Alternativa descartada: un cerrojo (lock). La 2.ª pantalla esperaría al cerrojo y
+luego leería la caché. Funciona, pero pide un paquete o más código; el mapa de
+peticiones en curso consigue lo mismo con una línea y reparte el mismo resultado.
+
+--- Resumen ---
+Antes: 100 duplicadas / 100 ejecuciones · Después: 0 duplicadas / 100 ejecuciones

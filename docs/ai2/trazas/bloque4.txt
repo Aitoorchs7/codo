@@ -1,0 +1,194 @@
+AI2 · Bloque 4 · Lo del usuario primero
+Equipo: PC del instituto · Windows 11 · flutter run --profile -d windows · 25/11/2026
+Cola: PriorityScheduler (lib/utils/priority_scheduler.dart) · peticiones reales a Open-Meteo
+Formato: t+ms (reloj común) · #id (bg = fondo, user = usuario) · estado
+  «EMPIEZA ... tras esperar X ms · racha usuario R»: X = tiempo en la cola;
+  R = peticiones de usuario seguidas desde la última de fondo.
+Regla: con un hueco libre entra primero el usuario. Anti-hambre: tras N de usuario
+seguidas, si hay fondo esperando, pasa UNA de fondo.
+
+--- Orden de las líneas EMPIEZA (resumen) ---
+A · slots=1 · regla=3 :  bg1 · user7 user8 · bg2 bg3 bg4 bg5 bg6
+B · slots=1 · regla=3 :  bg9 · user12 13 14 · bg10 · user15 16 17 · bg11 · user18…26
+B · slots=1 · sin regla: bg27 · user30…44 (las 15) · bg28 bg29
+Las tres coinciden con la predicción hecha antes de ejecutarlas.
+
+--- Lectura ---
+Traza A (el usuario adelanta): había 5 de fondo en cola (bg2…bg6). El usuario pidió 2
+cosas a los ~250 ms y fueron las siguientes en entrar: user7 y user8 empiezan antes que
+bg2, que llevaba esperando desde el principio.
+
+Traza B con regla 3 (el fondo no se queda sin turno): el usuario pide una cosa nueva cada
+20 ms, más rápido de lo que se atiende (~55 ms cada una), así que su cola no se vacía
+nunca (llega a 12 en espera). Aun así bg10 y bg11 entran cada 3 de usuario («racha 3»
+y luego empieza una de fondo con racha 0). Lo garantiza el contador _userStreak en
+_next(): al llegar a N y haber fondo esperando, se elige fondo aunque haya usuario.
+
+Traza B sin regla (inanición / starvation): con el mismo usuario que no para, bg28 y
+bg29 esperan a que se acaben las 15 del usuario: 1163 y 1214 ms en cola, frente a 423 y
+649 ms con la regla. Si el usuario no parase nunca, no se ejecutarían nunca.
+
+--- Peor caso de la regla ---
+1. Para el USUARIO (se ve en la traza A): no hay expulsión (no se interrumpe una petición
+   a medias). bg1 abría la primera conexión (DNS + TLS) y tardó 525 ms; user7 llegó a
+   t+248 y tuvo que esperar a que acabara: 285 ms en cola aun siendo la prioridad alta.
+   Peor caso: el usuario pide justo después de que haya entrado una de fondo lenta, o
+   justo cuando la racha llega a N y le toca el turno al fondo.
+2. Para el FONDO: con 1 hueco y regla N, espera como mucho N peticiones de usuario más
+   la que esté en curso. Sin regla, la espera no tiene límite.
+3. El ajuste: N pequeño es más justo con el fondo y hace esperar más al usuario; N grande
+   al revés. Con más huecos (slots=2) el problema 1 se suaviza: aunque haya una de fondo
+   lenta, queda otro hueco para el usuario.
+
+======================================================================================
+TRAZA A · slots=1 · regla=3
+======================================================================================
+t+      0 ms  #prio  TRAZA A · slots=1 · regla=3
+t+      6 ms  #bg1  encolada (background) · en cola: usuario 0, fondo 1
+t+      8 ms  #bg1  EMPIEZA (background) tras esperar 3 ms · racha usuario 0
+t+     86 ms  #bg2  encolada (background) · en cola: usuario 0, fondo 1
+t+     86 ms  #bg3  encolada (background) · en cola: usuario 0, fondo 2
+t+     87 ms  #bg4  encolada (background) · en cola: usuario 0, fondo 3
+t+     87 ms  #bg5  encolada (background) · en cola: usuario 0, fondo 4
+t+     87 ms  #bg6  encolada (background) · en cola: usuario 0, fondo 5
+t+    248 ms  #user7  encolada (user) · en cola: usuario 1, fondo 5
+t+    250 ms  #user8  encolada (user) · en cola: usuario 2, fondo 5
+t+    533 ms  #bg1  termina
+t+    533 ms  #user7  EMPIEZA (user) tras esperar 285 ms · racha usuario 1
+t+    587 ms  #user7  termina
+t+    588 ms  #user8  EMPIEZA (user) tras esperar 337 ms · racha usuario 2
+t+    640 ms  #user8  termina
+t+    640 ms  #bg2  EMPIEZA (background) tras esperar 553 ms · racha usuario 0
+t+    699 ms  #bg2  termina
+t+    700 ms  #bg3  EMPIEZA (background) tras esperar 613 ms · racha usuario 0
+t+    751 ms  #bg3  termina
+t+    751 ms  #bg4  EMPIEZA (background) tras esperar 664 ms · racha usuario 0
+t+    803 ms  #bg4  termina
+t+    804 ms  #bg5  EMPIEZA (background) tras esperar 716 ms · racha usuario 0
+t+    856 ms  #bg5  termina
+t+    856 ms  #bg6  EMPIEZA (background) tras esperar 769 ms · racha usuario 0
+t+    907 ms  #bg6  termina
+t+    908 ms  #prio  TRAZA A · fin
+(bg2…bg6 se encolan a t+86 y no a t+6: la primera petición crea el cliente HTTP y
+eso ocupa el hilo unos 80 ms antes de llegar a su primer await.)
+
+======================================================================================
+TRAZA B · slots=1 · regla=3 (el usuario pide cada 20 ms, 15 peticiones)
+======================================================================================
+t+  10906 ms  #prio  TRAZA B · slots=1 · regla=3
+t+  10907 ms  #bg9  encolada (background) · en cola: usuario 0, fondo 1
+t+  10908 ms  #bg9  EMPIEZA (background) tras esperar 0 ms · racha usuario 0
+t+  10911 ms  #bg10  encolada (background) · en cola: usuario 0, fondo 1
+t+  10912 ms  #bg11  encolada (background) · en cola: usuario 0, fondo 2
+t+  10913 ms  #user12  encolada (user) · en cola: usuario 1, fondo 2
+t+  11030 ms  #user13  encolada (user) · en cola: usuario 2, fondo 2
+t+  11037 ms  #bg9  termina
+t+  11038 ms  #user12  EMPIEZA (user) tras esperar 124 ms · racha usuario 1
+t+  11078 ms  #user14  encolada (user) · en cola: usuario 2, fondo 2
+t+  11110 ms  #user15  encolada (user) · en cola: usuario 3, fondo 2
+t+  11149 ms  #user16  encolada (user) · en cola: usuario 4, fondo 2
+t+  11181 ms  #user17  encolada (user) · en cola: usuario 5, fondo 2
+t+  11187 ms  #user12  termina
+t+  11188 ms  #user13  EMPIEZA (user) tras esperar 158 ms · racha usuario 2
+t+  11203 ms  #user18  encolada (user) · en cola: usuario 5, fondo 2
+t+  11224 ms  #user19  encolada (user) · en cola: usuario 6, fondo 2
+t+  11247 ms  #user20  encolada (user) · en cola: usuario 7, fondo 2
+t+  11270 ms  #user21  encolada (user) · en cola: usuario 8, fondo 2
+t+  11278 ms  #user13  termina
+t+  11279 ms  #user14  EMPIEZA (user) tras esperar 200 ms · racha usuario 3
+t+  11294 ms  #user22  encolada (user) · en cola: usuario 8, fondo 2
+t+  11316 ms  #user23  encolada (user) · en cola: usuario 9, fondo 2
+t+  11335 ms  #user14  termina
+t+  11335 ms  #bg10  EMPIEZA (background) tras esperar 423 ms · racha usuario 0
+t+  11337 ms  #user24  encolada (user) · en cola: usuario 10, fondo 1
+t+  11359 ms  #user25  encolada (user) · en cola: usuario 11, fondo 1
+t+  11380 ms  #user26  encolada (user) · en cola: usuario 12, fondo 1
+t+  11398 ms  #bg10  termina
+t+  11398 ms  #user15  EMPIEZA (user) tras esperar 288 ms · racha usuario 1
+t+  11451 ms  #user15  termina
+t+  11451 ms  #user16  EMPIEZA (user) tras esperar 302 ms · racha usuario 2
+t+  11503 ms  #user16  termina
+t+  11504 ms  #user17  EMPIEZA (user) tras esperar 322 ms · racha usuario 3
+t+  11561 ms  #user17  termina
+t+  11561 ms  #bg11  EMPIEZA (background) tras esperar 649 ms · racha usuario 0
+t+  11613 ms  #bg11  termina
+t+  11613 ms  #user18  EMPIEZA (user) tras esperar 410 ms · racha usuario 1
+t+  11682 ms  #user18  termina
+t+  11682 ms  #user19  EMPIEZA (user) tras esperar 458 ms · racha usuario 2
+t+  11734 ms  #user19  termina
+t+  11734 ms  #user20  EMPIEZA (user) tras esperar 487 ms · racha usuario 3
+t+  11787 ms  #user20  termina
+t+  11788 ms  #user21  EMPIEZA (user) tras esperar 519 ms · racha usuario 4
+t+  11895 ms  #user21  termina
+t+  11896 ms  #user22  EMPIEZA (user) tras esperar 601 ms · racha usuario 5
+t+  11948 ms  #user22  termina
+t+  11948 ms  #user23  EMPIEZA (user) tras esperar 632 ms · racha usuario 6
+t+  12013 ms  #user23  termina
+t+  12013 ms  #user24  EMPIEZA (user) tras esperar 676 ms · racha usuario 7
+t+  12064 ms  #user24  termina
+t+  12064 ms  #user25  EMPIEZA (user) tras esperar 705 ms · racha usuario 8
+t+  12114 ms  #user25  termina
+t+  12114 ms  #user26  EMPIEZA (user) tras esperar 734 ms · racha usuario 9
+t+  12165 ms  #user26  termina
+t+  12166 ms  #prio  TRAZA B · fin
+(Desde user18 la racha pasa de 3 sin que entre fondo: ya no queda ninguna de fondo.)
+
+======================================================================================
+TRAZA B · slots=1 · SIN REGLA (mismo usuario que no para)
+======================================================================================
+t+  28642 ms  #prio  TRAZA B · slots=1 · regla=sin regla
+t+  28642 ms  #bg27  encolada (background) · en cola: usuario 0, fondo 1
+t+  28643 ms  #bg27  EMPIEZA (background) tras esperar 0 ms · racha usuario 0
+t+  28645 ms  #bg28  encolada (background) · en cola: usuario 0, fondo 1
+t+  28645 ms  #bg29  encolada (background) · en cola: usuario 0, fondo 2
+t+  28645 ms  #user30  encolada (user) · en cola: usuario 1, fondo 2
+t+  28762 ms  #user31  encolada (user) · en cola: usuario 2, fondo 2
+t+  28809 ms  #user32  encolada (user) · en cola: usuario 3, fondo 2
+t+  28839 ms  #user33  encolada (user) · en cola: usuario 4, fondo 2
+t+  28893 ms  #user34  encolada (user) · en cola: usuario 5, fondo 2
+t+  28927 ms  #user35  encolada (user) · en cola: usuario 6, fondo 2
+t+  28947 ms  #bg27  termina
+t+  28947 ms  #user30  EMPIEZA (user) tras esperar 301 ms · racha usuario 1
+t+  28953 ms  #user36  encolada (user) · en cola: usuario 6, fondo 2
+t+  28975 ms  #user37  encolada (user) · en cola: usuario 7, fondo 2
+t+  28998 ms  #user38  encolada (user) · en cola: usuario 8, fondo 2
+t+  29004 ms  #user30  termina
+t+  29004 ms  #user31  EMPIEZA (user) tras esperar 241 ms · racha usuario 2
+t+  29020 ms  #user39  encolada (user) · en cola: usuario 8, fondo 2
+t+  29043 ms  #user40  encolada (user) · en cola: usuario 9, fondo 2
+t+  29060 ms  #user31  termina
+t+  29061 ms  #user32  EMPIEZA (user) tras esperar 251 ms · racha usuario 3
+t+  29064 ms  #user41  encolada (user) · en cola: usuario 9, fondo 2
+t+  29087 ms  #user42  encolada (user) · en cola: usuario 10, fondo 2
+t+  29111 ms  #user43  encolada (user) · en cola: usuario 11, fondo 2
+t+  29121 ms  #user32  termina
+t+  29122 ms  #user33  EMPIEZA (user) tras esperar 283 ms · racha usuario 4
+t+  29137 ms  #user44  encolada (user) · en cola: usuario 11, fondo 2
+t+  29187 ms  #user33  termina
+t+  29187 ms  #user34  EMPIEZA (user) tras esperar 294 ms · racha usuario 5
+t+  29245 ms  #user34  termina
+t+  29245 ms  #user35  EMPIEZA (user) tras esperar 318 ms · racha usuario 6
+t+  29300 ms  #user35  termina
+t+  29301 ms  #user36  EMPIEZA (user) tras esperar 348 ms · racha usuario 7
+t+  29352 ms  #user36  termina
+t+  29353 ms  #user37  EMPIEZA (user) tras esperar 377 ms · racha usuario 8
+t+  29411 ms  #user37  termina
+t+  29411 ms  #user38  EMPIEZA (user) tras esperar 413 ms · racha usuario 9
+t+  29468 ms  #user38  termina
+t+  29468 ms  #user39  EMPIEZA (user) tras esperar 448 ms · racha usuario 10
+t+  29523 ms  #user39  termina
+t+  29523 ms  #user40  EMPIEZA (user) tras esperar 480 ms · racha usuario 11
+t+  29580 ms  #user40  termina
+t+  29581 ms  #user41  EMPIEZA (user) tras esperar 516 ms · racha usuario 12
+t+  29636 ms  #user41  termina
+t+  29637 ms  #user42  EMPIEZA (user) tras esperar 550 ms · racha usuario 13
+t+  29700 ms  #user42  termina
+t+  29701 ms  #user43  EMPIEZA (user) tras esperar 589 ms · racha usuario 14
+t+  29755 ms  #user43  termina
+t+  29756 ms  #user44  EMPIEZA (user) tras esperar 619 ms · racha usuario 15
+t+  29808 ms  #user44  termina
+t+  29808 ms  #bg28  EMPIEZA (background) tras esperar 1163 ms · racha usuario 0
+t+  29859 ms  #bg28  termina
+t+  29860 ms  #bg29  EMPIEZA (background) tras esperar 1214 ms · racha usuario 0
+t+  29912 ms  #bg29  termina
+t+  29912 ms  #prio  TRAZA B · fin
