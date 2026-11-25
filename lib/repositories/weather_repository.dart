@@ -4,6 +4,7 @@ import 'package:codo/admins/weather_admin.dart';
 import 'package:codo/admins/weather_failure.dart';
 import 'package:codo/models/weather_summary.dart';
 import 'package:codo/utils/net_log.dart';
+import 'package:codo/utils/priority_scheduler.dart';
 import 'package:codo/utils/request_pool.dart';
 import 'package:codo/utils/weather_isolate.dart';
 import 'package:flutter/foundation.dart';
@@ -150,6 +151,89 @@ class WeatherRepository {
     final done = tasks.where((t) => t.state == RequestState.done).length;
     NetLog.log('pool', 'K=$k · $ms ms · $done/$count terminadas');
     return PoolReport(k: k, totalMs: ms, done: done, failed: count - done);
+  }
+
+  // ── Bloque 3 · No pedir dos veces lo mismo ──
+
+  // Cuántas veces se sale DE VERDAD a internet (lo leerá la prueba)
+  int realCalls = 0;
+  // Temperaturas ya pedidas, por punto
+  final Map<String, double> _cache = {};
+  // Peticiones EN CURSO por punto: la segunda pantalla se engancha a la misma
+  final Map<String, Future<double>> _inFlight = {};
+
+  Future<double> currentTemp(double lat, double lon) async {
+    final key = '${lat.toStringAsFixed(2)},${lon.toStringAsFixed(2)}';
+    final cached = _cache[key];
+    if (cached != null) return cached;
+    final inFlight = _inFlight[key];
+    if (inFlight != null) return inFlight;
+    final future = _fetchTemp(key, lat, lon);
+    _inFlight[key] = future;
+    return future.whenComplete(() => _inFlight.remove(key));
+  }
+
+  // Sale a la red de verdad. Solo lo llama currentTemp
+  Future<double> _fetchTemp(String key, double lat, double lon) async {
+    realCalls++;
+    final body = await _admin.fetchCurrentBody(lat: lat, lon: lon);
+    final json = jsonDecode(body) as Map<String, dynamic>;
+    final temp = ((json['current'] as Map)['temperature_2m'] as num).toDouble();
+    _cache[key] = temp;
+    return temp;
+  }
+
+  // ── Bloque 4 · Lo del usuario primero ──
+
+  // Una petición real a Open-Meteo para el punto i de la rejilla (red de verdad)
+  Future<String> _point(int i) {
+    final (lat, lon) = grid(64)[i % 64];
+    return _admin.fetchCurrentBody(lat: lat, lon: lon);
+  }
+
+  // Espera a todas sin cortar en la primera que falle (el fallo ya sale en la traza)
+  Future<void> _all(List<Future<String>> futures) => Future.wait(
+        futures.map((f) => f.then<void>((_) {}, onError: (Object e) {})),
+      );
+
+  // Traza A: arranca una sincronización de fondo de 6 peticiones; a los 150 ms el
+  // usuario pide 2 cosas. Se espera que las del usuario adelanten a las de fondo
+  // que aún estaban en la cola.
+  Future<void> demoUserOvertakes({int slots = 1, int? fairEvery = 3}) async {
+    final s = PriorityScheduler(slots: slots, fairEvery: fairEvery);
+    NetLog.log('prio', 'TRAZA A · slots=$slots · regla=${fairEvery ?? 'sin regla'}');
+    final futures = <Future<String>>[
+      for (var i = 0; i < 6; i++)
+        s.submit(NetLog.newId('bg'), Priority.background, () => _point(i)),
+    ];
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    for (var i = 0; i < 2; i++) {
+      futures.add(s.submit(NetLog.newId('user'), Priority.user, () => _point(10 + i)));
+    }
+    await _all(futures);
+    NetLog.log('prio', 'TRAZA A · fin');
+  }
+
+  // Traza B: 3 de fondo esperando y el usuario NO PARA: una petición nueva cada 20 ms
+  // durante [userRequests] peticiones (más rápido de lo que se atienden).
+  // Con regla, el fondo pasa cada [fairEvery]; sin regla, espera a que el usuario pare.
+  Future<void> demoUserFlood({
+    int slots = 1,
+    int? fairEvery = 3,
+    int userRequests = 15,
+  }) async {
+    final s = PriorityScheduler(slots: slots, fairEvery: fairEvery);
+    NetLog.log('prio', 'TRAZA B · slots=$slots · regla=${fairEvery ?? 'sin regla'}');
+    final futures = <Future<String>>[
+      for (var i = 0; i < 3; i++)
+        s.submit(NetLog.newId('bg'), Priority.background, () => _point(20 + i)),
+    ];
+    for (var i = 0; i < userRequests; i++) {
+      futures.add(s.submit(NetLog.newId('user'), Priority.user, () => _point(30 + i)));
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    await _all(futures);
+    NetLog.log('prio', 'TRAZA B · fin');
   }
 
   // La pantalla lo llama al cerrarse: mata el isolate si sigue vivo y cierra el cliente HTTP
