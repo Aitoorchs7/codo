@@ -73,6 +73,20 @@ class _NetLabScreenState extends State<NetLabScreen>
     });
   }
 
+  // Bloque 4: cola con prioridad
+  int _prioSlots = 1;
+  int? _fairEvery = 3; // null = sin regla anti-hambre
+  bool _prioRunning = false;
+
+  Future<void> _runPriority(Future<void> Function() demo) async {
+    setState(() => _prioRunning = true);
+    try {
+      await demo(); // la traza sale por consola y en la lista de abajo
+    } finally {
+      if (mounted) setState(() => _prioRunning = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -219,6 +233,54 @@ class _NetLabScreenState extends State<NetLabScreen>
               '(${r.done} bien, ${r.failed} fallidas)',
               style: text.bodyLarge,
             ),
+          const Divider(height: 32),
+          Text('Bloque 4 · El usuario primero', style: text.titleMedium),
+          Row(
+            children: [
+              const Text('Huecos a la vez: '),
+              SegmentedButton<int>(
+                segments: const [
+                  ButtonSegment(value: 1, label: Text('1')),
+                  ButtonSegment(value: 2, label: Text('2')),
+                ],
+                selected: {_prioSlots},
+                onSelectionChanged:
+                    _prioRunning ? null : (s) => setState(() => _prioSlots = s.first),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              const Text('Pasa 1 de fondo cada: '),
+              DropdownButton<int>(
+                value: _fairEvery ?? 0,
+                items: const [
+                  DropdownMenuItem(value: 0, child: Text('nunca (sin regla)')),
+                  DropdownMenuItem(value: 2, child: Text('2 del usuario')),
+                  DropdownMenuItem(value: 3, child: Text('3 del usuario')),
+                  DropdownMenuItem(value: 5, child: Text('5 del usuario')),
+                ],
+                onChanged: _prioRunning
+                    ? null
+                    : (v) => setState(() => _fairEvery = v == 0 ? null : v),
+              ),
+            ],
+          ),
+          FilledButton(
+            onPressed: _prioRunning
+                ? null
+                : () => _runPriority(() => _repository.demoUserOvertakes(
+                    slots: _prioSlots, fairEvery: _fairEvery)),
+            child: const Text('Traza A · el usuario adelanta al fondo'),
+          ),
+          const SizedBox(height: 8),
+          FilledButton(
+            onPressed: _prioRunning
+                ? null
+                : () => _runPriority(() => _repository.demoUserFlood(
+                    slots: _prioSlots, fairEvery: _fairEvery)),
+            child: const Text('Traza B · el usuario no para'),
+          ),
           const SizedBox(height: 16),
           Text('Traza', style: text.titleMedium),
           // Las últimas líneas; la traza completa sale también por consola (debugPrint)
